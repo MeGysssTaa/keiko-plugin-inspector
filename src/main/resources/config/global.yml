@@ -1,0 +1,28 @@
+# Should Keiko save all its output in own log files (.../plugins/Keiko/logs/)?
+# This will allow you to perform deep analysis any time in case something happens.
+# Debug data is also written in logs, even if "enable_debug" is set to "false".
+make_logs: true
+
+# Show debug (detailed verbose) messages in console?
+enable_debug: false
+
+# What should Keiko do if it fails to analyse a JAR?
+#
+#     warn     - Just print a warning in console and keep inspecting other JARs.
+#                NOTE: not recommended: this may let some potentially malicious plugins run.
+#
+#     shutdown - Print a warning in console and shut the server down.
+failure_policy: shutdown
+
+# When Keiko encounters a critical issue that could be harmful to your server
+# (e.g. detects malware on server's early boot), it will do its best to shut
+# your server down as soon as possible to avoid it being damaged. The most
+# efficient way of shutting down is so-called "rage quit" - "pkill -9 <pid>".
+#
+# Do you allow Keiko to perform rage quits in special/extreme cases?
+# If you will forbid it to, then Bukkit#shutdown() will be used instead,
+# which is often pretty slow and still lets the installed plugins enable.
+#
+# NOTE: this feature may not work properly on some certain servers, since
+#       process ID retrieval is difficult to implement for Java 8 properly.
+allow_keiko_rage_quit: true

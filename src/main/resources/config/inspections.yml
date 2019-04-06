@@ -1,0 +1,41 @@
+# Static inspections configuration.
+#
+# Static inspections are inspections that always run at server's early boot stage
+# and analyse bytecode (signature check) of all plugins before letting them run,
+# thus detecting potential threats even before a malicious plugin is ran.
+static:
+
+  # Keiko caches static analyses' results in order to save time at startup.
+  # Caches are stored based on hash (checksum) of the contents of analyzed files,
+  # and are stored permanently. To help you bear with extensive disk usage, Keiko
+  # will automatically delete all caches that exist for more then this number of
+  # days (automatic space free).
+  caches_lifespan_days: 7
+
+  # ForceOP is usually referred to as code that gives specific player or a group of
+  # players server operator (OP) permissions using Player#setOp or Bukkit commands ("/op").
+  forceop:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []
+
+  # Plugins should not shutdown your server normally. And even if they do, they must use the appropriate
+  # Bukkit#shutdown() method for that since System.exit/Runtime.getRuntime().exit do not let the server
+  # to finish its workflow properly, thus leading to unexpected issues/bugs such as server not responding
+  # to commands (including Ctrl+C) and not performing world save.
+  #
+  # (-*-) Keiko is capable of blocking SystemExit at runtime using Domain Access Control.
+  systemexit:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []
+
+  # "Natives" are extra files with code written in languages other than Java (e.g. C, C++)
+  # that allow Java software to perform something out of JVM. This is very rarely used by
+  # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
+  #
+  # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
+  natives_loader:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []

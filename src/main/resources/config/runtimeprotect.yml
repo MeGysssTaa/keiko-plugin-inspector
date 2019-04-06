@@ -1,0 +1,281 @@
+# Keiko Domain Access Control (custom Java SecurityManager) settings.
+#
+# This feature provides you nearly a full control of what specific plugins,
+# classes and methods are allowed to do and in which manner.
+#
+# IMPORTANT NOTE: Keiko blocks access by throwing a SecurityException when it detects
+#                 a call that should be filtered out. This may lead to loss of functionality
+#                 or specific bugs in some plugins. Use with care if you don't want to break anything!
+domain_access_control:
+
+  # Enable DAC?
+  enabled: true
+
+  # Should Keiko protect its work dir (.../plugins/Keiko) from unauthorized external access? How?
+  # Keeping this active is STRONGLy RECOMMENDED. It will keep Keiko protected even if you break the
+  # other parts of Domain Access Control (though this only has effect if DAC itself is enabled).
+  #
+  # BY DISABLING THIS YOU ARE LETTING POTENTIAL MALWARE TO ABUSE KEIKO'S CACHING, TWEAK ITS
+  # CONFIGURATION AND SPOOF OTHER STUFF, THUS PUTTING YOUR SERVER UNDER RISK!
+  self_defense: true
+
+  # Internet connectivity control.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <host> PORT <port>
+  #
+  # Examples:
+  #
+  #     # Allow plugin "SomeGooglePlugin" to open connections on host "https://google.com" on default HTTPS port (434):
+  #     - ALLOW PLUGIN=SomeGooglePlugin https://google.com PORT HTTPS
+  #
+  #     # Forbid all plugins to open connections on host "http://some-fishy-host.io" on port 12345:
+  #     - DENY ALL http://some-fishy-host.io PORT 12345
+  connection_open:
+    notify: false
+    default: ALLOW
+    rules: []
+
+  # Connection listen (the process of your server waiting for a connection from outside) control.
+  #
+  # Rules syntax:
+  #
+  #     same as in connection_open, examples can also be found there
+  #     EXCEPTION: host must always be equal to "localhost", i.e. actual syntax
+  #                turns into: <"ALLOW"/"DENY"> <identity> localhost PORT <port>
+  connection_listen:
+    notify: false
+    default: DENY
+    rules: []
+
+  # Connection accept (the process of your server accepting a connection that it has been waiting for outside) control.
+  #
+  # Rules syntax:
+  #
+  #     same as in connection_open, examples can also be found there
+  connection_accept:
+    notify: false
+    default: DENY
+    rules: []
+
+  # Connection (join/leave/send/receive) IP multicast control.
+  #
+  # Rules syntax:
+  #
+  #     same as in connection_open, examples can also be found there
+  #     EXCEPTION: port must always be equal to "*", i.e. actual syntax
+  #                turns into: <"ALLOW"/"DENY"> <identity> <host> PORT *
+  connection_multicast:
+    notify: false
+    default: DENY
+    rules: []
+
+  # Java SocketFactory set control.
+  #
+  # Overriding default system's SocketFactory may allow hackers to monitor your whole
+  # server networking in details, and sometimes even modify/interrupt it.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> *
+  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #
+  # Examples:
+  #
+  #     # Allow method "sendEncryptedMsg" of class "Chattor" in package "com.mcchattor" to modify system's SocketFactory:
+  #     - ALLOW SOURCE=com.mcchattor.Chattor#sendEncryptedMsg *
+  #
+  #     # Forbid plugin "not-malware-trust-me' to modify system's SocketFactory:
+  #     - DENY PLUGIN=not-malware-trust-me *
+  socket_factory_set:
+    notify: false
+    default: DENY
+    rules: []
+
+  # File write control.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <file name>
+  #
+  # Examples:
+  #
+  #     # Allow all plugins to create any plugins in their plugins/ folder:
+  #     - ALLOW ALL {plugins_folder}/{plugin_name}
+  #
+  #     # Forbid plugin "NotMalware4sure" to write in server's "server.properties" file:
+  #     - DENY PLUGIN=NotMalware4sure {server_folder}/server.properties
+  file_write:
+    notify: false
+    default: DENY
+    rules:
+      - ALLOW ALL {plugins_folder}/{plugin_name}
+      - ALLOW ALL {plugins_folder}/{plugin_name}/*
+      - ALLOW ALL {plugin_jar_path}
+
+  # File read control.
+  #
+  # Rules syntax:
+  #
+  #     same as in file_write, examples can also be found there
+  file_read:
+    notify: false
+    default: DENY
+    rules:
+      - ALLOW ALL {plugins_folder}/{plugin_name}
+      - ALLOW ALL {plugins_folder}/{plugin_name}/*
+      - ALLOW ALL {plugin_jar_path}
+      - ALLOW ALL {plugins_folder}/bStats/config.yml
+      - ALLOW ALL {plugins_folder}/PluginMetrics/config.yml
+      - ALLOW ALL /usr/lib/jvm/java-?*-oracle/jre/lib/*
+      - ALLOW ALL /tmp
+      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}
+      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}/*
+
+  # File deletion control.
+  #
+  # Rules syntax:
+  #
+  #     same as in file_write, examples can also be found there
+  file_delete:
+    notify: false
+    default: DENY
+    rules:
+      - ALLOW ALL {plugins_folder}/{plugin_name}
+      - ALLOW ALL {plugins_folder}/{plugin_name}/*
+
+  # Runtime natives load/linkage control.
+  #
+  # "Natives" are extra files with code written in languages other than Java (e.g. C, C++)
+  # that allow Java software to perform something out of JVM. This is very rarely used by
+  # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <library name or file path>
+  #
+  # Examples:
+  #
+  #     # Allow plugin "some-ccp-plugin" to load native library from file "stuff.dll" in its folder in plugins/:
+  #     - ALLOW PLUGIN=some-cpp-plugin {plugins_folder}/{plugin_name}/stuff.dll
+  #
+  #     # Forbid method "prepareNatives" of Java class "NativeRAT" in package "xyz.some.cool.plugin" to load any natives:
+  #     - DENY SOURCE=xyz.some.cool.plugin.NativeRAT#prepareNatives *
+  natives_linkage:
+    notify: false
+    default: DENY
+    rules:
+      - ALLOW ALL sunec
+
+  # System command execution control.
+  #
+  # WARNING: this controls execution of SYSTEM commands (like "echo", "rm", "cd", "wget", "grep", etc.), NOT
+  #          of Minecraft console commands. That is, plugins should never normally use such (system) commands,
+  #          as those can be used to harm your server and bypass Keiko Domain Access Control restrictions.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <command>
+  #
+  # Examples:
+  #
+  #     # Allow plugin "ShellSimulator" to execute "rm <file name>" (where "file name" may be anything - any file):
+  #     - ALLOW PLUGIN=ShellSimulator rm *
+  #
+  #     # Forbid all plugins to execute "wget http://some-fishy-host.io/rat.jar":
+  #     - DENY ALL wget http://some-fishy-host.io/rat.jar
+  command_execution:
+    notify: false
+    default: DENY
+    rules: []
+
+  # Forceful inappropriate system exit control.
+  #
+  # Plugins should not shutdown your server normally. And even if they do, they must use the appropriate
+  # Bukkit#shutdown() method for that since System.exit/Runtime.getRuntime().exit do not let the server
+  # to finish its workflow properly, thus leading to unexpected issues/bugs such as server not responding
+  # to commands (including Ctrl+C) and not performing world save.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <exit code/status>
+  #     NOTE: you should not rely on exit code - we advise you to block all statuses with an asterisk * mask,
+  #           because malicious plugins' developers can easily change this number in code thus bypassing this check.
+  #
+  # Examples:
+  #
+  #     # Allow all plugins to perform system exit with code 1337:
+  #     - ALLOW ALL 1337
+  #
+  #     # Forbid plugin "UntrustedPlugin" to perform system exit with any status code:
+  #     - DENY PLUGIN=UntrustedPlugin *
+  system_exit:
+    notify: false
+    default: DENY
+    rules: []
+
+  # JVM system properties access (read/write) control.
+  #
+  # This only affects methods System#getProperties() and System#setProperties(Properties),
+  # which allow to read and overwrite all system properties at once, which may sometimes be unsafe.
+  # This does not block individual property access, e.g. setProperty(..., ...) or getProperty(...).
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> *
+  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #
+  # Examples:
+  #
+  #     # Allow class "TrustedUtil" in package "com.trusted.plugin.util" to get and set all system properties at once:
+  #     - ALLOW SOURCE=com.trusted.plugin.util.TrustedUtil *
+  #
+  #     # Deny all plugins to get and set all system properties at once:
+  #     - DENY ALL *
+  properties_access:
+    notify: false
+    default: ALLOW
+    rules: []
+
+  # Individual JVM system property write control.
+  #
+  # This affects method System.setProperty.
+  # Plugins may often need to write or read some particular system properties.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <property name>
+  #
+  # Examples:
+  #
+  #     # Allow all plugins to write any system properties:
+  #     - ALLOW ALL *
+  #
+  #     # Forbid plugin "RandomDownloadedPlugin" to change any system properties that start with "ftp.":
+  #     - DENY PLUGIN=RandomDownloadedPlugin ftp.*
+  property_write:
+    notify: false
+    default: ALLOW
+    rules:
+      - DENY ALL http.proxyHost
+      - DENY ALL http.proxyPort
+      - DENY ALL https.proxyHost
+      - DENY ALL https.proxyPort
+      - DENY ALL ftp.proxyHost
+      - DENY ALL ftp.proxyPort
+      - DENY ALL socksProxyHost
+      - DENY ALL socksProxyPort
+
+  # Individual JVM system property read control.
+  #
+  # This affects method System.getProperty.
+  # Plugins may often need to write or read some particular system properties.
+  #
+  # Rules syntax:
+  #
+  #     same as in property_write, examples can also be found there
+  property_read:
+    notify: false
+    default: ALLOW
+    rules: []
