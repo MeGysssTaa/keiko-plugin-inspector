@@ -25,7 +25,7 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 
 * **[Use the Issue Tracker](https://github.com/MeGysssTaa/keiko-plugin-inspector/issues)** to report bugs, suggest features or get other sort of help.
 
-* **Write me in Discord (`DarksideSkid#1491``)** for other kind of assistance or just for live chat.
+* **Write me in Discord (`DarksideSkid#1491`)** for other kind of assistance or just for live chat.
 
 
 ## License
