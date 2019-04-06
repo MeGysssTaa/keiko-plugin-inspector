@@ -28,6 +28,16 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 * **Write me in Discord (`DarksideSkid#1491`)** for other kind of assistance or just for live chat.
 
 
+## Building (Gradle)
+
+1. Install **[library kantanj](https://github.com/MeGysssTaa/kantanj)** in your local Maven repository.
+2. Clone or download this repository, `cd` into it.
+3. Run `./gradlew build`.
+4. Wait a little bit.
+5. Grab the built JAR file in `build/libs/`.
+6. Profit!
+
+
 ## License
 
 Keiko is completely free and open source. It is released under **[Apache License 2.0](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**.
