@@ -38,6 +38,24 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 6. Profit!
 
 
+```bash
+echo "Cloning and installing kantanj..."
+git clone https://github.com/MeGysssTaa/kantanj
+cd kantanj
+mvn clean install
+
+cd ..
+
+echo "Cloning and building keiko-plugin-inspector..."
+git clone https://github.com/MeGysssTaa/keiko-plugin-inspector
+cd keiko-plugin-inspector
+./gradlew build
+
+echo "Done! You can find the output JAR in build/libs/"
+echo "Use './gradlew build' in its root folder (you are browsing it at the moment) whenever you want to rebuild Keiko."
+```
+
+
 ## License
 
 Keiko is completely free and open source. It is released under **[Apache License 2.0](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**.
