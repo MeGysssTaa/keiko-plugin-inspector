@@ -1,3 +1,25 @@
+#### Keiko: Runtime Protect Configuration #########################################
+#
+#   Welcome here!
+#
+#   This file lets you configure Keiko Runtime Protect - the part of Keiko
+# responsible for protecting your server at runtime. In particular, this config
+# lets you customize Keiko Domain Access Control (DAC) to monitor and/or restrict
+# access to Internet connectivity, files, and more.
+#
+#   Useful stuff:
+#
+#     1. Keiko Wiki (a lot of useful information):
+#        --> https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki
+#
+#     2. Developer's Discord (for questions, discussion, and live support):
+#        --> DarksideSkid#1491
+#
+###################################################################################
+
+
+
+
 # Keiko Domain Access Control (custom Java SecurityManager) settings.
 #
 # This feature provides you nearly a full control of what specific plugins,

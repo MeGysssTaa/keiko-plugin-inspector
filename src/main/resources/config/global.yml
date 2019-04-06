@@ -1,3 +1,23 @@
+#### Keiko: Global Configuration ##################################################
+#
+#   Welcome here!
+#
+#   This file lets you configure, as its name supposes, global options, that
+# affect Keiko in general (all its parts at the same time).
+#
+#   Useful stuff:
+#
+#     1. Keiko Wiki (a lot of useful information):
+#        --> https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki
+#
+#     2. Developer's Discord (for questions, discussion, and live support):
+#        --> DarksideSkid#1491
+#
+###################################################################################
+
+
+
+
 # Should Keiko save all its output in own log files (.../plugins/Keiko/logs/)?
 # This will allow you to perform deep analysis any time in case something happens.
 # Debug data is also written in logs, even if "enable_debug" is set to "false".

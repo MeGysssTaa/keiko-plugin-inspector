@@ -1,3 +1,25 @@
+#### Keiko: Inspections Configuration #############################################
+#
+#   Welcome here!
+#
+#   This file lets you configure, as its name supposes, Keiko's inspections
+# (analyses). In particular, it lets you configure so-called "static" analyses -
+# the ones that run at server's early boot (startup) and check plugins before
+# they actually load.
+#
+#   Useful stuff:
+#
+#     1. Keiko Wiki (a lot of useful information):
+#        --> https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki
+#
+#     2. Developer's Discord (for questions, discussion, and live support):
+#        --> DarksideSkid#1491
+#
+###################################################################################
+
+
+
+
 # Static inspections configuration.
 #
 # Static inspections are inspections that always run at server's early boot stage
