@@ -53,6 +53,12 @@ class Rule {
 
         // TODO: 30.03.2019 complex checking for contradictory rules
 
+        if (s.contains("\\")) {
+            KeikoPluginInspector.warn("NOTE: Rule \"%s\" contains backslash characters ('\\'). " +
+                    "Automatically replacing them with regular slashes ('/') (those also work fine on Windows!)");
+            s = s.replace("\\", "/"); // Windows's directory separator + Regex != love
+        }
+
         try {
             String[] tokens = s.split(" ");
 

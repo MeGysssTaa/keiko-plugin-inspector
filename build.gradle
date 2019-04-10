@@ -20,7 +20,7 @@ plugins {
 }
 
 group 'me.darksidecode.keiko'
-version '1.0.0'
+version '1.0.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -62,12 +62,13 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
+// Include resources
 processResources {
     expand project.properties
 }
 
 jar {
-    // Include resources
+    // Include dependencies (libraries)
     from {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)

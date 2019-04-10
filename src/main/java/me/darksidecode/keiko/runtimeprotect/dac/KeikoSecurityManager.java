@@ -196,6 +196,8 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     private void checkFileAccess(String file, Operation op) {
         file = new File(file).getAbsolutePath(); // transform 'file' to get the full path
+        file = file.replace("\\", "/"); // Windows's directory separator + Regex != love
+
         String finalFile = file;
 
         checkAccess(arg -> StringUtils.matchWildcards(
