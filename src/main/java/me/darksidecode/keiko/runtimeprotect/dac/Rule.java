@@ -121,7 +121,7 @@ class Rule {
             } else
                 filteredObject = null;
 
-            // Omit first two elements (rule type and identity type).
+            // Omit the first two elements (rule type and identity type).
             String[] args = new String[tokens.length - 2];
             System.arraycopy(tokens, 2, args, 0, args.length);
 
