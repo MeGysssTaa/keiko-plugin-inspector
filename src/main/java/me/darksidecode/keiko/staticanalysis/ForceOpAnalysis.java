@@ -84,7 +84,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
                     hasOpLdcBefore = true;
             }
         } else if ((hasOpLdcBefore)
-                && (insn.getOpcode() == INVOKESTATIC) || (insn.getOpcode() == INVOKEINTERFACE)) {
+                && ((insn.getOpcode() == INVOKESTATIC) || (insn.getOpcode() == INVOKEINTERFACE))) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
             if ((mtdInsn.name.equals("dispatchCommand"))
