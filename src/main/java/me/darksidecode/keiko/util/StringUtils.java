@@ -39,6 +39,9 @@ public final class StringUtils {
             case "HTTP":
                 return "80";
 
+            case "HTTP_ALT":
+                return "8080";
+
             case "HTTPS":
                 return "443";
 
