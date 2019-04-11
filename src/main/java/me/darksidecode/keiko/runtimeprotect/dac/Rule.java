@@ -33,8 +33,10 @@ class Rule {
 
     private static final Map<String, Supplier<String>> placeholders =
             ImmutableMap.<String, Supplier<String>>builder().
-                    put("{plugins_folder}", KeikoPluginInspector.getPluginsFolder()::getAbsolutePath).
-                    put("{server_folder}", KeikoPluginInspector.getServerFolder()::getAbsolutePath).
+                    put("{plugins_folder}", () -> KeikoPluginInspector.getPluginsFolder().
+                            getAbsolutePath().replace("\\", "/")). // better Windows compatibility
+                    put("{server_folder}", () -> KeikoPluginInspector.getServerFolder().
+                            getAbsolutePath().replace("\\", "/")). // better Windows compatibility
             build();
 
     @Getter (AccessLevel.PACKAGE)
@@ -131,7 +133,8 @@ class Rule {
             if (filteredPlugin != null)
                 arg = arg.
                         replace("{plugin_name}", filteredPlugin.getName()).
-                        replace("{plugin_jar_path}", filteredPlugin.getJar().getAbsolutePath());
+                        replace("{plugin_jar_path}", filteredPlugin.getJar().getAbsolutePath().
+                                replace("\\", "/") /* better Windows compatibility */);
 
             this.arg = arg;
         } catch (Exception ex) {

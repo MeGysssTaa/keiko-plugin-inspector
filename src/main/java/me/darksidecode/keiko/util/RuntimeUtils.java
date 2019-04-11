@@ -67,8 +67,14 @@ public final class RuntimeUtils {
 
                 if (pidStr.replaceAll("[0-9]", "").isEmpty()) { // just digits - probably our PID
                     KeikoPluginInspector.warn("Sending SIGKILL(9) to process %s (rage quit)", pidStr);
-                    Shell.execute("Keiko Rage Quit", KeikoPluginInspector.getWorkDir(),
-                            "kill -9 " + pidStr, new BasicLogger() {});
+
+                    try {
+                        Shell.execute("Keiko Rage Quit", KeikoPluginInspector.getWorkDir(),
+                                "kill -9 " + pidStr, new BasicLogger() {});
+                    } catch (Exception ex) {
+                        KeikoPluginInspector.warn("Failed to perform rage quit. Shutting the server down normally.");
+                        Bukkit.shutdown();
+                    }
                 } else
                     Bukkit.shutdown();
             } else

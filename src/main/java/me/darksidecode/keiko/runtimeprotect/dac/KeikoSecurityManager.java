@@ -206,7 +206,9 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     @Override
     public void checkLink(String lib) {
-        String libPath = new File(lib).getAbsolutePath();
+        String libPath = new File(lib).getAbsolutePath().
+                replace("\\", "/") /* better Windows compatibility */;
+
         checkAccess(arg -> {
             boolean allowLibName = StringUtils.matchWildcards(lib, arg);
             boolean allowLibPath = StringUtils.matchWildcards(libPath, arg);
@@ -309,7 +311,8 @@ public class KeikoSecurityManager extends DomainAccessController {
                 if (rule.getIdentityFilter() == Rule.IdentityFilter.ALL)
                     arg = arg.
                             replace("{plugin_name}", callerInfo.getPlugin().getName()).
-                            replace("{plugin_jar_path}", callerInfo.getPlugin().getJar().getAbsolutePath());
+                            replace("{plugin_jar_path}", callerInfo.getPlugin().getJar().getAbsolutePath().
+                                    replace("\\", "/") /* better Windows compatibility */);
 
                 boolean filtered = rule.filterCaller(callerInfo);
                 boolean allowArg = ruleFactory.get(arg);
