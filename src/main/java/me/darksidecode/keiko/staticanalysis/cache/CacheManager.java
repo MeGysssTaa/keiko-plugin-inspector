@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 DarksideCode
+ * Copyright 2020 DarksideCode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,10 @@ public class CacheManager {
                     String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
                     InspectionCache cache = CommonJson.fromJson(json, InspectionCache.class);
 
-                    if (cache.hasExpired(InspectionsConfig.getCachesLifespanDays())) {
+                    long cacheLifespanDays = InspectionsConfig.getCachesLifespanDays();
+                    String installedKeikoVersion = KeikoPluginInspector.getVersion();
+
+                    if (cache.hasExpired(cacheLifespanDays, installedKeikoVersion)) {
                         KeikoPluginInspector.debug("Skipped and deleted expired cache %s", file.getName());
                         //noinspection ResultOfMethodCallIgnored
                         file.delete();
@@ -64,8 +67,10 @@ public class CacheManager {
 
     public void saveCache(File file, Map<String, StaticAnalysis.Result> analysesResults) {
         String hash = hashFile(file);
+        String keikoVersion = KeikoPluginInspector.getVersion();
+
         InspectionCache cache = new InspectionCache(
-                System.currentTimeMillis(), hash, analysesResults);
+                System.currentTimeMillis(), keikoVersion, hash, analysesResults);
 
         File cachesFolder = getCachesFolder();
         File cacheFile = new File(cachesFolder, hash + ".dat");

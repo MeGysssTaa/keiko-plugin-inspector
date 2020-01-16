@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 DarksideCode
+ * Copyright 2020 DarksideCode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,10 @@ import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,6 +64,9 @@ public class KeikoPluginInspector extends JavaPlugin {
     @Getter
     private static KeikoInstaller installer;
 
+    @Getter
+    private static String version;
+
     static {
         // (Pre-)load before any other plugins.
         info("Booting early...");
@@ -92,6 +93,8 @@ public class KeikoPluginInspector extends JavaPlugin {
         workDir = new File(pluginsFolder, "Keiko/");
         installer = new KeikoInstaller(keikoJar, pluginsFolder, workDir);
 
+        fetchKeikoVersion();
+
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
 
@@ -101,6 +104,19 @@ public class KeikoPluginInspector extends JavaPlugin {
 
         startRuntimeProtect();
         runStaticAnalysis(pluginsFolder);
+    }
+
+    private static void fetchKeikoVersion() {
+        // Can't rely on Bukkit's Plugin#getDescription because we're booting too early.
+        try (InputStream pluginYmlStream = installer.internalResource("plugin.yml");
+             Reader reader = new InputStreamReader(pluginYmlStream)) {
+            YamlConfiguration pluginYml = new YamlConfiguration();
+            pluginYml.load(reader);
+
+            version = pluginYml.getString("version");
+        } catch (Exception ex) {
+            throw new RuntimeException("failed to fetch Keiko version", ex);
+        }
     }
 
     private static void loadConfigurations() {

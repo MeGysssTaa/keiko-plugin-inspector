@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 DarksideCode
+ * Copyright 2020 DarksideCode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class KeikoInstaller {
         return file;
     }
 
-    private InputStream internalResource(String name) {
+    public InputStream internalResource(String name) {
         return Objects.requireNonNull(getClass().getClassLoader().
                 getResourceAsStream(name), "unrecognized internal resource: " + name);
     }
