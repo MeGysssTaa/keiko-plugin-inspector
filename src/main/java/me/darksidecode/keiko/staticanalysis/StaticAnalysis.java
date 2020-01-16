@@ -41,7 +41,7 @@ public abstract class StaticAnalysis implements Opcodes {
     @Getter
     protected Result result;
 
-    StaticAnalysis(String name, String inputJarName, Collection<ClassNode> classes) {
+    public StaticAnalysis(String name, String inputJarName, Collection<ClassNode> classes) {
         this.name = name;
         this.inputJarName = inputJarName;
         this.classes = classes;
@@ -151,11 +151,11 @@ public abstract class StaticAnalysis implements Opcodes {
 
         private final Countermeasures recommendedCountermeasures;
 
-        Result(Type type, double confidencePercent, List<String> details) {
+        public Result(Type type, double confidencePercent, List<String> details) {
             this(type, confidencePercent, details, null);
         }
 
-        Result(Type type, double confidencePercent,
+        public Result(Type type, double confidencePercent,
                List<String> details, Countermeasures recommendedCountermeasures) {
             this.type = type;
             this.confidencePercent = confidencePercent;
