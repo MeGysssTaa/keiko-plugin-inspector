@@ -72,7 +72,7 @@ public class StaticAnalysisManager {
                     List<String> exclusions = InspectionsConfig.getYaml().
                             getStringList(configName + ".exclusions");
 
-                    if (exclusions.contains(inputJarName)) {
+                    if (exclusions.contains(inputJar.getAbsolutePath())) {
                         KeikoPluginInspector.debug(
                                 "JAR %s is excluded from analysis %s in config.", inputJarName, name);
                         continue;

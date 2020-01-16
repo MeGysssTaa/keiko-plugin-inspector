@@ -19,10 +19,6 @@ package me.darksidecode.keiko.staticanalysis.impl;
 import me.darksidecode.keiko.staticanalysis.Countermeasures;
 import me.darksidecode.keiko.staticanalysis.ManagedInspection;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
-import me.darksidecode.keiko.util.References;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import org.objectweb.asm.tree.*;
 
 import java.util.Collection;
@@ -63,8 +59,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
         if (insn.getOpcode() == INVOKEINTERFACE) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
-            if ((mtdInsn.owner.equals(References.transformedClassName(Player.class)))
-                    && (mtdInsn.name.equals("setOp")))
+            if ((mtdInsn.owner.equals(PLAYER_NAME)) && (mtdInsn.name.equals("setOp")))
                 // Blatant Player#setOp usage.
                 return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
                         "detected OP-giving Bukkit API usage in method " + mtdNode.name +
@@ -91,8 +86,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
             if ((mtdInsn.name.equals("dispatchCommand"))
-                    && ((mtdInsn.owner.equals(References.transformedClassName(Bukkit.class)))
-                        || (mtdInsn.owner.equals(References.transformedClassName(Server.class)))))
+                    && ((mtdInsn.owner.equals(BUKKIT_NAME)) || (mtdInsn.owner.equals(SERVER_NAME))))
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand` usage with a command
                 // that appears to contain force-op/deop calls.

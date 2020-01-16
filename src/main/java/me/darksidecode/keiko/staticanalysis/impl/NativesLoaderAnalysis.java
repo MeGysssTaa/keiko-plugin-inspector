@@ -19,7 +19,6 @@ package me.darksidecode.keiko.staticanalysis.impl;
 import me.darksidecode.keiko.staticanalysis.Countermeasures;
 import me.darksidecode.keiko.staticanalysis.ManagedInspection;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
-import me.darksidecode.keiko.util.References;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -44,22 +43,15 @@ public class NativesLoaderAnalysis extends StaticAnalysis {
     protected Result analyzeMethod(ClassNode clsNode, MethodNode mtdNode) throws Exception {
         for (int i = 0; i < mtdNode.instructions.size(); i++) {
             AbstractInsnNode insn = mtdNode.instructions.get(i);
+            int op = insn.getOpcode();
 
-            if (insn.getOpcode() == INVOKESTATIC) {
+            if ((op == INVOKESTATIC) || (op == INVOKEVIRTUAL)) {
                 MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
-                if ((mtdInsn.owner.equals(References.transformedClassName(System.class)))
-                        && (mtdInsn.name.equals("load")))
-                    return new Result(Result.Type.SUSPICIOUS, 50.0, Collections.singletonList(
-                            "detected natives linkage using System.load in method "
-                                    + mtdNode.name + " declared in class " + clsNode.name));
-            } else if (insn.getOpcode() == INVOKEVIRTUAL) {
-                MethodInsnNode mtdInsn = (MethodInsnNode) insn;
-
-                if ((mtdInsn.owner.equals(References.transformedClassName(Runtime.class)))
+                if (((mtdInsn.owner.equals(SYSTEM_NAME)) || (mtdInsn.owner.equals(RUNTIME_NAME)))
                         && ((mtdInsn.name.equals("load")) || (mtdInsn.name.equals("loadLibrary"))))
                     return new Result(Result.Type.SUSPICIOUS, 50.0, Collections.singletonList(
-                            "detected natives linkage using Runtime.getRuntime()." + mtdInsn.name
+                            "detected natives linkage using #" + mtdInsn.name
                                     + " in method " + mtdNode.name + " declared in class " + clsNode.name));
             }
         }

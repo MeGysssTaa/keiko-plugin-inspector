@@ -17,9 +17,13 @@
 package me.darksidecode.keiko.staticanalysis;
 
 import lombok.Getter;
+import me.darksidecode.kantanj.system.Shell;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.GlobalConfig;
+import me.darksidecode.keiko.util.References;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
@@ -31,6 +35,17 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class StaticAnalysis implements Opcodes {
+
+    /**
+     * Constants used to make the code in analysis classes less cumbersome.
+     */
+    protected static final String PROCESS_BUILDER_NAME = References.transformedClassName(ProcessBuilder.class);
+    protected static final String RUNTIME_NAME         = References.transformedClassName(Runtime.class);
+    protected static final String SYSTEM_NAME          = References.transformedClassName(System.class);
+    protected static final String PLAYER_NAME          = References.transformedClassName(Player.class);
+    protected static final String BUKKIT_NAME          = References.transformedClassName(Bukkit.class);
+    protected static final String SERVER_NAME          = References.transformedClassName(Server.class);
+    protected static final String SHELL_NAME           = References.transformedClassName(Shell.class);
 
     @Getter
     private final String name;

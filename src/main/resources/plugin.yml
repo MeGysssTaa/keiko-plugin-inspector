@@ -2,5 +2,6 @@ name: Keiko
 description: Automatic Spigot/Bukkit plugin inspector that protects servers from malicious plugins
 version: ${project.version}
 main: me.darksidecode.keiko.KeikoPluginInspector
+website: https://github.com/MeGysssTaa/keiko-plugin-inspector
 author: DarksideCode - https://github.com/MeGysssTaa
 api-version: 1.13

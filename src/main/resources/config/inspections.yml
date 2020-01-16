@@ -57,7 +57,20 @@ static:
   # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
   #
   # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
-  natives_loader:
+  nativesloader:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []
+
+  # There are many malicious plugins out there that can harm your server by executing
+  # certain system (Linux/Windows) commands like in SSH (e.g. 'rm -rf /' that deletes
+  # everything on your machine). Ordinary plugins should never use such Java capabilities.
+  #
+  # (-*-) Keiko is PARTIALLY(!) capable of blocking SystemProcess at runtime using Domain Access Control.
+  #       There are still cases when DAC is unable of preventing ProcessBuilder usage, so it is strongly
+  #       recommended that you let Keiko shut your server down forcefully if it detects a suspicious plugin
+  #       that can harm your server using "SSH-like" system commands.
+  systemprocess:
     enabled: true
     overwrite_countermeasures: ''
     exclusions: []
