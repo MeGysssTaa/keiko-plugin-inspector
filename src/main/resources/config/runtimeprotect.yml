@@ -154,6 +154,8 @@ domain_access_control:
       - ALLOW ALL /tmp
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}/*
+      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#onLoad {plugins_folder}
+      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#onLoad {plugins_folder}/*
 
   # File deletion control.
   #

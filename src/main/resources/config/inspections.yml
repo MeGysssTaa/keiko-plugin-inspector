@@ -20,6 +20,40 @@
 
 
 
+# Plugins integrity check configuration.
+#
+# Some malicious plugins that can't bypass Keiko themselves may exploit Keiko's
+# exclusions system (especially when it comes to Domain Access Control) and inject
+# their malware in plugins that you trust by modifying their code silently. For
+# example, if you allow plugin 'ProtocolLib' to delete all files on your machine,
+# other plugins may modify its JAR and insert their malicious code in it, that will,
+# for example, delete your whole server on behalf of 'ProtocolLib'.
+#
+# Keiko provides a solution for this: it can compare the actual SHA-256 checksums of
+# various specific plugins with the checksums that you listed below, and warn you
+# and disable the server forcefully in case of mismatch. This is especially useful
+# for servers who only use a few public plugins that update quite rarely.
+#
+# Learn more:
+# --> https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Plugins-Integrity-Check
+plugins_integrity:
+
+  # Should Keiko shut the server down forcefully if it finds a mismatch in actual
+  # and expected SHA-256 checksums in one of the plugins specified in the list below?
+  #
+  # (!) RECOMMENDED, because this will not allow malware to run in most cases.
+  abort_server_startup: true
+
+  # Map of plugin names to the SHA-256 checksums that they must have.
+  # You can obtain plugins' checksums using keiko-tools (see Wiki for details).
+  # If a plugin is not in this list, Keiko will not check its integrity.
+  expected_checksums:
+    SamplePlugin1: 0123456789abcdef
+    SamplePlugin2: AA223344556677FF
+
+
+
+
 # Static inspections configuration.
 #
 # Static inspections are inspections that always run at server's early boot stage

@@ -37,6 +37,11 @@ public class PluginContext {
 
     private final List<IndexedPlugin> plugins;
 
+    public IndexedPlugin getJarOwner(File pluginJar) {
+        return plugins.stream().filter(plugin
+                -> plugin.getJar().equals(pluginJar)).findFirst().orElse(null);
+    }
+
     public IndexedPlugin getClassOwner(String className) {
         return plugins.stream().filter(plugin
                 -> plugin.getClasses().contains(className)).findFirst().orElse(null);

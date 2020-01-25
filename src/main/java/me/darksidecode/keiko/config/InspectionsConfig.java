@@ -29,4 +29,7 @@ public final class InspectionsConfig {
     @Getter @Config (path = "static.caches_lifespan_days")
     private static Integer cachesLifespanDays = 7;
 
+    @Getter @Config (path = "plugins_integrity.abort_server_startup")
+    private static Boolean abortServerStartupOnIntegrityViolation = true;
+
 }

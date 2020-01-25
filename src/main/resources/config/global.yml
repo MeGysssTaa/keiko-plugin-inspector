@@ -43,6 +43,12 @@ failure_policy: shutdown
 # If you will forbid it to, then Bukkit#shutdown() will be used instead,
 # which is often pretty slow and still lets the installed plugins enable.
 #
-# NOTE: this feature may not work properly on some certain servers, since
-#       process ID retrieval is difficult to implement for Java 8 properly.
+# NOTE #1: this feature may not work properly on some certain servers, since
+#          process ID retrieval is difficult to implement for Java 8 properly.
+#
+# NOTE #2: this feature may cause Keiko to stop the server before logging any
+#          information in server console, which may sometimes look like the
+#          server is getting crashed for no reason. If you're experiencing
+#          this kind of issue make sure to check Keiko logs, which are located
+#          in '.../plugins/Keiko/logs/YYYY-MM-dd.log' files (log name = current date).
 allow_keiko_rage_quit: true

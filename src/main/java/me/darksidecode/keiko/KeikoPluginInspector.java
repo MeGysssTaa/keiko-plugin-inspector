@@ -22,6 +22,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.pluginsintegrity.PluginsIntegrityChecker;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
@@ -69,7 +70,6 @@ public class KeikoPluginInspector extends JavaPlugin {
 
     static {
         // (Pre-)load before any other plugins.
-        info("Booting early...");
         earlyBoot();
     }
 
@@ -93,17 +93,18 @@ public class KeikoPluginInspector extends JavaPlugin {
         workDir = new File(pluginsFolder, "Keiko/");
         installer = new KeikoInstaller(keikoJar, pluginsFolder, workDir);
 
-        fetchKeikoVersion();
-
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
 
+        fetchKeikoVersion();
+
+        info("Booting early...");
         loadConfigurations();
 
         pluginContext = PluginContext.getCurrentContext(pluginsFolder);
 
         startRuntimeProtect();
-        runStaticAnalysis(pluginsFolder);
+        runStaticCheck(pluginsFolder);
     }
 
     private static void fetchKeikoVersion() {
@@ -125,18 +126,30 @@ public class KeikoPluginInspector extends JavaPlugin {
         ConfigurationLoader.load(RuntimeProtectConfig.class);
     }
 
-    private static void runStaticAnalysis(File pluginsFolder) {
+    /**
+     * (1) Check integrity of all installed plugins listed in inspections.yml.
+     * (2) Run static inspections on all installed plugins.
+     */
+    private static void runStaticCheck(File pluginsFolder) {
         info("Running static analysis in folder %s. " +
                 "This may take some time...", pluginsFolder.getAbsolutePath());
 
+        PluginsIntegrityChecker checker = new PluginsIntegrityChecker();
         StaticAnalysisManager manager = new StaticAnalysisManager();
+
         File[] files = pluginsFolder.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if ((file.isFile()) && (file.getName().endsWith(".jar")) && (!(file.equals(keikoJar)))) {
                     try {
-                        manager.analyzeJar(file);
+                        boolean integrityOk = checker.
+                                checkIntegrity(file, pluginContext.getJarOwner(file));
+
+                        // No need to analyse corrupted plugins or plugins that
+                        // are already very likely to be infected artificially.
+                        if (integrityOk)
+                            manager.analyzeJar(file);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -169,6 +182,7 @@ public class KeikoPluginInspector extends JavaPlugin {
         synchronized (outputLock) {
             if ((format != null) && (format.length > 0))
                 s = String.format(s, format);
+
             printStream.println("[Keiko] " + s);
 
             if (GlobalConfig.getMakeLogs()) {
