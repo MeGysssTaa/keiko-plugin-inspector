@@ -5,7 +5,7 @@
 
 Owning a big server? Can't use many public plugins just because you worry that they can harm your network? Want to monitor and/or restrict Internet activity, file access and other stuff for certain plugins? **That's all exactly what Keiko comes for.**
 
-#### [→ Keiko on SpigotMC](https://www.spigotmc.org/resources/keiko-server-security-and-plugins-inspections.66278/)
+### [→ Keiko on SpigotMC](https://www.spigotmc.org/resources/keiko-server-security-and-plugins-inspections.66278/)
 
 
 **Keiko is capable of:**
@@ -13,6 +13,8 @@ Owning a big server? Can't use many public plugins just because you worry that t
 * inspecting bytecode of plugins at startup and check them for potentially unsafe operations or malware, including "Force-OP";
 
 * monitoring and restricting nearly every single action plugins do, including network connectivity, file access, natives linkage, and more, with an easy to use and understand rules syntax;
+
+* checking the integrity of installed plugins, ensuring they are not artificially modified or infected;
 
 * ***[planned]*** detecting suspicious behavior of plugins at runtime.
 
