@@ -58,8 +58,14 @@ public class ForceOpAnalysis extends StaticAnalysis {
     private Result inspectBukkitApi(ClassNode clsNode, MethodNode mtdNode, AbstractInsnNode insn) {
         if (insn.getOpcode() == INVOKEINTERFACE) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
+            String mtdOwner = mtdInsn.owner;
 
-            if ((mtdInsn.owner.equals(PLAYER_NAME)) && (mtdInsn.name.equals("setOp")))
+            boolean oppableEntity = mtdOwner.equals(PLAYER_NAME)
+                    || mtdOwner.equals(OFFLINE_PLAYER_NAME)
+                    || mtdOwner.equals(COMMAND_SENDER_NAME)
+                    || mtdOwner.equals(HUMAN_ENTITY_NAME);
+
+            if ((oppableEntity) && (mtdInsn.name.equals("setOp")))
                 // Blatant Player#setOp usage.
                 return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
                         "detected OP-giving Bukkit API usage in method " + mtdNode.name +

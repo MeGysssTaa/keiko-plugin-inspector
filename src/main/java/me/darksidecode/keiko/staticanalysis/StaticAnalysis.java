@@ -22,7 +22,10 @@ import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.util.References;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -40,12 +43,18 @@ public abstract class StaticAnalysis implements Opcodes {
      * Constants used to make the code in analysis classes less cumbersome.
      */
     protected static final String PROCESS_BUILDER_NAME = References.transformedClassName(ProcessBuilder.class);
+    protected static final String OFFLINE_PLAYER_NAME  = References.transformedClassName(OfflinePlayer.class);
+    protected static final String COMMAND_SENDER_NAME  = References.transformedClassName(CommandSender.class);
+    protected static final String HUMAN_ENTITY_NAME    = References.transformedClassName(HumanEntity.class);
     protected static final String RUNTIME_NAME         = References.transformedClassName(Runtime.class);
     protected static final String SYSTEM_NAME          = References.transformedClassName(System.class);
     protected static final String PLAYER_NAME          = References.transformedClassName(Player.class);
     protected static final String BUKKIT_NAME          = References.transformedClassName(Bukkit.class);
     protected static final String SERVER_NAME          = References.transformedClassName(Server.class);
     protected static final String SHELL_NAME           = References.transformedClassName(Shell.class);
+
+
+
 
     @Getter
     private final String name;
