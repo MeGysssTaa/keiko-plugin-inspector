@@ -21,6 +21,7 @@ import me.darksidecode.kantanj.system.Shell;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.util.References;
+import me.darksidecode.keiko.util.RuntimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -146,7 +147,7 @@ public abstract class StaticAnalysis implements Opcodes {
 
             if (GlobalConfig.getFailurePolicy() == FailurePolicy.SHUTDOWN) {
                 KeikoPluginInspector.warn("Shutting down as per configured failure policy.");
-                Bukkit.shutdown();
+                RuntimeUtils.rageQuit();
             }
         }
 

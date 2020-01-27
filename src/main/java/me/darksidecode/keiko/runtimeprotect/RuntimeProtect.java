@@ -18,7 +18,7 @@ package me.darksidecode.keiko.runtimeprotect;
 
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.runtimeprotect.dac.KeikoSecurityManager;
-import org.bukkit.Bukkit;
+import me.darksidecode.keiko.util.RuntimeUtils;
 
 public class RuntimeProtect {
 
@@ -32,7 +32,7 @@ public class RuntimeProtect {
                     "Domain access control may not work properly. Check your start command arguments for: " +
                     "'java.security.manager', 'java.security.policy'");
 
-            Bukkit.shutdown();
+            RuntimeUtils.rageQuit();
 
             return;
         }

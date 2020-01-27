@@ -17,7 +17,6 @@
 package me.darksidecode.keiko.util;
 
 import me.darksidecode.keiko.KeikoPluginInspector;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -59,7 +58,7 @@ public final class ConfigUtils {
                 KeikoPluginInspector.warn("The error that occurred was:");
 
                 ex.printStackTrace();
-                Bukkit.shutdown();
+                RuntimeUtils.rageQuit();
 
                 throw new RuntimeException("invalid " + configName + " configuration", ex);
             }
