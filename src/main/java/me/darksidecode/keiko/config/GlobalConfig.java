@@ -27,6 +27,9 @@ public final class GlobalConfig {
     private static Boolean makeLogs = true;
 
     @Getter @Config
+    private static Integer logsLifespanDays = 7;
+
+    @Getter @Config
     private static Boolean enableDebug = false;
 
     @Getter @Config

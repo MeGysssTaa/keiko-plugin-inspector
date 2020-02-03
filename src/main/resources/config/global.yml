@@ -23,6 +23,11 @@
 # Debug data is also written in logs, even if "enable_debug" is set to "false".
 make_logs: true
 
+# Keiko automatically deletes log files that are older than the number of days
+# specified below. If you don't want Keiko to manage its logs automatically,
+# you can disable this feature by setting logs_lifespan_days to -1.
+logs_lifespan_days: 7
+
 # Show debug (detailed verbose) messages in console?
 enable_debug: false
 

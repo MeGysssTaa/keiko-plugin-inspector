@@ -32,9 +32,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class KeikoPluginInspector extends JavaPlugin {
 
@@ -99,7 +102,9 @@ public class KeikoPluginInspector extends JavaPlugin {
         fetchKeikoVersion();
 
         info("Booting early...");
+
         loadConfigurations();
+        deleteOldLogs();
 
         pluginContext = PluginContext.getCurrentContext(pluginsFolder);
 
@@ -194,6 +199,8 @@ public class KeikoPluginInspector extends JavaPlugin {
                         // This is the first entry to log.
                         logWriter = new FileWriter(getLogFile(currentDate), true);
                         lastLogDate = currentDate;
+
+                        deleteOldLogs();
                     } else if (!(currentDate.equals(lastLogDate))) {
                         // Day changed, and there was no server restart.
                         logWriter = new FileWriter(getLogFile(currentDate), true);
@@ -207,6 +214,48 @@ public class KeikoPluginInspector extends JavaPlugin {
                 } catch (IOException ex) {
                     System.err.println("Failed to log in file. Stacktrace:");
                     ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void deleteOldLogs() {
+        File logsFolder = new File(workDir, "logs/");
+
+        //noinspection ResultOfMethodCallIgnored
+        logsFolder.mkdirs();
+
+        File[] logs = logsFolder.listFiles();
+
+        if (logs != null) {
+            long logsLifespanDays = GlobalConfig.getLogsLifespanDays();
+
+            if (logsLifespanDays != -1) {
+                try {
+                    long currentTime = System.currentTimeMillis();
+
+                    for (File log : logs) {
+                        // We could also just transform the file name (YYYY-MM-dd), but in that case
+                        // we wouldn't respect the TIME this log file was created or last modified.
+                        // File attributes allow us to keep "yesterday's" logs when date changes.
+                        BasicFileAttributes attr = Files.readAttributes(log.toPath(), BasicFileAttributes.class);
+                        long lastModifiedMillis = attr.lastModifiedTime().toMillis();
+
+                        if ((lastModifiedMillis == Long.MIN_VALUE) || (lastModifiedMillis == Long.MAX_VALUE))
+                            warn("Failed to retrieve last modified date/time of log file %s", log.getName());
+                        else {
+                            long millisSinceLastModified = currentTime - lastModifiedMillis;
+                            long daysSinceLastModified = TimeUnit.MILLISECONDS.toDays(millisSinceLastModified);
+
+                            if (daysSinceLastModified > logsLifespanDays) {
+                                //noinspection ResultOfMethodCallIgnored
+                                log.delete();
+                                info("Automatically deleted old log file %s", log.getName());
+                            }
+                        }
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException("failed to delete old logs", ex);
                 }
             }
         }
