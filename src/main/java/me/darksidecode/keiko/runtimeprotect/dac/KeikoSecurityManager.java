@@ -72,14 +72,15 @@ public class KeikoSecurityManager extends DomainAccessController {
 
                 if (rule.getFilterType() == defaultRules.get(op))
                     KeikoPluginInspector.warn("Ignoring contradictory rule %s for " +
-                            "operation %s (default rule is of the same type)", rule.getFilterType(), op);
+                            "operation %s (default rule is of the same type).", rule.getFilterType(), op);
                 else
                     rules.get(op).add(rule);
             } catch (Exception ex) {
                 // Invalid rule. Skip it and warn.
+                String cause = (ex.getCause() == null) ? "?" : ex.getCause().getMessage();
                 KeikoPluginInspector.warn(
-                        "Invalid Domain Access Control rules configuration for operation %s", op);
-                ex.printStackTrace();
+                        "Invalid Domain Access Control rules configuration for operation %s. " +
+                                "These rules will be ignored. Details: %s (%s).", op, ex.getMessage(), cause);
             }
         }
     }
