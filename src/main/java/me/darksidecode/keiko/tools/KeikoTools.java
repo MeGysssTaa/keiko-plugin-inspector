@@ -27,6 +27,7 @@ public class KeikoTools {
     public static void main(String[] unused) {
         List<Command> commands = Arrays.asList(
                 new ChecksumCommand(),
+                new ClearCachesCommand(),
                 new ExitCommand(),
                 new QInfoCommand(),
                 new QRestoreCommand()
