@@ -18,6 +18,19 @@
 
 
 
+# How often should Keiko check for its own updates? When a newer version
+# of Keiko is out, you will automatically be notified about that.
+# This value is measured in minutes (default: 120 minutes = check every 2 hours).
+#
+# Special options:
+#
+#     * set to 0 to disable periodic updates checking. Keiko will still
+#       check for updates on startup (remember - updating is important!);
+#
+#     * set to -1 to disable updates checking completely. Keiko will
+#       not check for updates at all (not recommended!).
+updates_check_freq_mins: 120
+
 # Should Keiko save all its output in own log files (.../plugins/Keiko/logs/)?
 # This will allow you to perform deep analysis any time in case something happens.
 # Debug data is also written in logs, even if "enable_debug" is set to "false".

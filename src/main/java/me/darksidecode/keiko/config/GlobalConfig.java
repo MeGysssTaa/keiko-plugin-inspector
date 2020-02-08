@@ -24,6 +24,9 @@ public final class GlobalConfig {
     private GlobalConfig() {}
 
     @Getter @Config
+    private static Integer updatesCheckFreqMins = 120;
+
+    @Getter @Config
     private static Boolean makeLogs = true;
 
     @Getter @Config

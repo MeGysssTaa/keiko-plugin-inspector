@@ -22,6 +22,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.installer.UpdatesCheckerTask;
 import me.darksidecode.keiko.pluginsintegrity.PluginsIntegrityChecker;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
@@ -74,6 +75,21 @@ public class KeikoPluginInspector extends JavaPlugin {
     static {
         // (Pre-)load before any other plugins.
         earlyBoot();
+    }
+
+    @Override
+    public void onEnable() {
+        int updatesCheckFreqMins = GlobalConfig.getUpdatesCheckFreqMins();
+
+        if (updatesCheckFreqMins >= 0) { // -1 = don't ever check for updates
+            if (updatesCheckFreqMins == 0) // Periodic checking is disabled - only check for updates once, at startup.
+                Bukkit.getScheduler().runTaskAsynchronously(this, new UpdatesCheckerTask());
+            else {
+                long updatesCheckFreqTicks = updatesCheckFreqMins * 60 * 20; // 1 second contains 20 ticks
+                Bukkit.getScheduler().runTaskTimerAsynchronously(
+                        this, new UpdatesCheckerTask(), 0, updatesCheckFreqTicks);
+            }
+        }
     }
 
     @Override
