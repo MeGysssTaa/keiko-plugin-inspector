@@ -25,12 +25,15 @@ public class RuntimeProtect {
     public void setupDomainAccessControl() {
         KeikoPluginInspector.debug("Setting up Keiko security manager");
 
-        if ((System.getSecurityManager() != null)
-                || (System.getProperty("java.security.manager") != null)
-                || (System.getProperty("java.security.policy") != null)) {
-            KeikoPluginInspector.warn("JVM security manager is already set. " +
+        SecurityManager curSec     = System.getSecurityManager();
+        String curSecurityManager = System.getProperty("java.security.manager");
+        String curSecurityPolicy  = System.getProperty("java.security.policy");
+
+        if ((curSec != null) || (curSecurityManager != null) || (curSecurityPolicy != null)) {
+            KeikoPluginInspector.warn("JVM security manager is already set (%s). " +
                     "Domain access control may not work properly. Check your start command arguments for: " +
-                    "'java.security.manager', 'java.security.policy'");
+                    "'java.security.manager' (%s), 'java.security.policy' (%s).",
+                    (curSec == null) ? "N/A" : curSec.getClass().getName(), curSecurityManager, curSecurityPolicy);
 
             RuntimeUtils.rageQuit();
 
