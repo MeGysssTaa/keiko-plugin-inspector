@@ -23,6 +23,8 @@ Owning a big server? Can't use many public plugins just because you worry that t
 
 Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/releases)** and download the latest Keiko release JAR, then put it in your server's `plugins/` folder and restart.
 
+> **IMPORTANT:** if you're runnning a BungeeCord network, make sure to install Keiko **both** on the Bungee itself and on **all** its 'child' (Bukkit) servers. This will let Keiko protect not only all your endpoints, but also your Bungee (proxy)!
+
 
 ## Configuration, help and troubleshooting
 
