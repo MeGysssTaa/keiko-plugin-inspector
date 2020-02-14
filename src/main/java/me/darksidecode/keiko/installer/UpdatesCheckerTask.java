@@ -16,10 +16,13 @@
 
 package me.darksidecode.keiko.installer;
 
-import me.darksidecode.kantanj.networking.GetHttpRequest;
-import me.darksidecode.kantanj.networking.Networking;
 import me.darksidecode.kantanj.networking.SampleUserAgents;
 import me.darksidecode.keiko.KeikoPluginInspector;
+
+import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public class UpdatesCheckerTask implements Runnable {
 
@@ -30,13 +33,28 @@ public class UpdatesCheckerTask implements Runnable {
     @Override
     public void run() {
         try {
-            GetHttpRequest request = new GetHttpRequest().
-                    baseUrl(SPIGOT_API_URL).
-                    path("legacy/update.php?resource=" + KEIKO_SPIGOT_PLUGIN_ID).
-                    userAgent(SampleUserAgents.MOZILLA_WIN_NT).
-                    asGetRequest();
+            // FIXME: Cannot use kantanj because of BungeeCord compatibility issues:
+            //     java.lang.NoSuchMethodError: org.apache.commons.io.IOUtils.readLines(Ljava/io/InputStream;Ljava/nio/charset/Charset;)Ljava/util/List;
+            //        at me.darksidecode.kantanj.networking.Networking$Http.readResponseAndDisconnect(Networking.java:130)
+            //        at me.darksidecode.kantanj.networking.Networking$Http.get(Networking.java:84)
+//            GetHttpRequest request = new GetHttpRequest().
+//                    baseUrl(SPIGOT_API_URL).
+//                    path("legacy/update.php?resource=" + KEIKO_SPIGOT_PLUGIN_ID).
+//                    userAgent(SampleUserAgents.MOZILLA_WIN_NT).
+//                    asGetRequest();
 
-            String latestVersion = Networking.Http.get(request);
+            URL url = new URL(SPIGOT_API_URL + "/legacy/update.php?resource=" + KEIKO_SPIGOT_PLUGIN_ID);
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+            con.setRequestProperty("User-Agent", SampleUserAgents.MOZILLA_WIN_NT);
+            con.setReadTimeout(5000);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String latestVersion = reader.readLine(); // Spigot should only return one line
+
+            reader.close();
+
+            // (see above) String latestVersion = Networking.Http.get(request);
             String installedVersion = KeikoPluginInspector.getVersion();
 
             if (!(installedVersion.equals(latestVersion))) {
