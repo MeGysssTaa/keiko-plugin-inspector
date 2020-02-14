@@ -100,7 +100,7 @@ public class KeikoPluginInspector {
 
         fetchKeikoVersion();
 
-        info("Performing early boot... [%s]", platform.name());
+        info("Performing early boot... [%s]", platform.name().toLowerCase());
         
         if (platform == Platform.BUKKIT) {
             warn("");
