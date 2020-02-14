@@ -25,7 +25,7 @@ public class RuntimeProtect {
     public void setupDomainAccessControl() {
         KeikoPluginInspector.debug("Setting up Keiko security manager");
 
-        SecurityManager curSec     = System.getSecurityManager();
+        SecurityManager curSec    = System.getSecurityManager();
         String curSecurityManager = System.getProperty("java.security.manager");
         String curSecurityPolicy  = System.getProperty("java.security.policy");
 
