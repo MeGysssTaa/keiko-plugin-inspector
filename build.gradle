@@ -56,7 +56,7 @@ dependencies {
     compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 
     // Present at runtime
-    compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.13.2-R0.1-SNAPSHOT'
+    compile group: 'org.spigotmc', name: 'spigot-api', version: '1.13.2-R0.1-SNAPSHOT'
     compileOnly group: 'net.md-5', name: 'bungeecord-api', version: '1.13-SNAPSHOT'
 
     // Annotation processors

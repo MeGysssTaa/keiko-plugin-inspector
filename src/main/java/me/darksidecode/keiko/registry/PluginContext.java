@@ -59,8 +59,7 @@ public class PluginContext {
 
         if (files != null) {
             List<IndexedPlugin> indexedPlugins = new ArrayList<>();
-            String pluginDataFile =
-                    (KeikoPluginInspector.getPlatform() == Platform.BUKKIT) ? "plugin.yml" : "bungee.yml";
+            boolean bungee = KeikoPluginInspector.getPlatform() == Platform.BUNGEECORD;
 
             for (File file : files) {
                 if ((file.isFile()) && (file.getName().endsWith(".jar"))) {
@@ -76,13 +75,22 @@ public class PluginContext {
                             ZipEntry entry = entries.nextElement();
                             String entryName = entry.getName();
 
-                            if ((entryName.equals(pluginDataFile))) {
+                            if ((entryName.equals("plugin.yml")) || (entryName.equals("bungee.yml"))) {
                                 try {
                                     YamlConfiguration yaml = new YamlConfiguration();
                                     yaml.load(new InputStreamReader(zipFile.getInputStream(entry)));
 
-                                    pluginName = yaml.getString("name");
-                                    pluginMainClass = yaml.getString("main");
+                                    // Some BungeeCord plugins only have 'plugin.yml'. But some (like Keiko itself)
+                                    // have got both 'plugin.yml' and 'bungee.yml' at the same time. In order to
+                                    // get the proper plugin data file for our current platform type, we check
+                                    // if plugin name/main are already assigned, and if so, we only overwrite them
+                                    // if the JAR entry currently being read is 'bungee.yml' and the server is
+                                    // BungeeCord. Otherwise we're fine with just 'plugin.yml'.
+                                    if ((pluginName == null) || ((entryName.equals("bungee.yml")) && (bungee)))
+                                        pluginName = yaml.getString("name");
+
+                                    if ((pluginMainClass == null) || ((entryName.equals("bungee.yml")) && (bungee)))
+                                        pluginMainClass = yaml.getString("main");
                                 } catch (Exception ex) {
                                     KeikoPluginInspector.warn("Invalid plugin.yml in %s", file.getName());
                                 }
@@ -130,7 +138,7 @@ public class PluginContext {
                 }
             }
 
-            KeikoPluginInspector.info("%s plugins have been indexed successfully.", indexedPlugins.size());
+            KeikoPluginInspector.info("Successfully indexed %s plugins.", indexedPlugins.size());
 
             return new PluginContext(indexedPlugins);
         } else
