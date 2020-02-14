@@ -53,6 +53,7 @@ public class UpdatesCheckerTask implements Runnable {
             String latestVersion = reader.readLine(); // Spigot should only return one line
 
             reader.close();
+            con.disconnect();
 
             // (see above) String latestVersion = Networking.Http.get(request);
             String installedVersion = KeikoPluginInspector.getVersion();
