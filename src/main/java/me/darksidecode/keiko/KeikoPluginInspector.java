@@ -101,8 +101,19 @@ public class KeikoPluginInspector {
         fetchKeikoVersion();
 
         info("Performing early boot... [%s]", platform.name());
-
-        if (platform == Platform.BUNGEECORD) {
+        
+        if (platform == Platform.BUKKIT) {
+            warn("");
+            warn(LINE);
+            warn("  (!) IMPORTANT: You are running Keiko on Bukkit.");
+            warn("      This means that Keiko will only inspect plugins installed on");
+            warn("      this certain Bukkit server, and if you are using BungeeCord,");
+            warn("      Bungee plugins will NOT be checked! You should install Keiko");
+            warn("      on the Bungee itself too if you are using it (make sure to have");
+            warn("      Keiko installed both on Bungee and ALL its 'child' servers).");
+            warn(LINE);
+            warn("");
+        } else {
             warn("");
             warn(LINE);
             warn("  (!) IMPORTANT: You are running Keiko on BungeeCord.");
