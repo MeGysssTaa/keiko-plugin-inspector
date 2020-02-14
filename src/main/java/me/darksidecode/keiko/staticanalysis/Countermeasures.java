@@ -40,7 +40,7 @@ public enum Countermeasures {
 
     ABORT_SERVER_STARTUP ((analysis, jar, analysisResult) -> {
         synchronized (KeikoPluginInspector.outputLock) { // to avoid quitting before warning
-            WARN.execute(analysis, jar, analysisResult);
+            WARN.execute(analysis, jar, analysisResult); // ignore WARN's return result - we want to return true
 
             // EXECUTED LATER (SEE JAVADOC TO METHOD execute):
             //     KeikoPluginInspector.warn("The server will be shut down forcefully (rage quit).");

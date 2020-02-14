@@ -100,7 +100,7 @@ public class KeikoPluginInspector {
 
         fetchKeikoVersion();
 
-        info("Performing early boot...");
+        info("Performing early boot... [%s]", platform.name());
 
         if (platform == Platform.BUNGEECORD) {
             warn("");

@@ -126,7 +126,7 @@ public class StaticAnalysisManager {
             }
         }
 
-        return false; // don't abort server startup
+        return abortServerStartup;
     }
 
     /**
