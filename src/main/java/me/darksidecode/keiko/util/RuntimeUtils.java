@@ -19,9 +19,11 @@ package me.darksidecode.keiko.util;
 import me.darksidecode.kantanj.logging.BasicLogger;
 import me.darksidecode.kantanj.system.Shell;
 import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.Platform;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import me.darksidecode.keiko.runtimeprotect.CallerInfo;
+import net.md_5.bungee.api.ProxyServer;
 import org.bukkit.Bukkit;
 
 import java.io.File;
@@ -73,14 +75,21 @@ public final class RuntimeUtils {
                                 "kill -9 " + pidStr, new BasicLogger() {});
                     } catch (Exception ex) {
                         KeikoPluginInspector.warn("Failed to perform rage quit. Shutting the server down normally.");
-                        Bukkit.shutdown();
+                        ordinaryServerShutdown();
                     }
                 } else
-                    Bukkit.shutdown();
+                    ordinaryServerShutdown();
             } else
-                Bukkit.shutdown();
+                ordinaryServerShutdown();
         } else
+            ordinaryServerShutdown();
+    }
+
+    public static void ordinaryServerShutdown() {
+        if (KeikoPluginInspector.getPlatform() == Platform.BUKKIT)
             Bukkit.shutdown();
+        else
+            ProxyServer.getInstance().stop();
     }
 
 }

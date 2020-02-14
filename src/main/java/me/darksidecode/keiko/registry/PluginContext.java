@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.Platform;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -58,6 +59,8 @@ public class PluginContext {
 
         if (files != null) {
             List<IndexedPlugin> indexedPlugins = new ArrayList<>();
+            String pluginDataFile =
+                    (KeikoPluginInspector.getPlatform() == Platform.BUKKIT) ? "plugin.yml" : "bungee.yml";
 
             for (File file : files) {
                 if ((file.isFile()) && (file.getName().endsWith(".jar"))) {
@@ -73,7 +76,7 @@ public class PluginContext {
                             ZipEntry entry = entries.nextElement();
                             String entryName = entry.getName();
 
-                            if (entryName.equals("plugin.yml")) {
+                            if ((entryName.equals(pluginDataFile))) {
                                 try {
                                     YamlConfiguration yaml = new YamlConfiguration();
                                     yaml.load(new InputStreamReader(zipFile.getInputStream(entry)));

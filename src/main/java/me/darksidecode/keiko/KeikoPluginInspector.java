@@ -22,15 +22,12 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
-import me.darksidecode.keiko.installer.UpdatesCheckerTask;
 import me.darksidecode.keiko.pluginsintegrity.PluginsIntegrityChecker;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
 import me.darksidecode.keiko.util.RuntimeUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -40,15 +37,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class KeikoPluginInspector extends JavaPlugin {
+public class KeikoPluginInspector {
 
     /**
      * Used to synchronize output in all streams between each other.
      */
     public static final Object outputLock = new Object();
 
+    public static final String LINE = "======================================================================";
+
     private static final DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
     private static final DateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss.SSS]");
+
+    private static boolean earlyBooted;
+
+    @Getter
+    private static Platform platform;
 
     @Getter
     private static File keikoJar;
@@ -72,34 +76,13 @@ public class KeikoPluginInspector extends JavaPlugin {
     @Getter
     private static String version;
 
-    static {
-        // (Pre-)load before any other plugins.
-        earlyBoot();
-    }
+    static void earlyBoot(Platform currentPlatform) {
+        if (earlyBooted)
+            throw new IllegalStateException("Keiko cannot early-boot twice");
 
-    @Override
-    public void onEnable() {
-        int updatesCheckFreqMins = GlobalConfig.getUpdatesCheckFreqMins();
+        earlyBooted = true;
+        platform = currentPlatform;
 
-        if (updatesCheckFreqMins >= 0) { // -1 = don't ever check for updates
-            if (updatesCheckFreqMins == 0) // Periodic checking is disabled - only check for updates once, at startup.
-                Bukkit.getScheduler().runTaskAsynchronously(this, new UpdatesCheckerTask());
-            else {
-                long updatesCheckFreqTicks = updatesCheckFreqMins * 60 * 20; // 1 second contains 20 ticks
-                Bukkit.getScheduler().runTaskTimerAsynchronously(
-                        this, new UpdatesCheckerTask(), 0, updatesCheckFreqTicks);
-            }
-        }
-    }
-
-    @Override
-    public void onDisable() {
-        warn("Keiko is shutting down! This may leave your server unsecured. " +
-                "To prevent abuse, Keiko will shut the server down as well.");
-        Bukkit.shutdown();
-    }
-
-    private static void earlyBoot() {
         keikoJar = RuntimeUtils.getSourceJar(KeikoPluginInspector.class);
         pluginsFolder = keikoJar.getParentFile();
         serverFolder = pluginsFolder.getParentFile();
@@ -117,7 +100,19 @@ public class KeikoPluginInspector extends JavaPlugin {
 
         fetchKeikoVersion();
 
-        info("Booting early...");
+        info("Performing early boot...");
+
+        if (platform == Platform.BUNGEECORD) {
+            warn("");
+            warn(LINE);
+            warn("  (!) IMPORTANT: You are running Keiko on BungeeCord.");
+            warn("      This means that Keiko will only inspect plugins installed");
+            warn("      on your Bungee, and plugins installed on your Bukkit servers");
+            warn("      will NOT be checked! You should install Keiko not only on");
+            warn("      Bungee, but on all your Bukkit ('child') servers as well!");
+            warn(LINE);
+            warn("");
+        }
 
         loadConfigurations();
         deleteOldLogs();
@@ -130,7 +125,9 @@ public class KeikoPluginInspector extends JavaPlugin {
 
     private static void fetchKeikoVersion() {
         // Can't rely on Bukkit's Plugin#getDescription because we're booting too early.
-        try (InputStream pluginYmlStream = installer.internalResource("plugin.yml");
+        String pluginDataFile = (platform == Platform.BUKKIT) ? "plugin.yml" : "bungee.yml";
+
+        try (InputStream pluginYmlStream = installer.internalResource(pluginDataFile);
              Reader reader = new InputStreamReader(pluginYmlStream)) {
             YamlConfiguration pluginYml = new YamlConfiguration();
             pluginYml.load(reader);

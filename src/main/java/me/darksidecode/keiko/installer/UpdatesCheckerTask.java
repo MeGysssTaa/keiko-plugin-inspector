@@ -23,8 +23,6 @@ import me.darksidecode.keiko.KeikoPluginInspector;
 
 public class UpdatesCheckerTask implements Runnable {
 
-    private static final String LINE = "======================================================================";
-
     private static final String SPIGOT_API_URL         = "https://api.spigotmc.org";
     private static final String SPIGOT_RESOURCES_URL   = "https://www.spigotmc.org/resources/";
     private static final String KEIKO_SPIGOT_PLUGIN_ID = "66278";
@@ -44,21 +42,21 @@ public class UpdatesCheckerTask implements Runnable {
             if (!(installedVersion.equals(latestVersion))) {
                 // A newer version of Keiko was found on SpigotMC.
                 KeikoPluginInspector.info(" ");
-                KeikoPluginInspector.info(LINE);
+                KeikoPluginInspector.info(KeikoPluginInspector.LINE);
                 KeikoPluginInspector.info("  (i) A new version of Keiko is available!");
                 KeikoPluginInspector.info("      Installed: %s, latest: %s", installedVersion, latestVersion);
                 KeikoPluginInspector.info("      Make sure to update as soon as possible:");
                 KeikoPluginInspector.info("      %s", SPIGOT_RESOURCES_URL + KEIKO_SPIGOT_PLUGIN_ID);
-                KeikoPluginInspector.info(LINE);
+                KeikoPluginInspector.info(KeikoPluginInspector.LINE);
                 KeikoPluginInspector.info(" ");
             }
         } catch (Exception ex) {
             KeikoPluginInspector.warn(" ");
-            KeikoPluginInspector.warn(LINE);
+            KeikoPluginInspector.warn(KeikoPluginInspector.LINE);
             KeikoPluginInspector.warn("  (!) Failed to check for updates! Is everything OK with");
             KeikoPluginInspector.warn("      your Internet connection? P.S.: you can disable updates");
             KeikoPluginInspector.warn("      checking in .../Keiko/config/global.yml (not recommended).");
-            KeikoPluginInspector.warn(LINE);
+            KeikoPluginInspector.warn(KeikoPluginInspector.LINE);
             KeikoPluginInspector.warn(" ");
 
             ex.printStackTrace();
