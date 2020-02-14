@@ -20,7 +20,6 @@ import me.darksidecode.kantanj.formatting.Hash;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.registry.IndexedPlugin;
-import me.darksidecode.keiko.util.RuntimeUtils;
 
 import java.io.File;
 
@@ -51,8 +50,9 @@ public class PluginsIntegrityChecker {
                                 "recommended that you delete %s and redownload it from official source in that case.",
                         pluginName, pluginName);
 
-                if (InspectionsConfig.getAbortServerStartupOnIntegrityViolation())
-                    RuntimeUtils.rageQuit();
+                // EXECUTED LATER (SEE JAVADOC TO METHOD me.darksidecode.keiko.staticanalysis.Countermeasures#execute):
+                //    if (InspectionsConfig.getAbortServerStartupOnIntegrityViolation())
+                //        RuntimeUtils.rageQuit();
 
                 return false; // integrity violation detected
             }

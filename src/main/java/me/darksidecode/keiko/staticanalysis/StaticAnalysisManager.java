@@ -36,7 +36,13 @@ public class StaticAnalysisManager {
         (cacheManager = new CacheManager()).loadCaches();
     }
 
-    public void analyzeJar(File inputJar) {
+    /**
+     * True = abort server startup later.
+     * @see Countermeasures#execute(StaticAnalysis, File, StaticAnalysis.Result)
+     */
+    public boolean analyzeJar(File inputJar) {
+        boolean abortServerStartup = false;
+
         InspectionCache cache = cacheManager.getCache(inputJar);
         Map<String, StaticAnalysis.Result> caches;
 
@@ -111,16 +117,23 @@ public class StaticAnalysisManager {
                         KeikoPluginInspector.debug("%s result for %s is cached: %s",
                                 name, inputJarName, result);
 
-                    processResult(inputJar, inputJarName, name, configName, analysis, result, miAnno);
+                    abortServerStartup = abortServerStartup
+                            || processResult(inputJar, inputJarName, name, configName, analysis, result, miAnno);
                 } catch (Exception ex) {
                     throw new RuntimeException("invalid managed " +
                             "inspection: " + inspectionClass.getName(), ex);
                 }
             }
         }
+
+        return false; // don't abort server startup
     }
 
-    private void processResult(File inputJar, String inputJarName, String name, String configName,
+    /**
+     * True = abort server startup later.
+     * @see Countermeasures#execute(StaticAnalysis, File, StaticAnalysis.Result)
+     */
+    private boolean processResult(File inputJar, String inputJarName, String name, String configName,
                                StaticAnalysis analysis, StaticAnalysis.Result result, ManagedInspection miAnno) {
         KeikoPluginInspector.debug("[Static Analysis] [%s] %s: %s",
                 name, inputJarName, result.toString());
@@ -156,8 +169,11 @@ public class StaticAnalysisManager {
             }
 
             KeikoPluginInspector.debug("Executing countermeasures: %s", countermeasures);
-            countermeasures.execute(analysis, inputJar, result);
+
+            return countermeasures.execute(analysis, inputJar, result);
         }
+
+        return false; // don't abort server startup
     }
 
 }

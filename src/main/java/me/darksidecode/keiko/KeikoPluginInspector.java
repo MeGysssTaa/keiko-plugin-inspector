@@ -156,6 +156,7 @@ public class KeikoPluginInspector {
         StaticAnalysisManager manager = new StaticAnalysisManager();
 
         File[] files = pluginsFolder.listFiles();
+        boolean abortServerStartup = false;
 
         if (files != null) {
             for (File file : files) {
@@ -167,12 +168,20 @@ public class KeikoPluginInspector {
                         // No need to analyse corrupted plugins or plugins that
                         // are already very likely to be infected artificially.
                         if (integrityOk)
-                            manager.analyzeJar(file);
+                            abortServerStartup = abortServerStartup || manager.analyzeJar(file);
+                        else if (InspectionsConfig.getAbortServerStartupOnIntegrityViolation())
+                            abortServerStartup = true; // abort server startup on integrity violation (if configured)
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
             }
+        }
+
+        if (abortServerStartup) {
+            // SEE JAVADOC TO METHOD me.darksidecode.keiko.staticanalysis.Countermeasures#execute
+            KeikoPluginInspector.warn("The server will be shut down forcefully (rage quit).");
+            RuntimeUtils.rageQuit();
         }
     }
 
