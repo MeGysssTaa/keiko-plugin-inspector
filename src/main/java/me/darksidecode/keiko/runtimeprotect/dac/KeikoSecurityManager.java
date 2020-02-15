@@ -270,6 +270,12 @@ public class KeikoSecurityManager extends DomainAccessController {
 
             if (actions.contains("read"))
                 checkPropertyAccess(key, Operation.PROPERTY_READ);
+        } else if (perm.getName().equals("setSecurityManager")) {
+            KeikoPluginInspector.warn(
+                    "(Self-Defense) Detected an attempt to overwrite Keiko's security manager " +
+                            "initiated by %s. That plugin may be malicious!", RuntimeUtils.getCallerInfo());
+
+            throw new SecurityException("(Self-Defense) access denied by Keiko Domain Access Control");
         }
     }
 
