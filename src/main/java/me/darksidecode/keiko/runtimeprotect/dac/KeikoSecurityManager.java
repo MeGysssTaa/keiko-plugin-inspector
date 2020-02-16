@@ -44,8 +44,6 @@ public class KeikoSecurityManager extends DomainAccessController {
             "setContextClassLoader",
             "enableContextClassLoaderOverride",
             "setSecurityManager",
-            "createSecurityManager",
-            "shutdownHooks",
             "usePolicy",
 
             // Net
@@ -310,14 +308,17 @@ public class KeikoSecurityManager extends DomainAccessController {
             if (actions.contains("read"))
                 checkPropertyAccess(key, Operation.PROPERTY_READ);
         } else {
-            // A plugin attempts to execute potentially malicious code that could otherwise bypass Keiko.
+            // A plugin attempts to execute potentially malicious code that would otherwise bypass Keiko.
             // https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+            CallerInfo callerInfo = RuntimeUtils.getCallerInfo();
             boolean restricted = restrictedActions.contains(action)
                     || action.startsWith("setProperty."); // allows to change security properties
 
-            if (restricted) {
-                KeikoPluginInspector.warn("Detected an attempt to perform " +
-                        "a restricted action %s by %s.", action, RuntimeUtils.getCallerInfo());
+            // If callerInfo is null, then this means that the caller is either
+            // Keiko, the Minecraft server/Bukkit/Spigot, or some other dark magic.
+            if ((restricted) && (callerInfo != null)) {
+                KeikoPluginInspector.warn(
+                        "Detected an attempt to perform a restricted action %s by %s.", action, callerInfo);
 
                 throw new SecurityException("access denied by Keiko Domain Access Control");
             }
