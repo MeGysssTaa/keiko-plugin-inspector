@@ -123,7 +123,7 @@ domain_access_control:
   #
   # Examples:
   #
-  #     # Allow all plugins to create any plugins in their plugins/ folder:
+  #     # Allow all plugins to create any files in their plugins/ folder:
   #     - ALLOW ALL {plugins_folder}/{plugin_name}
   #
   #     # Forbid plugin "NotMalware4sure" to write in server's "server.properties" file:
