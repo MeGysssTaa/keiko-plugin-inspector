@@ -32,6 +32,43 @@ import java.util.*;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
+    /**
+     * List of JVM permissions that are potentially dangerous and, when used in
+     * a specific way, may harm the server, bypassing Keiko's protection.
+     *
+     * https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+     */
+    private static final List<String> restrictedActions = Arrays.asList(
+            // Runtime
+            "createClassLoader",
+            "setContextClassLoader",
+            "enableContextClassLoaderOverride",
+            "setSecurityManager",
+            "createSecurityManager",
+            "shutdownHooks",
+            "usePolicy",
+
+            // Net
+            "setDefaultAuthenticator",
+            "requestPasswordAuthentication",
+            "setProxySelector",
+
+            // Link
+            "hard",
+            "symbolic",
+
+            // Security
+            "createAccessControlContext",
+            "setPolicy",
+            "insertProvider",
+
+            // Auth
+            "doAs",
+            "doAsPrivileged",
+            "modifyPrincipals",
+            "setLoginConfiguration"
+    );
+
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
 
@@ -259,6 +296,8 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     @Override
     public void checkPermission(Permission perm) {
+        String action = perm.getName();
+
         if (perm instanceof PropertyPermission) {
             PropertyPermission propertyPerm = (PropertyPermission) perm;
 
@@ -270,12 +309,18 @@ public class KeikoSecurityManager extends DomainAccessController {
 
             if (actions.contains("read"))
                 checkPropertyAccess(key, Operation.PROPERTY_READ);
-        } else if (perm.getName().equals("setSecurityManager")) {
-            KeikoPluginInspector.warn(
-                    "(Self-Defense) Detected an attempt to overwrite Keiko's security manager " +
-                            "initiated by %s. That plugin may be malicious!", RuntimeUtils.getCallerInfo());
+        } else {
+            // A plugin attempts to execute potentially malicious code that could otherwise bypass Keiko.
+            // https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+            boolean restricted = restrictedActions.contains(action)
+                    || action.startsWith("setProperty."); // allows to change security properties
 
-            throw new SecurityException("(Self-Defense) access denied by Keiko Domain Access Control");
+            if (restricted) {
+                KeikoPluginInspector.warn("Detected an attempt to perform " +
+                        "a restricted action %s by %s.", action, RuntimeUtils.getCallerInfo());
+
+                throw new SecurityException("access denied by Keiko Domain Access Control");
+            }
         }
     }
 
