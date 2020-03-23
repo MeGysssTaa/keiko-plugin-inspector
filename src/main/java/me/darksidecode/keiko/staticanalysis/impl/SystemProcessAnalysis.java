@@ -47,7 +47,8 @@ public class SystemProcessAnalysis extends StaticAnalysis {
                 if (typeInsn.desc.contains(PROCESS_BUILDER_NAME))
                     return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
                             "detected unsafe system/SSH command usage in method " + mtdNode.name
-                                    + " declared in class " + clsNode.name + " (hidden malicious SSH access?) (1)"));
+                                    + " declared in class " + clsNode.name
+                                    + " (hidden malicious SSH access?) (ProcessBuilder creation)"));
             } else if ((op == INVOKESPECIAL) || (op == INVOKEVIRTUAL) || (op == INVOKESTATIC)) {
                 MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
@@ -59,7 +60,8 @@ public class SystemProcessAnalysis extends StaticAnalysis {
                         || ((mtdInsn.owner.equals(SHELL_NAME)) && (mtdInsn.name.equals("execute"))))
                     return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
                             "detected unsafe system/SSH command usage in method " + mtdNode.name
-                                    + " declared in class " + clsNode.name + " (hidden malicious SSH access?) (2)"));
+                                    + " declared in class " + clsNode.name
+                                    + " (hidden malicious SSH access?) (exec/execute invocation)"));
             }
         }
 
