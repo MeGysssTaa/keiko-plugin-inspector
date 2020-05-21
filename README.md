@@ -37,22 +37,14 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 
 ## Building (Gradle)
 
-1. Install **[library kantanj](https://github.com/MeGysssTaa/kantanj)** in your local Maven repository.
-2. Clone or download this repository, `cd` into it.
-3. Run `./gradlew build`.
-4. Wait a little bit.
-5. Grab the built JAR file in `build/libs/`.
-6. Profit!
+1. Clone or download this repository, `cd` into it.
+2. Run `./gradlew build`.
+3. Wait a little bit.
+4. Grab the built JAR file in `build/libs/`.
+5. Profit!
 
 
 ```bash
-echo "Cloning and installing kantanj..."
-git clone https://github.com/MeGysssTaa/kantanj
-cd kantanj
-mvn clean install
-
-cd ..
-
 echo "Cloning and building keiko-plugin-inspector..."
 git clone https://github.com/MeGysssTaa/keiko-plugin-inspector
 cd keiko-plugin-inspector
@@ -65,4 +57,4 @@ echo "Use './gradlew build' in its root folder (you are browsing it at the momen
 
 ## License
 
-Keiko is completely free and open source. It is released under **[Apache License 2.0](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**.
+**[Apache License 2.0](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**

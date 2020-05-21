@@ -16,11 +16,10 @@
 
 plugins {
     id 'java'
-    id 'idea'
 }
 
 group 'me.darksidecode.keiko'
-version '2.0.0'
+version '2.0.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -30,7 +29,11 @@ compileTestJava.options.encoding = "UTF-8"
 
 repositories {
     mavenCentral()
-    mavenLocal()
+
+    maven {
+        name 'Public Reflex Repository'
+        url 'https://archiva.reflex.rip/repository/public/'
+    }
 
     maven {
         name 'BungeeCord'
