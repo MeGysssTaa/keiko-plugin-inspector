@@ -307,9 +307,19 @@ public class KeikoSecurityManager extends DomainAccessController {
 
             if (actions.contains("read"))
                 checkPropertyAccess(key, Operation.PROPERTY_READ);
-        } else {
+        } else if (!(action.equals("suppressAccessChecks"))) {
             // A plugin attempts to execute potentially malicious code that would otherwise bypass Keiko.
             // https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+            //
+            // We ignore permission 'suppressAccessChecks' fully because this permission is
+            // required to access members of Java classes that are otherwise not accessible
+            // using Reflection (see java.lang.reflect.AccessibleObject#setAccessible).
+            // If we did not ignore this permission, a StackOverflowError would be thrown
+            // at line with 'RuntimeUtils.getCallerInfo()' on some JVMs. This is because 'getCallerInfo()'
+            // calls `PluginContext#getClassOwner(String)', which uses Streams API, specifically,
+            // 'findFirst()', which natively calls 'java.lang.invoke.InnerClassLambdaMetafactory#buildCallSite',
+            // which requires the 'suppressAccessChecks' permission, thus executing method
+            // 'SecurityManager#checkPermission', and therefore returning us to this point.
             CallerInfo callerInfo = RuntimeUtils.getCallerInfo();
             boolean restricted = restrictedActions.contains(action)
                     || action.startsWith("setProperty."); // allows to change security properties
