@@ -38,7 +38,7 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 ## Building (Gradle)
 
 1. Clone or download this repository, `cd` into it.
-2. Run `./gradlew build`.
+2. Run `./gradlew shadowJar`.
 3. Wait a little bit.
 4. Grab the built JAR file in `build/libs/`.
 5. Profit!
@@ -48,10 +48,10 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 echo "Cloning and building keiko-plugin-inspector..."
 git clone https://github.com/MeGysssTaa/keiko-plugin-inspector
 cd keiko-plugin-inspector
-./gradlew build
+./gradlew shadowJar
 
 echo "Done! You can find the output JAR in build/libs/"
-echo "Use './gradlew build' in its root folder (you are browsing it at the moment) whenever you want to rebuild Keiko."
+echo "Use './gradlew shadowJar' in its root folder (you are browsing it at the moment) whenever you want to rebuild Keiko."
 ```
 
 

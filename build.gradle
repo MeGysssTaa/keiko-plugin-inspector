@@ -16,6 +16,7 @@
 
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 group 'me.darksidecode.keiko'
@@ -77,13 +78,14 @@ processResources {
     expand project.properties
 }
 
-jar {
-    // Include dependencies (libraries)
-    from {
-        configurations.compile.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
+shadowJar {
+    // Keiko uses Apache Commons to work with its files. Since the library is
+    // very widespread, it might happen that it is also present in some other
+    // plugins installed on the server, which may sometimes lead to Keiko trying
+    // to use other plugin's Commons, thus failing its own Self-Defense checks.
+    // Just relocate our Commons to avoid that.
+    relocate 'org.apache.commons', 'keiko.org.apache.commons'
+    configurations = [project.configurations.compile]
 
     // Build MANIFEST
     manifest {
