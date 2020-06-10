@@ -54,6 +54,17 @@ domain_access_control:
   #
   #     # Forbid all plugins to open connections on host "http://some-fishy-host.io" on port 12345:
   #     - DENY ALL http://some-fishy-host.io PORT 12345
+  #
+  # TIP: you can use the following placeholders instead of port numbers:
+  #
+  #     Placeholder    Port
+  #     =====================
+  #     HTTP           80
+  #     HTTP_ALT       8080
+  #     HTTPS          443
+  #     FTP            21
+  #     SFTP           22
+  #     SSH            22
   connection_open:
     notify: false
     default: ALLOW
@@ -66,6 +77,8 @@ domain_access_control:
   #     same as in connection_open, examples can also be found there
   #     EXCEPTION: host must always be equal to "localhost", i.e. actual syntax
   #                turns into: <"ALLOW"/"DENY"> <identity> localhost PORT <port>
+  #
+  # TIP: see connection_open for port placeholders.
   connection_listen:
     notify: false
     default: DENY
@@ -76,6 +89,8 @@ domain_access_control:
   # Rules syntax:
   #
   #     same as in connection_open, examples can also be found there
+  #
+  # TIP: see connection_open for port placeholders.
   connection_accept:
     notify: false
     default: DENY
