@@ -90,8 +90,12 @@ public final class Bytecoding {
                         "A retry attempt will be performed with SKIP_FRAMES|SKIP_DEBUG. Cause: " + ex.toString());
                 reader.accept(clsNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
             } catch (Exception fatal) {
-                throw new RuntimeException("failed to get node " +
-                        "from bytes, previous error: " + ex.toString(), fatal);
+                KeikoPluginInspector.warn("Skipping class %s (v%d): errors decompiling: (1) %s, (2) %s",
+                        clsNode.name, clsNode.version, ex.toString(), fatal.toString());
+
+                // Don't rethrow so that we don't skip the whole JAR,
+                // file but only this particular "broken" class.
+                return null;
             }
         }
 
