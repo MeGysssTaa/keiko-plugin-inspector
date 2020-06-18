@@ -21,8 +21,8 @@ import me.darksidecode.keiko.staticanalysis.ManagedInspection;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
 import org.objectweb.asm.tree.*;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 @ManagedInspection (
         name = "Static.SystemProcess",
@@ -45,10 +45,11 @@ public class SystemProcessAnalysis extends StaticAnalysis {
                 TypeInsnNode typeInsn = (TypeInsnNode) insn;
 
                 if (typeInsn.desc.contains(PROCESS_BUILDER_NAME))
-                    return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                            "detected unsafe system/SSH command usage in method " + mtdNode.name
-                                    + " declared in class " + clsNode.name
-                                    + " (hidden malicious SSH access?) (ProcessBuilder creation)"));
+                    return new Result(Result.Type.MALICIOUS, 100.0, Arrays.asList(
+                            "Detected unsafe system/SSH command usage in method "
+                                    + mtdNode.name + " declared in class " + clsNode.name
+                                    + " (hidden malicious SSH access?)",
+                            "ProcessBuilder creation"));
             } else if ((op == INVOKESPECIAL) || (op == INVOKEVIRTUAL) || (op == INVOKESTATIC)) {
                 MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
@@ -58,10 +59,11 @@ public class SystemProcessAnalysis extends StaticAnalysis {
                 if ((mtdInsn.owner.equals(PROCESS_BUILDER_NAME))
                         || ((mtdInsn.owner.equals(RUNTIME_NAME)) && (mtdInsn.name.equals("exec")))
                         || ((mtdInsn.owner.equals(SHELL_NAME)) && (mtdInsn.name.equals("execute"))))
-                    return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                            "detected unsafe system/SSH command usage in method " + mtdNode.name
-                                    + " declared in class " + clsNode.name
-                                    + " (hidden malicious SSH access?) (exec/execute invocation)"));
+                    return new Result(Result.Type.MALICIOUS, 100.0, Arrays.asList(
+                            "Detected unsafe system/SSH command usage in method "
+                                    + mtdNode.name + " declared in class " + clsNode.name
+                                    + " (hidden malicious SSH access?)",
+                            "Runtime#exec/Shell#execute call"));
             }
         }
 

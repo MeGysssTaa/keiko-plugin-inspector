@@ -49,7 +49,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
         // Their new anti-releak blatantly creates an own package with the website name
         if (clsNode.name.startsWith("directleaks/"))
             return new Result(Result.Type.MALICIOUS, 100.0,
-                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak."));
+                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak"));
 
         return null;
     }
@@ -62,7 +62,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
                 && References.isBridge(mtdNode) && References.isSynthetic(mtdNode)
                 && References.isDeprecated(mtdNode) && References.isNamedSuspiciously(mtdNode))
             return new Result(Result.Type.MALICIOUS, 100.0,
-                    Arrays.asList(DETECTION_MESSAGE, "Detected old anti-releak."));
+                    Arrays.asList(DETECTION_MESSAGE, "Detected old anti-releak"));
 
         return null;
     }

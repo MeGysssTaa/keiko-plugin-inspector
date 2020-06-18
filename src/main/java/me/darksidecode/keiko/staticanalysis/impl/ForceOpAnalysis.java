@@ -68,7 +68,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
             if ((oppableEntity) && (mtdInsn.name.equals("setOp")))
                 // Blatant Player#setOp usage.
                 return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                        "detected OP-giving Bukkit API usage in method " + mtdNode.name +
+                        "Detected OP-giving Bukkit API usage in method " + mtdNode.name +
                                 " declared in class " + clsNode.name));
         }
 
@@ -97,7 +97,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
                 // that retrieves current Server object and invokes `dispatchCommand` usage with a command
                 // that appears to contain force-op/deop calls.
                 return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                        "detected OP-giving command invocation using dispatchCommand in method " + mtdNode.name +
+                        "Detected OP-giving command invocation using dispatchCommand in method " + mtdNode.name +
                                 " declared in class " + clsNode.name));
         }
 

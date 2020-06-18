@@ -50,7 +50,7 @@ public class NativesLoaderAnalysis extends StaticAnalysis {
                 if (((mtdInsn.owner.equals(SYSTEM_NAME)) || (mtdInsn.owner.equals(RUNTIME_NAME)))
                         && ((mtdInsn.name.equals("load")) || (mtdInsn.name.equals("loadLibrary"))))
                     return new Result(Result.Type.SUSPICIOUS, 50.0, Collections.singletonList(
-                            "detected natives linkage using #" + mtdInsn.name
+                            "Detected natives linkage using " + mtdInsn.name
                                     + " in method " + mtdNode.name + " declared in class " + clsNode.name));
             }
         }

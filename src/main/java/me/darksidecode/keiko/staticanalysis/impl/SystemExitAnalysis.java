@@ -50,7 +50,7 @@ public class SystemExitAnalysis extends StaticAnalysis {
                 if (((mtdInsn.owner.equals(SYSTEM_NAME)) || (mtdInsn.owner.equals(RUNTIME_NAME)))
                         && (mtdInsn.name.equals("exit")))
                     return new Result(Result.Type.SUSPICIOUS, 50.0, Collections.singletonList(
-                            "detected unsafe System-/Runtime.exit usage in method " + mtdNode.name
+                            "Detected unsafe System-/Runtime.exit usage in method " + mtdNode.name
                                     + " declared in class " + clsNode.name));
             }
         }
