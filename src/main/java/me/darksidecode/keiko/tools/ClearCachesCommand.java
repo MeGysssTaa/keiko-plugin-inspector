@@ -16,6 +16,7 @@
 
 package me.darksidecode.keiko.tools;
 
+import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.util.RuntimeUtils;
 
 import java.io.File;
@@ -61,9 +62,10 @@ class ClearCachesCommand extends Command {
         }
 
         if (totalFilesDeleted == 0)
-            System.out.println("No caches deleted. Perhaps there are not any.");
+            KeikoPluginInspector.info("No caches deleted. Perhaps there are not any.");
         else
-            System.out.printf("Deleted %d cache files (%d bytes in total).\n", totalFilesDeleted, totalBytesDeleted);
+            KeikoPluginInspector.info("Deleted %d cache files " +
+                    "(%d bytes in total).\n", totalFilesDeleted, totalBytesDeleted);
     }
 
 }

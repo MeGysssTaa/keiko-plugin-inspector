@@ -16,6 +16,7 @@
 
 package me.darksidecode.keiko.tools;
 
+import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.quarantine.Quarantine;
 
 class QRestoreCommand extends Command {
@@ -31,10 +32,10 @@ class QRestoreCommand extends Command {
 
         try {
             Quarantine.restore(origFn);
-            System.out.println("Successfully restored the specified file from quarantine");
+            KeikoPluginInspector.info("Successfully restored the specified file from quarantine");
         } catch (Exception ex) {
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("Are you sure file " + origFn + " has really been quarantined?");
+            KeikoPluginInspector.warn("Error: %s", ex.getMessage());
+            KeikoPluginInspector.warn("Are you sure file %s has really been quarantined?", origFn);
         }
     }
 

@@ -17,6 +17,7 @@
 package me.darksidecode.keiko.tools;
 
 import me.darksidecode.kantanj.formatting.Hash;
+import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.util.RuntimeUtils;
 
 import java.io.File;
@@ -42,11 +43,12 @@ class ChecksumCommand extends Command {
             File pluginFile = new File(pluginsFolder, fileName);
             String checksum = Hash.SHA256.checksumString(pluginFile).toLowerCase();
 
-            System.out.println("SHA-256 checksum of file " + fileName + ":");
-            System.out.println(checksum);
+            KeikoPluginInspector.info("SHA-256 checksum of file %s:", fileName);
+            KeikoPluginInspector.info(checksum);
         } catch (Exception ex) {
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("Are you sure the specified file actually exists? Is it a valid plugin JAR?");
+            KeikoPluginInspector.warn("Error: %s", ex.getMessage());
+            KeikoPluginInspector.warn("Are you sure the " +
+                    "specified file actually exists? Is it a valid plugin JAR?");
         }
     }
 

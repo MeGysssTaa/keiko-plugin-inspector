@@ -16,6 +16,7 @@
 
 package me.darksidecode.keiko.tools;
 
+import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.quarantine.Quarantine;
 import me.darksidecode.keiko.quarantine.QuarantineEntry;
 
@@ -39,13 +40,13 @@ class QInfoCommand extends Command {
         try {
             QuarantineEntry info = Quarantine.info(origFn);
 
-            System.out.println("Quarantined since: "
-                    + dateFormat.format(new Date(info.getQuarantinedDateTime())));
-            System.out.println("Analysis name: " + info.getAnalysisName());
-            System.out.println("Analysis result: " + info.getAnalysisResult());
+            KeikoPluginInspector.info("Quarantined since: %s",
+                    dateFormat.format(new Date(info.getQuarantinedDateTime())));
+            KeikoPluginInspector.info("Analysis name: %s", info.getAnalysisName());
+            KeikoPluginInspector.info("Analysis result: %s", info.getAnalysisResult());
         } catch (Exception ex) {
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("Are you sure file " + origFn + " has really been quarantined?");
+            KeikoPluginInspector.warn("Error: %s", ex.getMessage());
+            KeikoPluginInspector.warn("Are you sure file %s has really been quarantined?", origFn);
         }
     }
 

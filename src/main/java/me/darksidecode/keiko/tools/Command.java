@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.darksidecode.keiko.KeikoPluginInspector;
 
 @RequiredArgsConstructor (access = AccessLevel.PACKAGE)
 abstract class Command {
@@ -34,7 +35,7 @@ abstract class Command {
         try {
             execute(args);
         } catch (Throwable t) {
-            System.err.println("Failed to process your command. Error:");
+            KeikoPluginInspector.warn("Failed to process your command. Error:");
             t.printStackTrace();
         }
     }
@@ -42,7 +43,7 @@ abstract class Command {
     protected abstract void execute(String[] args) throws Exception;
 
     void printUsage() {
-        System.err.println("Use: " + usage);
+        KeikoPluginInspector.warn("Use: %s", usage);
     }
 
 }

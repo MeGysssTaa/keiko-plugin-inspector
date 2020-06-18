@@ -16,6 +16,9 @@
 
 package me.darksidecode.keiko.tools;
 
+import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.Platform;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,26 +28,30 @@ import java.util.List;
 public class KeikoTools {
 
     public static void main(String[] unused) {
+        KeikoPluginInspector.earlyBoot(Platform.STANDALONE);
+        KeikoPluginInspector.info(" ");
+
         List<Command> commands = Arrays.asList(
                 new ChecksumCommand(),
                 new ClearCachesCommand(),
                 new ExitCommand(),
+                new InspectCommand(),
                 new QInfoCommand(),
                 new QRestoreCommand()
         );
 
-        System.out.println("----------------------------------------------------------------------------");
-        System.out.println("                          WELCOME [keiko-tools]");
-        System.out.println("  This utility allows you to manage certain parts of Keiko even");
-        System.out.println("  if your Minecraft server is power-off. Type \"?\" or \"help\" for help.");
-        System.out.println("----------------------------------------------------------------------------");
-
-        System.out.println("Available commands:");
+        KeikoPluginInspector.info("----------------------------------------------------------------------------");
+        KeikoPluginInspector.info("                          WELCOME [keiko-tools]");
+        KeikoPluginInspector.info("  This utility allows you to manage certain parts of Keiko even");
+        KeikoPluginInspector.info("  if your Minecraft server is power-off. Type \"?\" or \"help\" for help.");
+        KeikoPluginInspector.info("----------------------------------------------------------------------------");
+        KeikoPluginInspector.info(" ");
+        KeikoPluginInspector.info("Available commands:");
 
         for (Command cmd : commands)
-            System.out.printf("    %s - %s\n", cmd.getName(), cmd.getDescription());
-        System.out.println("\n\n");
+            KeikoPluginInspector.info("    %s - %s", cmd.getName(), cmd.getDescription());
 
+        KeikoPluginInspector.info(" ");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String line;
 
@@ -66,20 +73,20 @@ public class KeikoTools {
                         equalsIgnoreCase(label)).findFirst().orElse(null);
 
                 if (command == null) {
-                    System.err.println("Unknown command. Available:");
+                    KeikoPluginInspector.warn("Unknown command. Available:");
 
                     for (Command cmd : commands)
-                        System.out.printf("    %s - %s\n", cmd.getName(), cmd.getDescription());
-                    System.out.println("\n\n");
+                        KeikoPluginInspector.info("    %s - %s", cmd.getName(), cmd.getDescription());
+                    KeikoPluginInspector.info(" ");
                 } else if (args.length < command.getMinArgsLen())
                     command.printUsage();
                 else
                     command.executeSafely(args);
             }
 
-            System.out.println("Exiting KeikoTools. Bye! (end of input)");
+            KeikoPluginInspector.info("Exiting KeikoTools. Bye! (end of input)");
         } catch (IOException ex) {
-            System.err.println("Failed to read input. Error:");
+            KeikoPluginInspector.warn("Failed to read input. Error:");
             ex.printStackTrace();
         }
     }

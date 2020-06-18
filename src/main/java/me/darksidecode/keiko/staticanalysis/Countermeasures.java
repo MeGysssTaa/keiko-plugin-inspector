@@ -30,7 +30,7 @@ public enum Countermeasures {
                 "JAR " + jar.getName() +
                 " is likely " + analysisResult.getType() +
                 " (confidence: " + analysisResult.getConfidencePercent() + "%)!" +
-                " Details: " + analysis.getName() + analysisResult.getDetails().toString() +
+                " Details: " + analysis.getName() + analysisResult.detailsString() +
                 ". It is adviced that you delete it."
         );
 

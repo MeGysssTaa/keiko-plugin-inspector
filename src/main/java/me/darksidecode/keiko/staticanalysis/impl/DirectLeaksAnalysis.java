@@ -23,8 +23,8 @@ import me.darksidecode.keiko.util.References;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 @ManagedInspection (
         name = "Static.DirectLeaks",
@@ -38,7 +38,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
             "Leaks are often spoofy and contain malicious code. " +
             "By using cracked plugins you put your server in danger, whereas " +
             "by purchasing genuine software you support the developers and get " +
-            "the ability to report bugs, request help, and receive regular updates.";
+            "the ability to report bugs, request help, and receive regular updates";
 
     public DirectLeaksAnalysis(String name, String inputJarName, Collection<ClassNode> classes) {
         super(name, inputJarName, classes);
@@ -49,7 +49,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
         // Their new anti-releak blatantly creates an own package with the website name
         if (clsNode.name.startsWith("directleaks/"))
             return new Result(Result.Type.MALICIOUS, 100.0,
-                    Collections.singletonList(DETECTION_MESSAGE));
+                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak."));
 
         return null;
     }
@@ -62,7 +62,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
                 && References.isBridge(mtdNode) && References.isSynthetic(mtdNode)
                 && References.isDeprecated(mtdNode) && References.isNamedSuspiciously(mtdNode))
             return new Result(Result.Type.MALICIOUS, 100.0,
-                    Collections.singletonList(DETECTION_MESSAGE));
+                    Arrays.asList(DETECTION_MESSAGE, "Detected old anti-releak."));
 
         return null;
     }

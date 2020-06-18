@@ -19,7 +19,6 @@ package me.darksidecode.keiko.quarantine;
 import me.darksidecode.kantanj.formatting.CommonJson;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
-import me.darksidecode.keiko.util.RuntimeUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +33,6 @@ public final class Quarantine {
 
     private static final String QUARANTINED_SUFFIX = ".quarantined~";
     private static final String QUARANTINE_INFO_SUFFIX = ".qinfo";
-
-    // true - running as plugin, false - running as utility (keiko-tools)
-    private static Boolean isBukkit;
 
     public static void settle(StaticAnalysis analysis,
                               StaticAnalysis.Result analysisResult, File infectedFile) {
@@ -116,34 +112,7 @@ public final class Quarantine {
     }
 
     private static File getFolder() {
-        if (isBukkit == null) {
-            try {
-                Class.forName("org.bukkit.Bukkit");
-                isBukkit = true;
-            } catch (ClassNotFoundException ex) {
-                isBukkit = false;
-            }
-        }
-
-        File workDir;
-
-        if (isBukkit)
-            workDir = KeikoPluginInspector.getWorkDir();
-        else {
-            File pluginsFolder = RuntimeUtils.getSourceJar(Quarantine.class).getParentFile();
-
-            if ((!(pluginsFolder.isDirectory())) || (!(pluginsFolder.getName().equals("plugins"))))
-                throw new IllegalStateException("keiko-tools JAR must " +
-                        "be Keiko plugin JAR and placed inside the server's plugins/ folder");
-
-            workDir = new File(pluginsFolder, "Keiko/");
-
-            if (!(workDir.exists()))
-                throw new IllegalStateException("missing Keiko's working directory (plugins/Keiko/): " +
-                        "is Keiko [properly] installed? has it ever been ran as plugin?");
-        }
-
-        File folder = new File(workDir, ".quarantine/");
+        File folder = new File(KeikoPluginInspector.getWorkDir(), ".quarantine/");
 
         if (!(folder.exists()))
             //noinspection ResultOfMethodCallIgnored

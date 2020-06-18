@@ -188,11 +188,23 @@ public abstract class StaticAnalysis implements Opcodes {
             this.recommendedCountermeasures = recommendedCountermeasures;
         }
 
+        public String detailsString() {
+            StringBuilder detailsBuilder = new StringBuilder();
+
+            for (String detail : details)
+                detailsBuilder.append('(').append(detail).append(')').append(',');
+
+            // Delete trailing comma.
+            detailsBuilder.deleteCharAt(detailsBuilder.length() - 1);
+
+            return '[' + detailsBuilder.toString() + ']';
+        }
+
         @Override
         public String toString() {
             return String.format(
-                    "StaticAnalysis.Result.%s[%s%%](%s)->%s",
-                    type, confidencePercent, details, recommendedCountermeasures
+                    "StaticAnalysis.Result.%s[%s%%]%s->%s",
+                    type, confidencePercent, detailsString(), recommendedCountermeasures
             );
         }
 

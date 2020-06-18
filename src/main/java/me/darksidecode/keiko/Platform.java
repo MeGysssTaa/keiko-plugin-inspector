@@ -27,6 +27,6 @@ public enum Platform {
 
     BUNGEECORD,
 
-    KEIKO_TOOLS
+    STANDALONE
 
 }

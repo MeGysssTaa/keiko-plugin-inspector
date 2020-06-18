@@ -16,6 +16,8 @@
 
 package me.darksidecode.keiko.tools;
 
+import me.darksidecode.keiko.KeikoPluginInspector;
+
 class ExitCommand extends Command {
 
     ExitCommand() {
@@ -24,7 +26,7 @@ class ExitCommand extends Command {
 
     @Override
     protected void execute(String[] args) throws Exception {
-        System.out.println("Exiting KeikoTools. Bye!");
+        KeikoPluginInspector.info("Exiting KeikoTools. Bye!");
         System.exit(0);
     }
 
