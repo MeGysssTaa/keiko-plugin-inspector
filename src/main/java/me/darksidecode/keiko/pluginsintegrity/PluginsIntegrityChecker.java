@@ -31,7 +31,7 @@ public class PluginsIntegrityChecker {
      *         plugin has most likely been modified) this method returns false.
      */
     public boolean checkIntegrity(File file, IndexedPlugin plugin) {
-        String pluginName = plugin.getName().replace(" ", "_"); // not sure if plugins may have spaces in their names
+        String pluginName = plugin.getName();
         String expectedChecksum = InspectionsConfig.getYaml().
                 getString("plugins_integrity.expected_checksums." + pluginName);
 
