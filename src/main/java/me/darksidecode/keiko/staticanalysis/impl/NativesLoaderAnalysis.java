@@ -31,7 +31,6 @@ import java.util.Collections;
         name = "Static.NativesLoader",
         countermeasuresForSuspicious = Countermeasures.WARN, // Keiko is capable of blocking natives linkage at runtime
         countermeasuresForMalicious = Countermeasures.WARN // --^
-
 )
 public class NativesLoaderAnalysis extends StaticAnalysis {
 

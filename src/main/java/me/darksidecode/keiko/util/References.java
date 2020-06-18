@@ -16,12 +16,48 @@
 
 package me.darksidecode.keiko.util;
 
-public final class References {
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.MethodNode;
+
+import java.util.regex.Pattern;
+
+public final class References implements Opcodes {
+
+    /**
+     * Pattern used to name methods in most programs and obfuscators.
+     * Includes alphabet (case-insensetive), digits, and underscores.
+     */
+    private static final Pattern COMMON_METHOD_NAME_PATTERN
+            = Pattern.compile("^[a-zA-Z0-9_]+$");
 
     private References() {}
 
     public static String transformedClassName(Class clazz) {
         return clazz.getName().replace(".", "/");
+    }
+
+    public static boolean isPrivate(MethodNode mtdNode) {
+        return (mtdNode.access & ACC_PRIVATE) != 0;
+    }
+
+    public static boolean isStatic(MethodNode mtdNode) {
+        return (mtdNode.access & ACC_STATIC) != 0;
+    }
+
+    public static boolean isBridge(MethodNode mtdNode) {
+        return (mtdNode.access & ACC_BRIDGE) != 0;
+    }
+
+    public static boolean isSynthetic(MethodNode mtdNode) {
+        return (mtdNode.access & ACC_SYNTHETIC) != 0;
+    }
+
+    public static boolean isDeprecated(MethodNode mtdNode) {
+        return (mtdNode.access & ACC_DEPRECATED) != 0;
+    }
+
+    public static boolean isNamedSuspiciously(MethodNode mtdNode) {
+        return !COMMON_METHOD_NAME_PATTERN.matcher(mtdNode.name).matches();
     }
 
 }
