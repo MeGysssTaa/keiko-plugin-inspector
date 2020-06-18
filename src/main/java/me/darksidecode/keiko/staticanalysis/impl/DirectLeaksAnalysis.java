@@ -34,7 +34,7 @@ import java.util.Collection;
 public class DirectLeaksAnalysis extends StaticAnalysis {
 
     private static final String DETECTION_MESSAGE =
-            "detected a pirated copy of a premium plugin. " +
+            "Detected a pirated copy of a premium plugin. " +
             "Leaks are often spoofy and contain malicious code. " +
             "By using cracked plugins you put your server in danger, whereas " +
             "by purchasing genuine software you support the developers and get " +
