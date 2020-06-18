@@ -68,9 +68,32 @@ static:
   # days (automatic space free).
   caches_lifespan_days: 7
 
+  # Pirated copies of premium plugins are often malicious. By using a cracked plugin,
+  # you are putting your server under the risk of being accessed or destroyed externally.
+  # Usage of pirated plugins is one of the most common reason of servers' databases and
+  # whole builds (maps, custom gamemodes, etc.) being leaked. By using genuine software
+  # you support the original developers, help them maintain the product, get the ability
+  # to report bugs, request help, and receive regular updates, and, most importantly, you
+  # keep your server safe - paid plugins are often analyzed by the marketplace staff.
+  # This inspection detects illegal, unlicensed software downloaded from DirectLeaks.
+  directleaks:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []
+
   # ForceOP is usually referred to as code that gives specific player or a group of
   # players server operator (OP) permissions using Player#setOp or Bukkit commands ("/op").
   forceop:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []
+
+  # "Natives" are extra files with code written in languages other than Java (e.g. C, C++)
+  # that allow Java software to perform something out of JVM. This is very rarely used by
+  # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
+  #
+  # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
+  nativesloader:
     enabled: true
     overwrite_countermeasures: ''
     exclusions: []
@@ -82,16 +105,6 @@ static:
   #
   # (-*-) Keiko is capable of blocking SystemExit at runtime using Domain Access Control.
   systemexit:
-    enabled: true
-    overwrite_countermeasures: ''
-    exclusions: []
-
-  # "Natives" are extra files with code written in languages other than Java (e.g. C, C++)
-  # that allow Java software to perform something out of JVM. This is very rarely used by
-  # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
-  #
-  # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
-  nativesloader:
     enabled: true
     overwrite_countermeasures: ''
     exclusions: []
