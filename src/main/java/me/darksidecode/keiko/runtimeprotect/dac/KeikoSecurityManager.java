@@ -297,7 +297,7 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
-        checkAccess(arg -> true, op, "(No details.)");
+        checkAccess(arg -> true, op, "no details");
     }
 
     private void checkAccess(Factory<Boolean, String> ruleFactory, Operation op, String details) {
