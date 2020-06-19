@@ -59,6 +59,9 @@ plugins_integrity:
 # Static inspections are inspections that always run at server's early boot stage
 # and analyse bytecode (signature check) of all plugins before letting them run,
 # thus detecting potential threats even before a malicious plugin is ran.
+#
+# TIP: you can use placeholder {plugins_folder} in all exclusions. Example:
+#      - {plugins_folder}/ProtocolLib.jar
 static:
 
   # Keiko caches static analyses' results in order to save time at startup.
