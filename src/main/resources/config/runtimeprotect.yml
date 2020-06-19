@@ -34,11 +34,11 @@ domain_access_control:
   enabled: true
 
   # Should Keiko protect its work dir (.../plugins/Keiko) from unauthorized external access? How?
-  # Keeping this active is STRONGLy RECOMMENDED. It will keep Keiko protected even if you break the
+  # Keeping this active is STRONGLY RECOMMENDED. It will keep Keiko protected even if you break the
   # other parts of Domain Access Control (though this only has effect if DAC itself is enabled).
   #
-  # BY DISABLING THIS YOU ARE LETTING POTENTIAL MALWARE TO ABUSE KEIKO'S CACHING, TWEAK ITS
-  # CONFIGURATION AND SPOOF OTHER STUFF, THUS PUTTING YOUR SERVER UNDER RISK!
+  # BY DISABLING THIS YOU ARE LETTING POTENTIAL MALWARE TO ABUSE KEIKO'S CACHING, TWEAK
+  # ITS CONFIGURATION, AND SPOOF OTHER STUFF, THUS PUTTING YOUR SERVER UNDER SERIOUS RISK!
   self_defense: true
 
   # Internet connectivity control.
@@ -165,7 +165,7 @@ domain_access_control:
       - ALLOW ALL {plugin_jar_path}
       - ALLOW ALL {plugins_folder}/bStats/config.yml
       - ALLOW ALL {plugins_folder}/PluginMetrics/config.yml
-      - ALLOW ALL /usr/lib/jvm/java-?*-oracle/jre/lib/*
+      - ALLOW ALL /usr/lib/jvm/java-+-oracle/*
       - ALLOW ALL /tmp
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}/*
