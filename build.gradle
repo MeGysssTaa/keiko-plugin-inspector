@@ -68,9 +68,6 @@ dependencies {
     // Annotation processors
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
-
-    // Testing
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 // Include resources
