@@ -318,3 +318,44 @@ domain_access_control:
     notify: false
     default: ALLOW
     rules: []
+
+  # Miscellaneous JVM actions (permissions) control.
+  #
+  # Allows to control plugins' access to specific JVM permissions.
+  # Most of the actions blocked by the default set of rules are potentially
+  # unsafe and should not be used by ordinary plugins in normal scenarios.
+  # Learn more: https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <JVM permission name>
+  #
+  # Examples:
+  #
+  #     # Allow plugin "ProtocolLib" to create own Java class loaders:
+  #     - ALLOW PLUGIN=ProtocolLib createClassLoader
+  #
+  #     # Forbid all plugins to execute any JVM actions whose name starts with "doAs":
+  #     - DENY ALL doAs*
+  miscellaneous:
+    notify: false
+    default: ALLOW
+    rules:
+      - DENY ALL createClassLoader
+      - DENY ALL setContextClassLoader
+      - DENY ALL enableContextClassLoaderOverride
+      - DENY ALL setSecurityManager
+      - DENY ALL usePolicy
+      - DENY ALL setDefaultAuthenticator
+      - DENY ALL requestPasswordAuthentication
+      - DENY ALL setProxySelector
+      - DENY ALL hard
+      - DENY ALL symbolic
+      - DENY ALL createAccessControlContext
+      - DENY ALL setPolicy
+      - DENY ALL insertProvider
+      - DENY ALL doAs
+      - DENY ALL doAsPrivileged
+      - DENY ALL modifyPrincipals
+      - DENY ALL setLoginConfiguration
+      - DENY ALL setProperty.*

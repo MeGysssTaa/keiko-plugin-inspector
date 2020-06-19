@@ -32,41 +32,6 @@ import java.util.*;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
-    /**
-     * List of JVM permissions that are potentially dangerous and, when used in
-     * a specific way, may harm the server, bypassing Keiko's protection.
-     *
-     * https://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
-     */
-    private static final List<String> restrictedActions = Arrays.asList(
-            // Runtime
-            "createClassLoader",
-            "setContextClassLoader",
-            "enableContextClassLoaderOverride",
-            "setSecurityManager",
-            "usePolicy",
-
-            // Net
-            "setDefaultAuthenticator",
-            "requestPasswordAuthentication",
-            "setProxySelector",
-
-            // Link
-            "hard",
-            "symbolic",
-
-            // Security
-            "createAccessControlContext",
-            "setPolicy",
-            "insertProvider",
-
-            // Auth
-            "doAs",
-            "doAsPrivileged",
-            "modifyPrincipals",
-            "setLoginConfiguration"
-    );
-
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
 
@@ -89,7 +54,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                 defaultRules.put(op, Rule.Type.valueOf(defaultRuleStr.toUpperCase().trim()));
             } catch (NullPointerException | IllegalArgumentException ex) {
                 KeikoPluginInspector.warn("Invalid Domain Access Control default configuration " +
-                        "for operation %s: %s, expected one of: %s. Falling back to 'ALLOW'",
+                                "for operation %s: %s, expected one of: %s. Falling back to 'ALLOW'",
                         op, defaultRuleStr, Arrays.toString(Rule.Type.values()));
 
                 defaultRules.put(op, Rule.Type.ALLOW);
@@ -320,18 +285,8 @@ public class KeikoSecurityManager extends DomainAccessController {
             // 'findFirst()', which natively calls 'java.lang.invoke.InnerClassLambdaMetafactory#buildCallSite',
             // which requires the 'suppressAccessChecks' permission, thus executing method
             // 'SecurityManager#checkPermission', and therefore returning us to this point.
-            CallerInfo callerInfo = RuntimeUtils.getCallerInfo();
-            boolean restricted = restrictedActions.contains(action)
-                    || action.startsWith("setProperty."); // allows to change security properties
-
-            // If callerInfo is null, then this means that the caller is either
-            // Keiko, the Minecraft server/Bukkit/Spigot, or some other dark magic.
-            if ((restricted) && (callerInfo != null)) {
-                KeikoPluginInspector.warn(
-                        "Detected an attempt to perform a restricted action %s by %s.", action, callerInfo);
-
-                throw new SecurityException("access denied by Keiko Domain Access Control");
-            }
+            checkAccess(arg -> StringUtils.matchWildcards(
+                    action, arg), Operation.MISCELLANEOUS, "Action: " + action);
         }
     }
 
@@ -342,7 +297,7 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
-        checkAccess(arg -> true, op, "No Details");
+        checkAccess(arg -> true, op, "(No details.)");
     }
 
     private void checkAccess(Factory<Boolean, String> ruleFactory, Operation op, String details) {
@@ -421,7 +376,8 @@ public class KeikoSecurityManager extends DomainAccessController {
         SYSTEM_EXIT,
         PROPERTIES_ACCESS,
         PROPERTY_WRITE,
-        PROPERTY_READ
+        PROPERTY_READ,
+        MISCELLANEOUS
     }
 
 }
