@@ -18,6 +18,7 @@ package me.darksidecode.keiko.tools;
 
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.Platform;
+import me.darksidecode.keiko.installer.UpdatesCheckerTask;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class KeikoTools {
     public static void main(String[] unused) {
         KeikoPluginInspector.earlyBoot(Platform.STANDALONE);
         KeikoPluginInspector.info(" ");
+        new UpdatesCheckerTask().run(); // forcefully check for updates once at keiko-tools startup
 
         List<Command> commands = Arrays.asList(
                 new ChecksumCommand(),
