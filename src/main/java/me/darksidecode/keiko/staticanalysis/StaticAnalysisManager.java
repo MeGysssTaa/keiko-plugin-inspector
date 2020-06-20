@@ -75,16 +75,18 @@ public class StaticAnalysisManager {
 
             if (InspectionsConfig.getYaml().getBoolean(configName + ".enabled", true)) {
                 try {
-                    String inputJarPath = inputJar.getAbsolutePath();
+                    String inputJarPath = inputJar.getAbsolutePath()
+                            .replace("\\", "/"); // better Windows compatibility
                     String pluginsFolderPath = inputJar.getParentFile().getPath();
-
                     List<String> exclusions = InspectionsConfig.getYaml().
                             getStringList(configName + ".exclusions");
 
                     boolean excluded = false;
 
                     for (String exclusion : exclusions) {
-                        if (exclusion.replace("{plugins_folder}", pluginsFolderPath).equals(inputJarPath)) {
+                        if (exclusion.replace("{plugins_folder}", pluginsFolderPath)
+                                .replace("\\", "/") // better Windows compatibility
+                                .equals(inputJarPath)) {
                             KeikoPluginInspector.debug(
                                     "JAR %s is excluded from analysis %s in config.", inputJarName, name);
 
