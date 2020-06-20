@@ -33,17 +33,10 @@ class InspectCommand extends Command {
         StaticAnalysisManager manager = new StaticAnalysisManager();
 
         if (args.length > 0) { // inspect one particular plugin
-            // Use StringBuilder to allow spaces in file/directory names.
-            StringBuilder pathBuilder = new StringBuilder();
-
-            for (String arg : args)
-                pathBuilder.append(arg).append(' ');
-
-            pathBuilder.deleteCharAt(pathBuilder.length() - 1); // delete trailing space
-            String path = pathBuilder.toString();
-
+            // Use String#join to allow spaces in file/directory names.
+            String path = String.join(" ", args);
             File targetJarFile = path.contains("plugins/")
-                    ? new File(pathBuilder.toString())
+                    ? new File(path)
                     : new File(KeikoPluginInspector.getPluginsFolder(), path);
 
             if (targetJarFile.isFile()) {
