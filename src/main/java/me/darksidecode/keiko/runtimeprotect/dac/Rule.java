@@ -37,6 +37,7 @@ class Rule {
                             getAbsolutePath().replace("\\", "/")). // better Windows compatibility
                     put("{server_folder}", () -> KeikoPluginInspector.getServerFolder().
                             getAbsolutePath().replace("\\", "/")). // better Windows compatibility
+                    put("{java_folder}", KeikoPluginInspector::getJrePath). // "\" -> "/" is done on init for jrePath
             build();
 
     @Getter (AccessLevel.PACKAGE)

@@ -165,7 +165,7 @@ domain_access_control:
       - ALLOW ALL {plugin_jar_path}
       - ALLOW ALL {plugins_folder}/bStats/config.yml
       - ALLOW ALL {plugins_folder}/PluginMetrics/config.yml
-      - ALLOW ALL /usr/lib/jvm/java-+-oracle/*
+      - ALLOW ALL {java_folder}/*
       - ALLOW ALL /tmp
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}
       - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}/*

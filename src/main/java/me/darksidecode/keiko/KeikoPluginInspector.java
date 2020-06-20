@@ -58,6 +58,9 @@ public class KeikoPluginInspector {
     private static File keikoJar;
 
     @Getter
+    private static String jrePath;
+
+    @Getter
     private static File serverFolder, pluginsFolder, workDir;
 
     @Getter
@@ -82,7 +85,7 @@ public class KeikoPluginInspector {
 
         earlyBooted = true;
         platform = currentPlatform;
-
+        jrePath = System.getProperty("java.home").replace("\\", "/"); // better Windows compatibility
         keikoJar = RuntimeUtils.getSourceJar(KeikoPluginInspector.class);
         pluginsFolder = keikoJar.getParentFile();
         serverFolder = pluginsFolder.getParentFile();
