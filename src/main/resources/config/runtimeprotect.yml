@@ -344,7 +344,11 @@ domain_access_control:
       - DENY ALL createClassLoader
       - DENY ALL setContextClassLoader
       - DENY ALL enableContextClassLoaderOverride
+      - DENY ALL closeClassLoader
       - DENY ALL setSecurityManager
+      - DENY ALL createSecurityManager
+      - DENY ALL shutdownHooks
+      - DENY ALL setIO
       - DENY ALL usePolicy
       - DENY ALL setDefaultAuthenticator
       - DENY ALL requestPasswordAuthentication
