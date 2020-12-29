@@ -49,7 +49,12 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
         // Their new anti-releak blatantly creates an own package with the website name
         if (clsNode.name.startsWith("directleaks/"))
             return new Result(Result.Type.MALICIOUS, 100.0,
-                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak"));
+                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak (DirectLeaks)"));
+
+        // xBrownieCodez's encrypted message injector
+        if (clsNode.name.startsWith("de/xbrowniecodez/pluginprotect/"))
+            return new Result(Result.Type.MALICIOUS, 100.0,
+                    Arrays.asList(DETECTION_MESSAGE, "Detected new anti-releak (PluginProtect)"));
 
         return null;
     }
