@@ -124,3 +124,13 @@ static:
     enabled: true
     overwrite_countermeasures: ''
     exclusions: []
+
+  # Some of the most aggressive trojans often modify compiled code (bytecode) in other,
+  # already installed and/or running plugins at runtime, and inject own, malicious, code
+  # in them, or even in your server core. This way an attacker can keep the trojan running
+  # on your machine even after you delete the initial infected plugin. Keiko attempts to
+  # detect suspicious use of Java runtime class loading and bytecode instrumentation mechanisms.
+  codeinjection:
+    enabled: true
+    overwrite_countermeasures: ''
+    exclusions: []

@@ -47,6 +47,7 @@ public abstract class StaticAnalysis implements Opcodes {
     protected static final String OFFLINE_PLAYER_NAME  = References.transformedClassName(OfflinePlayer.class);
     protected static final String COMMAND_SENDER_NAME  = References.transformedClassName(CommandSender.class);
     protected static final String HUMAN_ENTITY_NAME    = References.transformedClassName(HumanEntity.class);
+    protected static final String CLASS_LOADER_NAME    = References.transformedClassName(ClassLoader.class);
     protected static final String RUNTIME_NAME         = References.transformedClassName(Runtime.class);
     protected static final String SYSTEM_NAME          = References.transformedClassName(System.class);
     protected static final String PLAYER_NAME          = References.transformedClassName(Player.class);
@@ -139,6 +140,9 @@ public abstract class StaticAnalysis implements Opcodes {
                     }
                 }
             }
+
+            if ((result = analyzeEnd()) != null)
+                return result;
         } catch (Throwable t) {
             KeikoPluginInspector.warn("Failed to run static analysis " + name + " on file " + inputJarName);
             KeikoPluginInspector.warn("Cause:");
@@ -160,6 +164,7 @@ public abstract class StaticAnalysis implements Opcodes {
     protected Result analyzeClass (ClassNode clsNode                    ) throws Exception { return null; }
     protected Result analyzeField (ClassNode clsNode, FieldNode  fldNode) throws Exception { return null; }
     protected Result analyzeMethod(ClassNode clsNode, MethodNode mtdNode) throws Exception { return null; }
+    protected Result analyzeEnd   (                                     ) throws Exception { return null; }
 
     @Getter
     public static class Result implements Serializable {
