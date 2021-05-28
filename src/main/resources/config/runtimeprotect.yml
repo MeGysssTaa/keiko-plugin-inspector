@@ -49,7 +49,7 @@ domain_access_control:
   #
   # Examples:
   #
-  #     # Allow plugin "SomeGooglePlugin" to open connections on host "https://google.com" on default HTTPS port (434):
+  #     # Allow plugin "SomeGooglePlugin" to open connections on host "https://google.com" on default HTTPS port (443):
   #     - ALLOW PLUGIN=SomeGooglePlugin https://google.com PORT HTTPS
   #
   #     # Forbid all plugins to open connections on host "http://some-fishy-host.io" on port 12345:
