@@ -55,20 +55,23 @@ public final class Bytecoding {
         try (InputStream input = jar.getInputStream(entry)) {
             if (name.endsWith(".class")) {
                 byte[] bytes = IOUtils.toByteArray(input);
-                String cafebabe = String.format(
-                        "%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
 
-                // Validate Java class (should start with "magic word" CAFEBABE (hexadecimal)).
-                if (cafebabe.toUpperCase().equals("CAFEBABE")) {
-                    try {
-                        ClassNode clsNode = getNode(bytes);
+                if (bytes.length > 4) {
+                    String cafebabe = String.format(
+                            "%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
 
-                        if ((clsNode != null)
-                                && ((clsNode.name.equals("java/lang/Object"))
+                    // Validate Java class (should start with "magic word" CAFEBABE (hexadecimal)).
+                    if (cafebabe.equalsIgnoreCase("CAFEBABE")) {
+                        try {
+                            ClassNode clsNode = getNode(bytes);
+
+                            if ((clsNode != null)
+                                    && ((clsNode.name.equals("java/lang/Object"))
                                     || (clsNode.superName != null)))
-                            classes.put(clsNode.name, clsNode);
-                    } catch (Exception ex) {
-                        throw new RuntimeException("failed to read a Java class", ex);
+                                classes.put(clsNode.name, clsNode);
+                        } catch (Exception ex) {
+                            throw new RuntimeException("failed to read a Java class", ex);
+                        }
                     }
                 }
             }
