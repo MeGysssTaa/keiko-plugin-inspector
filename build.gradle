@@ -16,18 +16,55 @@
 
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 group 'me.darksidecode.keiko'
 version '4.0.0'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+def buildTimestamp = new Date().format('yyyy/MM/dd_HH-mm-ss')
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
+// Include resources
+processResources {
+    expand project.properties
+}
+
+// Fill build.properties
+task createProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/build.properties").withWriter { w ->
+            Properties p = new Properties()
+
+            p['version'] = project.version.toString()
+            p['timestamp'] = buildTimestamp.toString()
+
+            p.store w, null
+        }
+    }
+}
+
+classes.dependsOn createProperties
+
+// Relocate all our internal libraries to avoid linkage errors when proxying other executables at runtime.
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
+task relocateShadowJar(type: ConfigureShadowRelocation) {
+    target = tasks.shadowJar
+    prefix = 'keiko_internals'
+}
+
+// Include MANIFEST.MF
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'me.darksidecode.keiko.proxy.Keiko'
+    }
+}
+
+tasks.shadowJar.dependsOn tasks.relocateShadowJar
+
+// Dependencies
 repositories {
     mavenCentral()
 
@@ -48,7 +85,6 @@ repositories {
 }
 
 def asmVersion = '9.1'
-def log4jVersion = '2.14.1'
 def lombokVersion = '1.18.6'
 
 dependencies {
@@ -57,9 +93,6 @@ dependencies {
     implementation group: 'me.darksidecode.jminima', name: 'jminima', version: '1.1.1'
     implementation group: 'org.ow2.asm', name: 'asm', version: "${asmVersion}"
     implementation group: 'org.ow2.asm', name: 'asm-util', version: "${asmVersion}"
-//    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4jVersion}"
-//    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${log4jVersion}"
-//    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4jVersion}"
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
@@ -74,33 +107,3 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
 }
-
-// Include resources
-processResources {
-    expand project.properties
-}
-
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-
-task relocateShadowJar(type: ConfigureShadowRelocation) {
-    target = tasks.shadowJar
-    prefix = 'keiko_internals'
-
-}
-
-shadowJar {
-    // Keiko uses Apache Commons to work with its files. Since the library is
-    // very widespread, it might happen that it is also present in some other
-    // plugins installed on the server, which may sometimes lead to Keiko trying
-    // to use other plugin's Commons, thus failing its own Self-Defense checks.
-    // Just relocate our Commons to avoid that.
-    //relocate 'org.apache.commons', 'keiko_internals.org.apache.commons'
-    //configurations = [project.configurations.runtimeClasspath]
-
-    // Build MANIFEST
-    manifest {
-        attributes 'Main-Class': 'me.darksidecode.keiko.proxy.KeikoProxy'
-    }
-}
-
-tasks.shadowJar.dependsOn tasks.relocateShadowJar

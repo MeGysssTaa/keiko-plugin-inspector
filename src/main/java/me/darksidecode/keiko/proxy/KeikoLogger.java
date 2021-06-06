@@ -1,0 +1,197 @@
+/*
+ * Copyright 2021 German Vekhorev (DarksideCode)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package me.darksidecode.keiko.proxy;
+
+import lombok.AccessLevel;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import me.darksidecode.kantanj.logging.BasicLogger;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+@SuppressWarnings ("UseOfSystemOutOrSystemErr")
+@RequiredArgsConstructor (access = AccessLevel.PACKAGE)
+class KeikoLogger implements BasicLogger, Closeable {
+
+    private static final String PREFIX = "[Keiko] ";
+
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    private final Object writeLock = new Object();
+
+    private final boolean debug;
+
+    @NonNull
+    private final File logsDir;
+
+    private FileWriter logWriter;
+
+    private String lastLogDate;
+
+    @Override
+    public void close() throws IOException {
+        logWriter.close();
+    }
+
+    @Override
+    public boolean isEnableDebug() {
+        return debug;
+    }
+
+    @Override
+    public void debug(@NonNull String s, Object... format) {
+        if (isEnableDebug()) print(System.out, "DEBUG   :  " + s, format);
+    }
+
+    @Override
+    public void info(@NonNull String s, Object... format) {
+        print(System.out, "INFO    :  " + s, format);
+    }
+
+    @Override
+    public void warning(@NonNull String s, Object... format) {
+        print(System.out, "WARNING :  " + s, format);
+    }
+
+    @Override
+    public void error(@NonNull String s, Object... format) {
+        Throwable t = null;
+        Object lastFmt;
+
+        if (format != null && format.length > 0
+                && (lastFmt = format[format.length - 1]) instanceof Throwable) {
+            t = (Throwable) lastFmt;
+            format = format.length == 1 ? null
+                    : Arrays.copyOf(format, format.length - 1);
+        }
+
+        print(System.out, "ERROR   :  " + s, format);
+
+        if (t != null) {
+            error("    " + t);
+
+            for (StackTraceElement line : t.getStackTrace())
+                error("        at " + line);
+
+            if (t.getCause() != null)
+                error("    Caused by:", t.getCause());
+        }
+    }
+
+    @Override
+    public void print(@NonNull PrintStream printStream, @NonNull String message, Object... format) {
+        synchronized (writeLock) {
+            if (format != null && format.length > 0)
+                message = String.format(message, format);
+
+            String currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String currentTime = LocalTime.now().format(timeFormatter);
+            message = PREFIX + "[" + currentDate + "] [" + currentTime + "] " + message;
+
+            printStream.println(message);
+            printToFile(message, currentDate);
+        }
+    }
+
+    private void printToFile(String message, String currentDate) {
+        try {
+            if (lastLogDate == null) {
+                // This is the first entry to log.
+                logWriter = new FileWriter(getLogFile(currentDate), true);
+                lastLogDate = currentDate;
+                deleteOldLogs();
+            } else if (!currentDate.equals(lastLogDate)) {
+                // Day changed, and there was no server restart.
+                close();
+                logWriter = new FileWriter(getLogFile(currentDate), true);
+                lastLogDate = currentDate;
+            }
+
+            logWriter.append(message).append('\n').flush();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void deleteOldLogs() {
+        if (!logsDir.isDirectory())
+            return;
+
+        File[] logs = logsDir.listFiles();
+
+        if (logs != null) {
+            if (KeikoProperties.logsLifespanDays != -1) {
+                try {
+                    long currentTime = System.currentTimeMillis();
+
+                    for (File log : logs) {
+                        // We could also just transform the file name (yyyy-MM-dd), but in that case
+                        // we wouldn't respect the TIME this log file was created or last modified.
+                        // File attributes allow us to keep "yesterday's" logs when date changes.
+                        BasicFileAttributes attr = Files.readAttributes(log.toPath(), BasicFileAttributes.class);
+                        long lastModifiedMillis = attr.lastModifiedTime().toMillis();
+
+                        if (lastModifiedMillis == Long.MIN_VALUE || lastModifiedMillis == Long.MAX_VALUE)
+                            warning("Failed to retrieve last modified date/time of log file %s", log.getName());
+                        else {
+                            long millisSinceLastModified = currentTime - lastModifiedMillis;
+                            long daysSinceLastModified = TimeUnit.MILLISECONDS.toDays(millisSinceLastModified);
+
+                            if (daysSinceLastModified > KeikoProperties.logsLifespanDays) {
+                                //noinspection ResultOfMethodCallIgnored
+                                log.delete();
+                                debug("Automatically deleted old log file %s", log.getName());
+                            }
+                        }
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException("failed to delete old logs", ex);
+                }
+            }
+        }
+    }
+
+    private File getLogFile(String date) {
+        if (!logsDir.exists())
+            if (!logsDir.mkdirs())
+                throw new IllegalStateException("failed to create logsDir: " + logsDir.getAbsolutePath());
+        else if (logsDir.isFile())
+            throw new IllegalStateException("logsDir is a file: " + logsDir.getAbsolutePath());
+
+        File logFile = new File(logsDir, date + ".log");
+
+        if (logFile.isDirectory())
+            throw new IllegalStateException("logFile is a directory: " + logFile.getAbsolutePath());
+        else {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                logFile.createNewFile();
+                return logFile;
+            } catch (IOException ex) {
+                throw new IllegalStateException("failed to create logFile: " + logFile.getAbsolutePath());
+            }
+        }
+    }
+
+}
