@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.kantanj.logging.BasicLogger;
+import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.i18n.I18n;
 
 import java.io.*;
@@ -41,8 +42,6 @@ public class KeikoLogger implements BasicLogger, Closeable {
 
     private final Object writeLock = new Object();
 
-    private final boolean debug;
-
     @NonNull
     private final File logsDir;
 
@@ -57,12 +56,12 @@ public class KeikoLogger implements BasicLogger, Closeable {
 
     @Override
     public boolean isEnableDebug() {
-        return debug;
+        return GlobalConfig.getEnableDebug();
     }
 
     @Override
     public void debug(@NonNull String s, Object... format) {
-        print(debug ? System.out : null, "DEBUG   :  " + s, format);
+        print(GlobalConfig.getEnableDebug() ? System.out : null, "DEBUG   :  " + s, format);
     }
 
     public void debugLocalized(@NonNull String key, Object... args) {
@@ -124,7 +123,9 @@ public class KeikoLogger implements BasicLogger, Closeable {
 
             if (printStream != null)
                 printStream.println(message);
-            printToFile(message, currentDate);
+
+            if (GlobalConfig.getMakeLogs())
+                printToFile(message, currentDate);
         }
     }
 
@@ -155,7 +156,7 @@ public class KeikoLogger implements BasicLogger, Closeable {
         File[] logs = logsDir.listFiles();
 
         if (logs != null) {
-            if (KeikoProperties.logsLifespanDays != -1) {
+            if (GlobalConfig.getLogsLifespanDays() != -1) {
                 try {
                     long currentTime = System.currentTimeMillis();
 
@@ -172,7 +173,7 @@ public class KeikoLogger implements BasicLogger, Closeable {
                             long millisSinceLastModified = currentTime - lastModifiedMillis;
                             long daysSinceLastModified = TimeUnit.MILLISECONDS.toDays(millisSinceLastModified);
 
-                            if (daysSinceLastModified > KeikoProperties.logsLifespanDays) {
+                            if (daysSinceLastModified > GlobalConfig.getLogsLifespanDays()) {
                                 if (log.delete())
                                     infoLocalized("logsCleaner.deleteSuccess", log.getName());
                                 else

@@ -21,24 +21,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class KeikoProperties {
 
-    public static final String locale =
-            System.getProperty("keiko.locale");
-
-    public static final boolean debug = Boolean.parseBoolean(
-            System.getProperty("keiko.debug", "false"));
-
-    public static final String workDirPath =
-            System.getProperty("keiko.workDirPath", "keiko");
-
-    public static final int logsLifespanDays =
-            getIntegerProperty("keiko.logsLifespanDays", 30);
-
-    private static int getIntegerProperty(String key, int def) {
-        try {
-            return Integer.parseInt(key, def);
-        } catch (NumberFormatException ex) {
-            return def;
-        }
-    }
+    public static final String workDir =
+            System.getProperty("keiko.workDir", "keiko");
 
 }

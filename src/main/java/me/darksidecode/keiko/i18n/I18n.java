@@ -18,8 +18,8 @@ package me.darksidecode.keiko.i18n;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.proxy.KeikoProperties;
 
 import java.util.Locale;
 import java.util.Map;
@@ -32,14 +32,14 @@ public class I18n {
     private static final Map<String, FormattedLocalizedMessageBuilder> map = new ConcurrentHashMap<>();
 
     private static final String INVALID_LOCALE =
-            "invalid locale: " + KeikoProperties.locale + " - must be in format language_COUNTRY " +
+            "invalid locale: " + GlobalConfig.getLocale() + " - must be in format language_COUNTRY " +
             "(case-sensetive; 'language' and 'COUNTRY' both consist of two Latin letters)";
 
     static {
         Locale locale;
 
-        if (KeikoProperties.locale != null) {
-            String[] spl = KeikoProperties.locale.split("_");
+        if (GlobalConfig.getLocale() != null) {
+            String[] spl = GlobalConfig.getLocale().split("_");
 
             if (spl.length == 2) {
                 String language = spl[0];

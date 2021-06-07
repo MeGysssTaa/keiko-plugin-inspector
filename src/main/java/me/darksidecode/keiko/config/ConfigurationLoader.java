@@ -16,32 +16,37 @@
 
 package me.darksidecode.keiko.config;
 
+import lombok.NonNull;
 import me.darksidecode.keiko.KeikoPluginInspector;
-import me.darksidecode.keiko.util.ConfigUtils;
-import org.bukkit.configuration.file.YamlConfiguration;
+import me.darksidecode.keiko.installer.KeikoInstaller;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public final class ConfigurationLoader {
 
     private ConfigurationLoader() {}
 
-    public static void load(Class configClass) {
+    public static void load(@NonNull KeikoInstaller installer, @NonNull Class<?> configClass) {
         String configName = configClass.getSimpleName().
                 replace("Config", "").toLowerCase();
-        YamlConfiguration yaml = ConfigUtils.loadConfig(configName);
+        YamlHandle handle = loadConfig(installer, configName);
 
         try {
-            Field yamlField = configClass.getDeclaredField("yaml");
-            yamlField.setAccessible(true);
+            Field handleField = configClass.getDeclaredField("handle");
+            handleField.setAccessible(true);
 
-            if (Modifier.isStatic(yamlField.getModifiers())) {
-                if (yamlField.getType() == YamlConfiguration.class)
-                    yamlField.set(null /* static */, yaml);
+            if (Modifier.isStatic(handleField.getModifiers())) {
+                if (handleField.getType() == YamlHandle.class)
+                    handleField.set(null /* static */, handle);
                 else
                     throw new RuntimeException("illegal yaml field in " + configClass.getName()
-                            + ": must be of type " + YamlConfiguration.class.getName());
+                            + ": must be of type " + YamlHandle.class.getName());
             } else
                 throw new RuntimeException("illegal yaml field " +
                         "in " + configClass.getName() + ": must be static");
@@ -56,7 +61,7 @@ public final class ConfigurationLoader {
                 field.setAccessible(true);
 
                 Config configAnno = field.getAnnotation(Config.class);
-                String path = configAnno.path();
+                String path = configAnno.value();
 
                 if (path.isEmpty()) {
                     // Default (infer by field name, e.g. 'fieldName' => 'field_name'').
@@ -73,21 +78,18 @@ public final class ConfigurationLoader {
                     path = pathBuilder.toString();
                 }
 
-                Object val = yaml.get(path);
+                Object val = handle.get(path);
 
-                if (val == null) {
+                if (val == null)
                     // This field is not present in the configuration file.
-                    KeikoPluginInspector.warn("Missing field %s in %s " +
-                            "configuration. Falling back to default value!", path, configName);
-
                     // Assume that there is a default value available in the config class.
                     continue;
-                }
 
                 try {
                     if (Enum.class.isAssignableFrom(field.getType())) {
                         // This field is an Enum constant.
                         if (val instanceof String)
+                            //noinspection rawtypes
                             val = Enum.valueOf((Class<Enum>) field.getType(), ((String) val).toUpperCase());
                         else
                             throw new RuntimeException("field " + field.getName() + " in " + configClass.getName()
@@ -122,6 +124,37 @@ public final class ConfigurationLoader {
         }
 
         KeikoPluginInspector.debug("Loaded %s configuration", configName);
+    }
+
+    private static YamlHandle loadConfig(KeikoInstaller installer, String configName) {
+        Yaml yaml = new Yaml();
+        File configsFolder = new File(installer.getWorkDir(), "config/");
+        //noinspection ResultOfMethodCallIgnored
+        configsFolder.mkdirs();
+
+        File configFile = new File(configsFolder, configName + ".yml");
+
+        if (configFile.exists()) {
+            try (Reader reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(configFile), StandardCharsets.UTF_8))) {
+                return new YamlHandle(yaml.load(reader));
+            } catch (Exception ex) {
+                File moveTo = new File(configFile.getAbsolutePath() + "-INVALID.backup~");
+
+                try {
+                    Files.move(configFile.toPath(), moveTo.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException moveEx) {
+                    moveEx.printStackTrace();
+                }
+
+                throw new RuntimeException("invalid " + configName + " configuration", ex);
+            }
+        } else {
+            // Install and retry.
+            installer.checkInstallation("config/" + configName + ".yml");
+
+            return loadConfig(installer, configName);
+        }
     }
 
 }

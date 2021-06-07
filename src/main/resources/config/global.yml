@@ -18,6 +18,10 @@
 
 
 
+# What locale (language) should Keiko display its messages in?
+# https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Locales
+locale: en_US
+
 # How often should Keiko check for its own updates? When a newer version
 # of Keiko is out, you will automatically be notified about that.
 # This value is measured in minutes (default: 120 minutes = check every 2 hours).

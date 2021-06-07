@@ -17,17 +17,16 @@
 package me.darksidecode.keiko.config;
 
 import lombok.Getter;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 public class RuntimeProtectConfig {
 
     @Getter
-    private static YamlConfiguration yaml;
+    private static YamlHandle handle;
 
-    @Getter @Config (path = "domain_access_control.enabled")
+    @Getter @Config ("domain_access_control.enabled")
     private static Boolean domainAccessControlEnabled = true;
 
-    @Getter @Config (path = "domain_access_control.self_defense")
+    @Getter @Config ("domain_access_control.self_defense")
     private static Boolean selfDefense = true;
 
 }

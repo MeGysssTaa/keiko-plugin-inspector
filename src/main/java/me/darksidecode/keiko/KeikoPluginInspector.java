@@ -17,16 +17,11 @@
 package me.darksidecode.keiko;
 
 import lombok.Getter;
-import me.darksidecode.keiko.config.ConfigurationLoader;
 import me.darksidecode.keiko.config.GlobalConfig;
-import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
-import me.darksidecode.keiko.pluginsintegrity.PluginsIntegrityChecker;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
-import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
-import me.darksidecode.keiko.util.RuntimeUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
@@ -80,81 +75,81 @@ public class KeikoPluginInspector {
     private static String version;
 
     public static void earlyBoot(Platform currentPlatform) {
-        if (earlyBooted)
-            throw new IllegalStateException("Keiko cannot early-boot twice");
-
-        earlyBooted = true;
-        platform = currentPlatform;
-        jrePath = System.getProperty("java.home").replace("\\", "/"); // better Windows compatibility
-        keikoJar = RuntimeUtils.getSourceJar(KeikoPluginInspector.class);
-        pluginsFolder = keikoJar.getParentFile();
-        serverFolder = pluginsFolder.getParentFile();
-
-        if ((!(pluginsFolder.isDirectory()))
-                || (!(pluginsFolder.getName().equals("plugins"))))
-            throw new RuntimeException(
-                    "[FATAL] parent dir is not server plugins dir, is Keiko installed correctly?");
-
-        workDir = new File(pluginsFolder, "Keiko/");
-        installer = new KeikoInstaller(keikoJar, pluginsFolder, workDir);
-
-        //noinspection ResultOfMethodCallIgnored
-        workDir.mkdirs();
-        fetchKeikoVersion();
-
-        info("Performing early boot... [%s]", platform.name().toLowerCase());
-
-        switch (platform) {
-            case BUKKIT:
-                warn("");
-                warn(LINE);
-                warn("  (!) IMPORTANT: You are running Keiko on Bukkit.");
-                warn("      This means that Keiko will only inspect plugins installed on");
-                warn("      this certain Bukkit server, and if you are using BungeeCord,");
-                warn("      Bungee plugins will NOT be checked! You should install Keiko");
-                warn("      on the Bungee itself too if you are using it (make sure to have");
-                warn("      Keiko installed both on Bungee and ALL its 'child' servers).");
-                warn(LINE);
-                warn("");
-
-                break;
-
-            case BUNGEECORD:
-                warn("");
-                warn(LINE);
-                warn("  (!) IMPORTANT: You are running Keiko on BungeeCord.");
-                warn("      This means that Keiko will only inspect plugins installed");
-                warn("      on your Bungee, and plugins installed on your Bukkit servers");
-                warn("      will NOT be checked! You should install Keiko not only on");
-                warn("      Bungee, but on all your Bukkit ('child') servers as well!");
-                warn(LINE);
-                warn("");
-
-                break;
-
-            case STANDALONE:
-                warn("");
-                warn(LINE);
-                warn("  (!) IMPORTANT: You are running Keiko as a standalone application.");
-                warn("      This means that Keiko will not do anything on its own behalf.");
-                warn("      Instead, it will simply execute the command that you have typed");
-                warn("      in keiko-tools. This mode might be useful to run static analyses");
-                warn("      on plugins before starting your server.");
-                warn(LINE);
-                warn("");
-
-                break;
-        }
-
-        loadConfigurations();
-        deleteOldLogs();
-
-        if (platform != Platform.STANDALONE) {
-            pluginContext = PluginContext.getCurrentContext(pluginsFolder);
-
-            startRuntimeProtect();
-            runStaticCheck(pluginsFolder);
-        }
+//        if (earlyBooted)
+//            throw new IllegalStateException("Keiko cannot early-boot twice");
+//
+//        earlyBooted = true;
+//        platform = currentPlatform;
+//        jrePath = System.getProperty("java.home").replace("\\", "/"); // better Windows compatibility
+//        keikoJar = RuntimeUtils.getSourceJar(KeikoPluginInspector.class);
+//        pluginsFolder = keikoJar.getParentFile();
+//        serverFolder = pluginsFolder.getParentFile();
+//
+//        if ((!(pluginsFolder.isDirectory()))
+//                || (!(pluginsFolder.getName().equals("plugins"))))
+//            throw new RuntimeException(
+//                    "[FATAL] parent dir is not server plugins dir, is Keiko installed correctly?");
+//
+//        workDir = new File(pluginsFolder, "Keiko/");
+//        installer = new KeikoInstaller(keikoJar, pluginsFolder, workDir);
+//
+//        //noinspection ResultOfMethodCallIgnored
+//        workDir.mkdirs();
+//        fetchKeikoVersion();
+//
+//        info("Performing early boot... [%s]", platform.name().toLowerCase());
+//
+//        switch (platform) {
+//            case BUKKIT:
+//                warn("");
+//                warn(LINE);
+//                warn("  (!) IMPORTANT: You are running Keiko on Bukkit.");
+//                warn("      This means that Keiko will only inspect plugins installed on");
+//                warn("      this certain Bukkit server, and if you are using BungeeCord,");
+//                warn("      Bungee plugins will NOT be checked! You should install Keiko");
+//                warn("      on the Bungee itself too if you are using it (make sure to have");
+//                warn("      Keiko installed both on Bungee and ALL its 'child' servers).");
+//                warn(LINE);
+//                warn("");
+//
+//                break;
+//
+//            case BUNGEECORD:
+//                warn("");
+//                warn(LINE);
+//                warn("  (!) IMPORTANT: You are running Keiko on BungeeCord.");
+//                warn("      This means that Keiko will only inspect plugins installed");
+//                warn("      on your Bungee, and plugins installed on your Bukkit servers");
+//                warn("      will NOT be checked! You should install Keiko not only on");
+//                warn("      Bungee, but on all your Bukkit ('child') servers as well!");
+//                warn(LINE);
+//                warn("");
+//
+//                break;
+//
+//            case STANDALONE:
+//                warn("");
+//                warn(LINE);
+//                warn("  (!) IMPORTANT: You are running Keiko as a standalone application.");
+//                warn("      This means that Keiko will not do anything on its own behalf.");
+//                warn("      Instead, it will simply execute the command that you have typed");
+//                warn("      in keiko-tools. This mode might be useful to run static analyses");
+//                warn("      on plugins before starting your server.");
+//                warn(LINE);
+//                warn("");
+//
+//                break;
+//        }
+//
+//        loadConfigurations();
+//        deleteOldLogs();
+//
+//        if (platform != Platform.STANDALONE) {
+//            pluginContext = PluginContext.getCurrentContext(pluginsFolder);
+//
+//            startRuntimeProtect();
+//            runStaticCheck(pluginsFolder);
+//        }
     }
 
     private static void fetchKeikoVersion() {
@@ -173,9 +168,9 @@ public class KeikoPluginInspector {
     }
 
     private static void loadConfigurations() {
-        ConfigurationLoader.load(GlobalConfig.class);
-        ConfigurationLoader.load(InspectionsConfig.class);
-        ConfigurationLoader.load(RuntimeProtectConfig.class);
+//        ConfigurationLoader.load(GlobalConfig.class);
+//        ConfigurationLoader.load(InspectionsConfig.class);
+//        ConfigurationLoader.load(RuntimeProtectConfig.class);
     }
 
     /**
@@ -183,40 +178,40 @@ public class KeikoPluginInspector {
      * (2) Run static inspections on all installed plugins.
      */
     private static void runStaticCheck(File pluginsFolder) {
-        info("Running static analysis in folder %s. " +
-                "This may take some time...", pluginsFolder.getAbsolutePath());
-
-        PluginsIntegrityChecker checker = new PluginsIntegrityChecker();
-        StaticAnalysisManager manager = new StaticAnalysisManager();
-
-        File[] files = pluginsFolder.listFiles();
-        boolean abortServerStartup = false;
-
-        if (files != null) {
-            for (File file : files) {
-                if ((file.isFile()) && (file.getName().endsWith(".jar")) && (!(file.equals(keikoJar)))) {
-                    try {
-                        boolean integrityOk = checker.
-                                checkIntegrity(file, pluginContext.getJarOwner(file));
-
-                        // No need to analyze corrupted plugins or plugins that
-                        // are already very likely to be infected artificially.
-                        if (integrityOk)
-                            abortServerStartup = abortServerStartup || manager.analyzeJar(file);
-                        else if (InspectionsConfig.getAbortServerStartupOnIntegrityViolation())
-                            abortServerStartup = true; // abort server startup on integrity violation (if configured)
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        if (abortServerStartup) {
-            // SEE JAVADOC TO METHOD me.darksidecode.keiko.staticanalysis.Countermeasures#execute
-            KeikoPluginInspector.warn("The server will be shut down forcefully (rage quit).");
-            RuntimeUtils.rageQuit();
-        }
+//        info("Running static analysis in folder %s. " +
+//                "This may take some time...", pluginsFolder.getAbsolutePath());
+//
+//        PluginsIntegrityChecker checker = new PluginsIntegrityChecker();
+//        StaticAnalysisManager manager = new StaticAnalysisManager();
+//
+//        File[] files = pluginsFolder.listFiles();
+//        boolean abortServerStartup = false;
+//
+//        if (files != null) {
+//            for (File file : files) {
+//                if ((file.isFile()) && (file.getName().endsWith(".jar")) && (!(file.equals(keikoJar)))) {
+//                    try {
+//                        boolean integrityOk = checker.
+//                                checkIntegrity(file, pluginContext.getJarOwner(file));
+//
+//                        // No need to analyze corrupted plugins or plugins that
+//                        // are already very likely to be infected artificially.
+//                        if (integrityOk)
+//                            abortServerStartup = abortServerStartup || manager.analyzeJar(file);
+//                        else if (InspectionsConfig.getAbortServerStartupOnIntegrityViolation())
+//                            abortServerStartup = true; // abort server startup on integrity violation (if configured)
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (abortServerStartup) {
+//            // SEE JAVADOC TO METHOD me.darksidecode.keiko.staticanalysis.Countermeasures#execute
+//            KeikoPluginInspector.warn("The server will be shut down forcefully (rage quit).");
+//            RuntimeUtils.rageQuit();
+//        }
     }
 
     private static void startRuntimeProtect() {

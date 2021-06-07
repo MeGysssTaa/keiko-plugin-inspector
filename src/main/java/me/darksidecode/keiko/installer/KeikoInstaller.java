@@ -16,6 +16,7 @@
 
 package me.darksidecode.keiko.installer;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -28,23 +29,18 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class KeikoInstaller {
 
-    @NonNull
-    private final File keikoJar, pluginsFolder, workDir;
+    @Getter @NonNull
+    private final File workDir;
 
-    public File checkInstallation(String path) {
+    public File checkInstallation(@NonNull String path) {
         return checkInstallation(new File(workDir, path), path);
     }
 
-    public File checkInstallation(File file, String internalPath) {
-        if (!(file.exists())) {
-            try {
-                InputStream is = internalResource(internalPath);
-                FileOutputStream fos = new FileOutputStream(file);
-
-                IOUtils.copy(is, fos);
-
-                is.close();
-                fos.close();
+    public File checkInstallation(@NonNull File file, @NonNull String internalPath) {
+        if (!file.exists()) {
+            try (InputStream      in  = internalResource(internalPath);
+                 FileOutputStream out = new FileOutputStream(file)   ) {
+                IOUtils.copy(in, out);
             } catch (Exception ex) {
                 throw new RuntimeException("failed to check installation; " +
                         "local: " + file.getAbsolutePath() + "; internal: " + internalPath, ex);
@@ -54,7 +50,7 @@ public class KeikoInstaller {
         return file;
     }
 
-    public InputStream internalResource(String name) {
+    public InputStream internalResource(@NonNull String name) {
         return Objects.requireNonNull(getClass().getClassLoader().
                 getResourceAsStream(name), "unrecognized internal resource: " + name);
     }

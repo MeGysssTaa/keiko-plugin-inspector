@@ -17,6 +17,11 @@
 package me.darksidecode.keiko.proxy;
 
 import lombok.Getter;
+import me.darksidecode.keiko.config.ConfigurationLoader;
+import me.darksidecode.keiko.config.GlobalConfig;
+import me.darksidecode.keiko.config.InspectionsConfig;
+import me.darksidecode.keiko.config.RuntimeProtectConfig;
+import me.darksidecode.keiko.installer.KeikoInstaller;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,10 +46,10 @@ public final class Keiko {
     private volatile boolean started;
 
     @Getter
-    private final BuildProperties buildProperties;
+    private BuildProperties buildProperties;
 
     @Getter
-    private final File workDir;
+    private File workDir;
 
     @Getter
     private final KeikoLogger logger;
@@ -52,25 +57,17 @@ public final class Keiko {
     @SuppressWarnings ("UseOfSystemOutOrSystemErr")
     private Keiko() {
         checkEnvironment();
-
-        try (InputStream stream = Thread.currentThread()
-                .getContextClassLoader().getResourceAsStream("build.properties")) {
-            Properties properties = new Properties();
-            properties.load(stream);
-            buildProperties = new BuildProperties(properties);
-        } catch (IOException ex) {
-            throw new RuntimeException("failed to load build.properties", ex);
-        }
+        fetchBuildProperties();
+        installEverything();
 
         System.out.println(LOGO);
         System.out.println("      --  " + buildProperties.getVersion());
         System.out.println("      --  " + buildProperties.getTimestamp());
         System.out.println("\n\n");
 
-        workDir = new File(KeikoProperties.workDirPath);
-        logger = new KeikoLogger(KeikoProperties.debug, new File(workDir, "logs"));
+        logger = new KeikoLogger(new File(workDir, "logs"));
 
-        if (KeikoProperties.debug)
+        if (GlobalConfig.getEnableDebug())
             logger.debugLocalized("startup.debugEnabled");
     }
 
@@ -148,6 +145,29 @@ public final class Keiko {
                     "Keiko must be launched with the default system class loader: " +
                     "expected " + sysLoader.getClass().getName() + ", " +
                     "got " + thrLoader.getClass().getName() + " (thrLoader)");
+    }
+
+    private void fetchBuildProperties() {
+        try (InputStream stream = Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream("build.properties")) {
+            Properties properties = new Properties();
+            properties.load(stream);
+            buildProperties = new BuildProperties(properties);
+        } catch (IOException ex) {
+            throw new RuntimeException("failed to load build.properties", ex);
+        }
+    }
+
+    private void installEverything() {
+        workDir = new File(KeikoProperties.workDir);
+        //noinspection ResultOfMethodCallIgnored
+        workDir.mkdirs();
+
+        KeikoInstaller installer = new KeikoInstaller(workDir);
+
+        ConfigurationLoader.load(installer, GlobalConfig.class);
+        ConfigurationLoader.load(installer, InspectionsConfig.class);
+        ConfigurationLoader.load(installer, RuntimeProtectConfig.class);
     }
 
     private void launch(File proxiedExecutable) throws Exception {

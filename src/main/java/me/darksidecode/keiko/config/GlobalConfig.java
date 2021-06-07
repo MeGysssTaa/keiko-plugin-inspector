@@ -24,13 +24,16 @@ public final class GlobalConfig {
     private GlobalConfig() {}
 
     @Getter @Config
+    private static String locale = "en_US";
+
+    @Getter @Config
     private static Integer updatesCheckFreqMins = 120;
 
     @Getter @Config
     private static Boolean makeLogs = true;
 
     @Getter @Config
-    private static Integer logsLifespanDays = 7;
+    private static Integer logsLifespanDays = 14;
 
     @Getter @Config
     private static Boolean enableDebug = false;

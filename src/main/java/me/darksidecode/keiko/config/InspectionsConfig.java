@@ -17,19 +17,18 @@
 package me.darksidecode.keiko.config;
 
 import lombok.Getter;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class InspectionsConfig {
 
     private InspectionsConfig() {}
 
     @Getter
-    private static YamlConfiguration yaml;
+    private static YamlHandle handle;
 
-    @Getter @Config (path = "static.caches_lifespan_days")
+    @Getter @Config ("static.caches_lifespan_days")
     private static Integer cachesLifespanDays = 7;
 
-    @Getter @Config (path = "plugins_integrity.abort_server_startup")
+    @Getter @Config ("plugins_integrity.abort_server_startup")
     private static Boolean abortServerStartupOnIntegrityViolation = true;
 
 }

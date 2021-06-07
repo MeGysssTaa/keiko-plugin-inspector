@@ -19,11 +19,11 @@ package me.darksidecode.keiko.runtimeprotect.dac;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
+import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.runtimeprotect.CallerInfo;
 import me.darksidecode.keiko.util.Factory;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import me.darksidecode.keiko.util.StringUtils;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -35,22 +35,19 @@ public class KeikoSecurityManager extends DomainAccessController {
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
 
-    private final YamlConfiguration conf;
+    private final YamlHandle conf;
 
     public KeikoSecurityManager() {
-        conf = RuntimeProtectConfig.getYaml();
-
+        conf = RuntimeProtectConfig.getHandle();
         defaultRules = new HashMap<>();
         rules = new HashMap<>();
 
         for (Operation op : Operation.values()) {
-            String defaultRuleStr = conf.getString(
-                    "domain_access_control." + op.name().toLowerCase() + ".default");
+            String defaultRuleStr = conf.get(
+                    "domain_access_control." + op.name().toLowerCase() + ".default",
+                    Rule.Type.ALLOW.name());
 
             try {
-                if (defaultRuleStr == null)
-                    throw new NullPointerException();
-
                 defaultRules.put(op, Rule.Type.valueOf(defaultRuleStr.toUpperCase().trim()));
             } catch (NullPointerException | IllegalArgumentException ex) {
                 KeikoPluginInspector.warn("Invalid Domain Access Control default configuration " +
@@ -86,7 +83,7 @@ public class KeikoSecurityManager extends DomainAccessController {
     }
 
     private List<String> getRules(Operation op) {
-        return conf.getStringList("domain_access_control." + op.name().toLowerCase() + ".rules");
+        return conf.get("domain_access_control." + op.name().toLowerCase() + ".rules");
     }
 
     @Override
@@ -354,8 +351,7 @@ public class KeikoSecurityManager extends DomainAccessController {
         String message = String.format("Registered %s call initiated by %s. %s",
                 op.name().toLowerCase().replace("_", " "), callerInfo, details);
 
-        if (RuntimeProtectConfig.getYaml().getBoolean(
-                "domain_access_control." + op.name().toLowerCase() + ".notify", false))
+        if (conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false))
             KeikoPluginInspector.info(message);
         else
             KeikoPluginInspector.debug(message);

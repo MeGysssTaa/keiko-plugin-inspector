@@ -37,7 +37,7 @@ public class KeikoTools {
                 new ChecksumCommand(),
                 new ClearCachesCommand(),
                 new ExitCommand(),
-                new InspectCommand(),
+                //new InspectCommand(),
                 new QInfoCommand(),
                 new QRestoreCommand()
         );
