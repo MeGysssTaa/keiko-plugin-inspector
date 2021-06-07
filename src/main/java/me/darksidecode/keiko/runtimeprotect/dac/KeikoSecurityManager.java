@@ -21,7 +21,6 @@ import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.runtimeprotect.CallerInfo;
-import me.darksidecode.keiko.util.Factory;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import me.darksidecode.keiko.util.StringUtils;
 
@@ -29,6 +28,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.security.Permission;
 import java.util.*;
+import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
@@ -297,7 +297,7 @@ public class KeikoSecurityManager extends DomainAccessController {
         checkAccess(arg -> true, op, "no details");
     }
 
-    private void checkAccess(Factory<Boolean, String> ruleFactory, Operation op, String details) {
+    private void checkAccess(Function<String, Boolean> ruleFunc, Operation op, String details) {
         CallerInfo callerInfo = RuntimeUtils.getCallerInfo();
 
         // If callerInfo is null, then this means that the caller is either
@@ -330,7 +330,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                                     replace("\\", "/") /* better Windows compatibility */);
 
                 boolean filtered = rule.filterCaller(callerInfo);
-                boolean allowArg = ruleFactory.get(arg);
+                boolean allowArg = ruleFunc.apply(arg);
                 boolean match = filtered && allowArg;
 
                 if (match)
