@@ -121,6 +121,13 @@ public final class Keiko {
                     "Keiko must be ran without a pre-set SecurityManager " +
                     "(detected: " + securityManager.getClass().getName() + ")");
 
+        String propSysLoader = System.getProperty("java.system.class.loader");
+
+        if (propSysLoader != null)
+            throw new IllegalStateException(
+                    "Keiko must be launched with the default system class loader " +
+                    "(detected: " + propSysLoader + ")");
+
         ClassLoader sysLoader = Objects.requireNonNull(
                 ClassLoader.getSystemClassLoader(), "expected non-null sysLoader");
 
