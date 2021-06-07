@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.kantanj.logging.BasicLogger;
+import me.darksidecode.keiko.i18n.I18n;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings ("UseOfSystemOutOrSystemErr")
 @RequiredArgsConstructor (access = AccessLevel.PACKAGE)
-class KeikoLogger implements BasicLogger, Closeable {
+public class KeikoLogger implements BasicLogger, Closeable {
 
     private static final String PREFIX = "[Keiko] ";
 
@@ -61,7 +62,11 @@ class KeikoLogger implements BasicLogger, Closeable {
 
     @Override
     public void debug(@NonNull String s, Object... format) {
-        if (isEnableDebug()) print(System.out, "DEBUG   :  " + s, format);
+        print(debug ? System.out : null, "DEBUG   :  " + s, format);
+    }
+
+    public void debugLocalized(@NonNull String key, Object... args) {
+        debug(I18n.get(key, args));
     }
 
     @Override
@@ -69,9 +74,17 @@ class KeikoLogger implements BasicLogger, Closeable {
         print(System.out, "INFO    :  " + s, format);
     }
 
+    public void infoLocalized(@NonNull String key, Object... args) {
+        info(I18n.get(key, args));
+    }
+
     @Override
     public void warning(@NonNull String s, Object... format) {
         print(System.out, "WARNING :  " + s, format);
+    }
+
+    public void warningLocalized(@NonNull String key, Object... args) {
+        warning(I18n.get(key, args));
     }
 
     @Override
@@ -100,7 +113,7 @@ class KeikoLogger implements BasicLogger, Closeable {
     }
 
     @Override
-    public void print(@NonNull PrintStream printStream, @NonNull String message, Object... format) {
+    public void print(PrintStream printStream, @NonNull String message, Object... format) {
         synchronized (writeLock) {
             if (format != null && format.length > 0)
                 message = String.format(message, format);
@@ -109,7 +122,8 @@ class KeikoLogger implements BasicLogger, Closeable {
             String currentTime = LocalTime.now().format(timeFormatter);
             message = PREFIX + "[" + currentDate + "] [" + currentTime + "] " + message;
 
-            printStream.println(message);
+            if (printStream != null)
+                printStream.println(message);
             printToFile(message, currentDate);
         }
     }
@@ -153,15 +167,16 @@ class KeikoLogger implements BasicLogger, Closeable {
                         long lastModifiedMillis = attr.lastModifiedTime().toMillis();
 
                         if (lastModifiedMillis == Long.MIN_VALUE || lastModifiedMillis == Long.MAX_VALUE)
-                            warning("Failed to retrieve last modified date/time of log file %s", log.getName());
+                            warningLocalized("logsCleaner.dateErr", log.getName());
                         else {
                             long millisSinceLastModified = currentTime - lastModifiedMillis;
                             long daysSinceLastModified = TimeUnit.MILLISECONDS.toDays(millisSinceLastModified);
 
                             if (daysSinceLastModified > KeikoProperties.logsLifespanDays) {
-                                //noinspection ResultOfMethodCallIgnored
-                                log.delete();
-                                debug("Automatically deleted old log file %s", log.getName());
+                                if (log.delete())
+                                    infoLocalized("logsCleaner.deleteSuccess", log.getName());
+                                else
+                                    warningLocalized("logsCleaner.deleteErr", log.getName());
                             }
                         }
                     }

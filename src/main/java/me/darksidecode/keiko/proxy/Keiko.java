@@ -71,16 +71,14 @@ public final class Keiko {
         logger = new KeikoLogger(KeikoProperties.debug, new File(workDir, "logs"));
 
         if (KeikoProperties.debug)
-            logger.debug("Note: debug is enabled. Run with \"-Dkeiko.debug=false\" to disable");
-        else
-            logger.info("Note: debug is disabled. Run with \"-Dkeiko.debug=true\" to enable");
+            logger.debugLocalized("startup.debugEnabled");
     }
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
-            INSTANCE.getLogger().error("Please specify the JAR file for Keiko to proxy.");
-            INSTANCE.getLogger().error("For details, see the installations instructins at:");
-            INSTANCE.getLogger().error("https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Installation-Instructions");
+            INSTANCE.getLogger().warningLocalized("startup.noArgsErr.line1");
+            INSTANCE.getLogger().warningLocalized("startup.noArgsErr.line2");
+            INSTANCE.getLogger().warningLocalized("startup.noArgsErr.line3");
             System.exit(1);
 
             return;
@@ -89,25 +87,28 @@ public final class Keiko {
         File proxiedExecutable = new File(String.join(" ", args));
 
         if (!proxiedExecutable.exists()) {
-            INSTANCE.getLogger().error("The specified JAR file does not exist.");
+            INSTANCE.getLogger().warningLocalized("startup.jarErr.notExists");
             System.exit(1);
 
             return;
         }
 
         if (!proxiedExecutable.exists()) {
-            INSTANCE.getLogger().error("The specified path is a directory, not a file.");
+            INSTANCE.getLogger().warningLocalized("startup.jarErr.isDir");
             System.exit(1);
 
             return;
         }
 
         if (!proxiedExecutable.canRead()) {
-            INSTANCE.getLogger().error("The specified JAR file cannot be read (no permissions?).");
+            INSTANCE.getLogger().warningLocalized("startup.jarErr.cantRead");
             System.exit(1);
 
             return;
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                INSTANCE::shutdown, "Keiko Proxy Shutdown Hook"));
 
         INSTANCE.launch(proxiedExecutable);
     }
@@ -147,17 +148,28 @@ public final class Keiko {
             throw new IllegalStateException("cannot start twice");
 
         started = true;
-        logger.info("Launching Keiko proxy, please wait...");
+        logger.infoLocalized("startup.launchingProxy");
 
         KeikoClassLoader loader = new KeikoClassLoader(proxiedExecutable);
         Thread.currentThread().setContextClassLoader(loader);
-        logger.info("Loaded %d classes (%d non-fatal errors)",
+        logger.infoLocalized("startup.classLoaderStats",
                 loader.getLoadResult().successes, loader.getLoadResult().failures);
 
-        logger.info("Proxying %s", loader.getBootstrapClassName());
+        logger.infoLocalized("startup.proxyBegin", loader.getBootstrapClassName());
         Class<?> bootstrapClass = loader.findClass(loader.getBootstrapClassName());
         Method bootstrapMethod = bootstrapClass.getMethod("main", String[].class);
         bootstrapMethod.invoke(null, (Object) new String[0]);
+    }
+
+    private void shutdown() {
+        try {
+            logger.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        //noinspection UseOfSystemOutOrSystemErr
+        System.out.println("[Keiko] Bye!");
     }
 
 }

@@ -21,6 +21,9 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class KeikoProperties {
 
+    public static final String locale =
+            System.getProperty("keiko.locale");
+
     public static final boolean debug = Boolean.parseBoolean(
             System.getProperty("keiko.debug", "false"));
 
