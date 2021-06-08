@@ -67,7 +67,7 @@ class KeikoClassLoader extends URLClassLoader {
                 : manifest.getMainAttributes().getValue("Main-Class");
 
         try (Workflow workflow = new Workflow()
-                .phase(new EmitArbitraryValuePhase<>(() -> jar))
+                .phase(new EmitArbitraryValuePhase<>(jar))
                 .phase(new LoadClassesPhase(this)
                         .afterExecution((val, err) -> loadResult = val))) {
             WorkflowExecutionResult result = workflow.executeAll();
