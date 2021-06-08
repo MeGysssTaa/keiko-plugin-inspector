@@ -66,15 +66,15 @@ class KeikoClassLoader extends URLClassLoader {
         this.bootstrapClassName = manifest == null ? null
                 : manifest.getMainAttributes().getValue("Main-Class");
 
-        Workflow workflow = new Workflow()
+        try (Workflow workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(() -> jar))
                 .phase(new LoadClassesPhase(this)
-                        .afterExecution((val, err) -> loadResult = val));
+                        .afterExecution((val, err) -> loadResult = val))) {
+            WorkflowExecutionResult result = workflow.executeAll();
 
-        WorkflowExecutionResult result = workflow.executeAll();
-
-        if (result == WorkflowExecutionResult.FATAL_FAILURE)
-            throw new IllegalStateException("fatal class loader failure");
+            if (result == WorkflowExecutionResult.FATAL_FAILURE)
+                throw new IllegalStateException("fatal class loader failure");
+        }
     }
 
     @Override

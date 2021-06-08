@@ -158,32 +158,32 @@ public class StaticAnalysisManager {
 
     private boolean runInspectionWorkflow(IndexedPlugin plugin,
                                           Collection<Class<? extends StaticAnalysis>> inspections) {
-        Workflow workflow = new Workflow()
+        try (Workflow workflow = new Workflow()
                 .phase(new OpenJarFilePhase(plugin.getJar()))
-                .phase(new DisassemblePhase(SimpleJavaDisassembler.class));
+                .phase(new DisassemblePhase(SimpleJavaDisassembler.class))) {
+            for (Class<? extends StaticAnalysis> inspection : inspections)
+                workflow.phase(new WalkClassesPhase(inspection));
 
-        for (Class<? extends StaticAnalysis> inspection : inspections)
-            workflow.phase(new WalkClassesPhase(inspection));
+            workflow.phase(new CloseJarFilePhase());
 
-        workflow.phase(new CloseJarFilePhase());
+            WorkflowExecutionResult result = workflow.executeAll();
 
-        WorkflowExecutionResult result = workflow.executeAll();
+            if (result != WorkflowExecutionResult.FULL_SUCCESS) {
+                int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
+                        ? 1 /* true */
+                        : 0 /* false */;
 
-        if (result != WorkflowExecutionResult.FULL_SUCCESS) {
-            int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
-                    ? 1 /* true */
-                    : 0 /* false */;
+                Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
+                        isFatal, plugin.getName(), plugin.getJar().getName());
 
-            Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
-                    isFatal, plugin.getName(), plugin.getJar().getName());
+                for (PhaseExecutionException error : workflow.getAllErrorsChronological())
+                    Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
 
-            for (PhaseExecutionException error : workflow.getAllErrorsChronological())
-                Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
+                return true; // inspection failed
+            }
 
-            return true; // inspection failed
+            return false; // inspection succeeded
         }
-
-        return false; // inspection succeeded
     }
 
 }
