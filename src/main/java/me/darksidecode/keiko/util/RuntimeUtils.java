@@ -16,18 +16,11 @@
 
 package me.darksidecode.keiko.util;
 
-import me.darksidecode.kantanj.logging.BasicLogger;
-import me.darksidecode.kantanj.system.Shell;
 import me.darksidecode.keiko.KeikoPluginInspector;
-import me.darksidecode.keiko.Platform;
-import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import me.darksidecode.keiko.runtimeprotect.CallerInfo;
-import net.md_5.bungee.api.ProxyServer;
-import org.bukkit.Bukkit;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
 import java.util.Objects;
 
 public final class RuntimeUtils {
@@ -58,38 +51,6 @@ public final class RuntimeUtils {
         }
 
         return null;
-    }
-
-    public static void rageQuit() {
-        if (GlobalConfig.getAllowKeikoRageQuit()) {
-            String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-
-            if (jvmName.contains("@")) {
-                String pidStr = jvmName.split("@")[0].trim();
-
-                if (pidStr.replaceAll("[0-9]", "").isEmpty()) { // just digits - probably our PID
-                    KeikoPluginInspector.warn("Sending SIGKILL(9) to process %s (rage quit)", pidStr);
-
-                    try {
-                        Shell.execute("Keiko Rage Quit", KeikoPluginInspector.getWorkDir(),
-                                "kill -9 " + pidStr, new BasicLogger() {});
-                    } catch (Exception ex) {
-                        KeikoPluginInspector.warn("Failed to perform rage quit. Shutting the server down normally.");
-                        ordinaryServerShutdown();
-                    }
-                } else
-                    ordinaryServerShutdown();
-            } else
-                ordinaryServerShutdown();
-        } else
-            ordinaryServerShutdown();
-    }
-
-    public static void ordinaryServerShutdown() {
-        if (KeikoPluginInspector.getPlatform() == Platform.BUKKIT)
-            Bukkit.shutdown();
-        else
-            ProxyServer.getInstance().stop();
     }
 
 }

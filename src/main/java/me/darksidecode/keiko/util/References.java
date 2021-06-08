@@ -32,10 +32,6 @@ public final class References implements Opcodes {
 
     private References() {}
 
-    public static String transformedClassName(Class clazz) {
-        return clazz.getName().replace(".", "/");
-    }
-
     public static boolean isPrivate(MethodNode mtdNode) {
         return (mtdNode.access & ACC_PRIVATE) != 0;
     }

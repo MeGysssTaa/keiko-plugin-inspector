@@ -17,9 +17,9 @@
 package me.darksidecode.keiko.proxy;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.kantanj.logging.BasicLogger;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.i18n.I18n;
 
@@ -34,11 +34,12 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings ("UseOfSystemOutOrSystemErr")
 @RequiredArgsConstructor (access = AccessLevel.PACKAGE)
-public class KeikoLogger implements BasicLogger, Closeable {
+public class KeikoLogger implements Closeable {
 
     private static final String PREFIX = "[Keiko] ";
 
-    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss"  );
 
     private final Object writeLock = new Object();
 
@@ -49,44 +50,43 @@ public class KeikoLogger implements BasicLogger, Closeable {
 
     private String lastLogDate;
 
+    public void log(@NonNull Level level, @NonNull String s, Object... format) {
+        print(level, System.out, s, format);
+    }
+
+    public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
+        log(level, I18n.get(key, args));
+    }
+
     @Override
     public void close() throws IOException {
         logWriter.close();
     }
 
-    @Override
-    public boolean isEnableDebug() {
-        return GlobalConfig.getEnableDebug();
-    }
-
-    @Override
     public void debug(@NonNull String s, Object... format) {
-        print(GlobalConfig.getEnableDebug() ? System.out : null, "DEBUG   :  " + s, format);
+        print(Level.DEBUG, GlobalConfig.getEnableDebug() ? System.out : null, s, format);
     }
 
     public void debugLocalized(@NonNull String key, Object... args) {
         debug(I18n.get(key, args));
     }
 
-    @Override
     public void info(@NonNull String s, Object... format) {
-        print(System.out, "INFO    :  " + s, format);
+        print(Level.INFO, System.out, s, format);
     }
 
     public void infoLocalized(@NonNull String key, Object... args) {
         info(I18n.get(key, args));
     }
 
-    @Override
     public void warning(@NonNull String s, Object... format) {
-        print(System.out, "WARNING :  " + s, format);
+        print(Level.WARNING, System.out, s, format);
     }
 
     public void warningLocalized(@NonNull String key, Object... args) {
         warning(I18n.get(key, args));
     }
 
-    @Override
     public void error(@NonNull String s, Object... format) {
         Throwable t = null;
         Object lastFmt;
@@ -98,7 +98,7 @@ public class KeikoLogger implements BasicLogger, Closeable {
                     : Arrays.copyOf(format, format.length - 1);
         }
 
-        print(System.out, "ERROR   :  " + s, format);
+        print(Level.ERROR, System.out, s, format);
 
         if (t != null) {
             error("    " + t);
@@ -111,15 +111,14 @@ public class KeikoLogger implements BasicLogger, Closeable {
         }
     }
 
-    @Override
-    public void print(PrintStream printStream, @NonNull String message, Object... format) {
+    private void print(@NonNull Level level, PrintStream printStream, @NonNull String message, Object... format) {
         synchronized (writeLock) {
             if (format != null && format.length > 0)
                 message = String.format(message, format);
 
-            String currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String currentDate = LocalDate.now().format(dateFormatter);
             String currentTime = LocalTime.now().format(timeFormatter);
-            message = PREFIX + "[" + currentDate + "] [" + currentTime + "] " + message;
+            message = PREFIX + "[" + currentDate + "] [" + currentTime + "] " + level.getPrefix() + message;
 
             if (printStream != null)
                 printStream.println(message);
@@ -208,6 +207,17 @@ public class KeikoLogger implements BasicLogger, Closeable {
                 throw new IllegalStateException("failed to create logFile: " + logFile.getAbsolutePath());
             }
         }
+    }
+
+    @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
+    public enum Level {
+        DEBUG   ("DEBUG    :  "),
+        INFO    ("INFO     :  "),
+        WARNING ("WARNING  :  "),
+        ERROR   ("ERROR    :  ");
+
+        @NonNull @Getter
+        private final String prefix;
     }
 
 }

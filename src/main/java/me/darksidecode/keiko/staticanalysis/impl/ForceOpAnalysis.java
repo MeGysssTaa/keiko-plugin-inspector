@@ -16,66 +16,60 @@
 
 package me.darksidecode.keiko.staticanalysis.impl;
 
-import me.darksidecode.keiko.staticanalysis.Countermeasures;
+import lombok.NonNull;
+import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.staticanalysis.ManagedInspection;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
+import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 import org.objectweb.asm.tree.*;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
-@ManagedInspection (
-        name = "Static.ForceOp",
-        countermeasuresForSuspicious = Countermeasures.ABORT_SERVER_STARTUP,
-        countermeasuresForMalicious = Countermeasures.ABORT_SERVER_STARTUP
-)
+@ManagedInspection
 public class ForceOpAnalysis extends StaticAnalysis {
 
     private boolean hasOpLdcBefore;
 
-    public ForceOpAnalysis(String name, String inputJarName, Collection<ClassNode> classes) {
-        super(name, inputJarName, classes);
+    public ForceOpAnalysis(@NonNull ClassNode cls) {
+        super(cls);
     }
 
     @Override
-    protected Result analyzeMethod(ClassNode clsNode, MethodNode mtdNode) throws Exception {
+    public void visitMethod(@NonNull MethodNode mtd) {
+        List<String> details = new ArrayList<>();
         hasOpLdcBefore = false; // reset
-        Result result;
 
-        for (int i = 0; i < mtdNode.instructions.size(); i++) {
-            AbstractInsnNode insn = mtdNode.instructions.get(i);
-
-            if ((result = inspectBukkitApi(clsNode, mtdNode, insn)) != null)
-                return result;
-
-            if ((result = inspectConsoleCommand(clsNode, mtdNode, insn)) != null)
-                return result;
+        for (int i = 0; i < mtd.instructions.size(); i++) {
+            AbstractInsnNode insn = mtd.instructions.get(i);
+            inspectBukkitApi(mtd, insn, details);
+            inspectConsoleCommand(mtd, insn, details);
         }
 
-        return null;
+        if (!details.isEmpty())
+            Keiko.INSTANCE.getStaticAnalysisManager().addResult(new StaticAnalysisResult(
+                    cls, getScannerName(), StaticAnalysisResult.Type.MALICIOUS, details));
     }
 
-    private Result inspectBukkitApi(ClassNode clsNode, MethodNode mtdNode, AbstractInsnNode insn) {
+    private void inspectBukkitApi(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
         if (insn.getOpcode() == INVOKEINTERFACE) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
             String mtdOwner = mtdInsn.owner;
 
-            boolean oppableEntity = mtdOwner.equals(PLAYER_NAME)
-                    || mtdOwner.equals(OFFLINE_PLAYER_NAME)
-                    || mtdOwner.equals(COMMAND_SENDER_NAME)
-                    || mtdOwner.equals(HUMAN_ENTITY_NAME);
+            boolean oppableEntity =
+                       mtdOwner.equals("org/bukkit/permissions/ServerOperator")
+                    || mtdOwner.equals("org/bukkit/entity/Player")
+                    || mtdOwner.equals("org/bukkit/entity/HumanEntity")
+                    || mtdOwner.equals("org/bukkit/OfflinePlayer")
+                    || mtdOwner.equals("org/bukkit/command/CommandSender");
 
-            if ((oppableEntity) && (mtdInsn.name.equals("setOp")))
-                // Blatant Player#setOp usage.
-                return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                        "Detected OP-giving Bukkit API usage in method " + mtdNode.name +
-                                " declared in class " + clsNode.name));
+            if (oppableEntity && mtdInsn.name.equals("setOp"))
+                // Direct Player#setOp usage.
+                details.add("Direct Bukkit setOp API usage in " + cls.name + "#" + mtd.name);
         }
-
-        return null;
     }
 
-    private Result inspectConsoleCommand(ClassNode clsNode, MethodNode mtdNode, AbstractInsnNode insn) {
+    private void inspectConsoleCommand(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
         if (insn.getOpcode() == LDC) {
             LdcInsnNode ldcInsn = (LdcInsnNode) insn;
             Object cst = ldcInsn.cst;
@@ -83,25 +77,22 @@ public class ForceOpAnalysis extends StaticAnalysis {
             if (cst instanceof String) {
                 String stringCst = ((String) cst).trim().toLowerCase();
 
-                if ((stringCst.contains("op ")) || (stringCst.contains("deop ")))
-                    // Indicate that a potential op/deop command has been found recently.
+                if (stringCst.startsWith("op ") || stringCst.startsWith("deop "))
+                    // Indicate that a potential `op`/`deop` command was seen recently recently.
                     hasOpLdcBefore = true;
             }
-        } else if ((hasOpLdcBefore)
-                && ((insn.getOpcode() == INVOKESTATIC) || (insn.getOpcode() == INVOKEINTERFACE))) {
+        } else if (hasOpLdcBefore
+                && (insn.getOpcode() == INVOKESTATIC || insn.getOpcode() == INVOKEINTERFACE)) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
-            if ((mtdInsn.name.equals("dispatchCommand"))
-                    && ((mtdInsn.owner.equals(BUKKIT_NAME)) || (mtdInsn.owner.equals(SERVER_NAME))))
+            if (mtdInsn.name.equals("dispatchCommand")
+                    && (mtdInsn.owner.equals("org.bukkit.Bukkit")
+                     || mtdInsn.owner.equals("org.bukkit.Server")))
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand` usage with a command
                 // that appears to contain force-op/deop calls.
-                return new Result(Result.Type.MALICIOUS, 100.0, Collections.singletonList(
-                        "Detected OP-giving command invocation using dispatchCommand in method " + mtdNode.name +
-                                " declared in class " + clsNode.name));
+                details.add("Console command usage for op/deop in " + cls.name + mtd.name);
         }
-
-        return null;
     }
 
 }

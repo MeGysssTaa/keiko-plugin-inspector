@@ -17,7 +17,6 @@
 package me.darksidecode.keiko.config;
 
 import lombok.NonNull;
-import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.installer.KeikoInstaller;
 import org.yaml.snakeyaml.Yaml;
 
@@ -122,8 +121,6 @@ public final class ConfigurationLoader {
                 } catch (NoSuchFieldException ignored) { /* no validation desired for this field */ }
             }
         }
-
-        KeikoPluginInspector.debug("Loaded %s configuration", configName);
     }
 
     private static YamlHandle loadConfig(KeikoInstaller installer, String configName) {
@@ -152,7 +149,6 @@ public final class ConfigurationLoader {
         } else {
             // Install and retry.
             installer.checkInstallation("config/" + configName + ".yml");
-
             return loadConfig(installer, configName);
         }
     }

@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package me.darksidecode.keiko.staticanalysis;
+package me.darksidecode.keiko.util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Target (ElementType.TYPE)
-@Retention (RetentionPolicy.RUNTIME)
-public @interface ManagedInspection {}
+@NoArgsConstructor
+@AllArgsConstructor
+public class Holder<T> {
+
+    @Getter @Setter
+    private T value;
+
+    public boolean hasValue() {
+        return value != null;
+    }
+
+}

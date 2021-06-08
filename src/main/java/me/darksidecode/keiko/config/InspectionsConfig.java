@@ -26,7 +26,7 @@ public final class InspectionsConfig {
     private static YamlHandle handle;
 
     @Getter @Config ("static.caches_lifespan_days")
-    private static Integer cachesLifespanDays = 7;
+    private static Integer cachesLifespanDays = 14;
 
     @Getter @Config ("plugins_integrity.abort_server_startup")
     private static Boolean abortServerStartupOnIntegrityViolation = true;

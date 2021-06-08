@@ -69,7 +69,7 @@ static:
   # and are stored permanently. To help you bear with extensive disk usage, Keiko
   # will automatically delete all caches that exist for more then this number of
   # days (automatic space free).
-  caches_lifespan_days: 7
+  caches_lifespan_days: 14
 
   # Pirated copies of premium plugins are often malicious. By using a cracked plugin,
   # you are putting your server under the risk of being accessed or destroyed externally.
@@ -79,16 +79,20 @@ static:
   # to report bugs, request help, and receive regular updates, and, most importantly, you
   # keep your server safe - paid plugins are often analyzed by the marketplace staff.
   # This inspection detects illegal, unlicensed software downloaded from DirectLeaks.
-  directleaks:
+  direct_leaks:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []
 
   # ForceOP is usually referred to as code that gives specific player or a group of
   # players server operator (OP) permissions using Player#setOp or Bukkit commands ("/op").
-  forceop:
+  force_op:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []
 
   # "Natives" are extra files with code written in languages other than Java (e.g. C, C++)
@@ -96,9 +100,11 @@ static:
   # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
   #
   # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
-  nativesloader:
+  natives_loader:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []
 
   # Plugins should not shutdown your server normally. And even if they do, they must use the appropriate
@@ -107,9 +113,11 @@ static:
   # to commands (including Ctrl+C) and not performing world save.
   #
   # (-*-) Keiko is capable of blocking SystemExit at runtime using Domain Access Control.
-  systemexit:
+  system_exit:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []
 
   # There are many malicious plugins out there that can harm your server by executing
@@ -120,9 +128,11 @@ static:
   #       There are still cases when DAC is unable of preventing ProcessBuilder usage, so it is strongly
   #       recommended that you let Keiko shut your server down forcefully if it detects a suspicious plugin
   #       that can harm your server using "SSH-like" system commands.
-  systemprocess:
+  system_process:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []
 
   # Some of the most aggressive trojans often modify compiled code (bytecode) in other,
@@ -130,7 +140,9 @@ static:
   # in them, or even in your server core. This way an attacker can keep the trojan running
   # on your machine even after you delete the initial infected plugin. Keiko attempts to
   # detect suspicious use of Java runtime class loading and bytecode instrumentation mechanisms.
-  codeinjection:
+  code_injection:
     enabled: true
-    overwrite_countermeasures: ''
+    countermeasures:
+      suspicious: always ignore
+      malicious: always abort
     exclusions: []

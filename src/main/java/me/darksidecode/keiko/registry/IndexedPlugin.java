@@ -20,7 +20,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 
 @Getter
 @RequiredArgsConstructor
@@ -28,10 +28,8 @@ public class IndexedPlugin {
 
     private final File jar;
 
-    private final List<String> classes;
+    private final Collection<String> classes;
 
     private final String name;
-
-    private final String mainClass;
 
 }

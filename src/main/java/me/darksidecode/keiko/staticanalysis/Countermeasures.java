@@ -16,76 +16,40 @@
 
 package me.darksidecode.keiko.staticanalysis;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.KeikoPluginInspector;
-import me.darksidecode.keiko.quarantine.Quarantine;
+import me.darksidecode.keiko.proxy.Keiko;
 
-import java.io.File;
+import java.util.function.Function;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor (access = AccessLevel.PRIVATE)
 public enum Countermeasures {
 
-    WARN ((analysis, jar, analysisResult) -> {
-        KeikoPluginInspector.warn(
-                "JAR " + jar.getName() +
-                " is likely " + analysisResult.getType() +
-                " (confidence: " + analysisResult.getConfidencePercent() + "%)!" +
-                " Details: " + analysis.getName() + analysisResult.detailsString() +
-                ". It is adviced that you delete it."
-        );
+    ALWAYS_IGNORE (result -> false),
 
-        return false; // don't abort server startup
-    }),
-
-
-    ABORT_SERVER_STARTUP ((analysis, jar, analysisResult) -> {
-        synchronized (KeikoPluginInspector.outputLock) { // to avoid quitting before warning
-            WARN.execute(analysis, jar, analysisResult); // ignore WARN's return result - we want to return true
-
-            // EXECUTED LATER (SEE JAVADOC TO METHOD execute):
-            //     KeikoPluginInspector.warn("The server will be shut down forcefully (rage quit).");
-            //     RuntimeUtils.rageQuit();
-
-            return true; // abort server startup
-        }
-    }),
-
-
-    MOVE_TO_QUARANTINE ((analysis, jar, analysisResult) -> {
-        synchronized (KeikoPluginInspector.outputLock) { // to avoid quitting before warning
-            // executed by ABORT_SERVER_STARTUP : WARN.execute(analysis, jar, analysisResult);
-
-            KeikoPluginInspector.warn("The aforementioned file will be moved to quarantine.");
-            Quarantine.settle(analysis, analysisResult, jar);
-
-            return ABORT_SERVER_STARTUP.execute(analysis, jar, analysisResult); // abort server startup
-        }
-    }),
-
+    ALWAYS_ABORT (result -> true),
 
     ;
 
-    private final Executor executor;
+    private static final Countermeasures DEFAULT = ALWAYS_IGNORE;
 
-    /**
-     * Returns true only and only if the server startup is to be aborted
-     * later (after all inspections for all plugins have been ran). This
-     * allows us to print ALL warnings/errors to the user before killing
-     * the server (which, in its turn, allows user to see ALL plugins that
-     * were classified as malware at once, without having to restart the
-     * server multiple times).
-     */
-    public boolean execute(StaticAnalysis analysis, File jar, StaticAnalysis.Result analysisResult) {
-        try {
-            return executor.execute(analysis, jar, analysisResult);
-        } catch (Exception ex) {
-            throw new RuntimeException("failed to execute countermeasure " + name() + " from " + analysis.getName() +
-                    " for JAR " + jar.getName() + " with result " + analysisResult.toString(), ex);
+    @NonNull @Getter
+    private final Function<StaticAnalysisResult, Boolean> abortStartupFunc;
+
+    public static Countermeasures fromString(String s) {
+        if (s == null) {
+            Keiko.INSTANCE.getLogger().error("Countermeasures string is null");
+            return DEFAULT;
         }
-    }
 
-    private interface Executor {
-        boolean execute(StaticAnalysis analysis, File jar, StaticAnalysis.Result analysisResult) throws Exception;
+        try {
+            return valueOf(s.toUpperCase().replace(' ', '_'));
+        } catch (IllegalArgumentException ex) {
+            Keiko.INSTANCE.getLogger().error("Countermeasures string is invalid: '%s'", s);
+            return DEFAULT;
+        }
     }
 
 }

@@ -1,181 +1,189 @@
-///*
-// * Copyright 2021 German Vekhorev (DarksideCode)
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License");
-// * you may not use this file except in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *     http://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS,
-// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// * See the License for the specific language governing permissions and
-// * limitations under the License.
-// */
-//
-//package me.darksidecode.keiko.staticanalysis;
-//
-//import me.darksidecode.keiko.KeikoPluginInspector;
-//import me.darksidecode.keiko.config.InspectionsConfig;
-//import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
-//import me.darksidecode.keiko.staticanalysis.cache.InspectionCache;
-//import me.darksidecode.keiko.util.Bytecoding;
-//import org.objectweb.asm.tree.ClassNode;
-//import org.reflections.Reflections;
-//
-//import java.io.File;
-//import java.lang.reflect.Constructor;
-//import java.util.*;
-//
-//public class StaticAnalysisManager {
-//
-//    private final CacheManager cacheManager;
-//
-//    public StaticAnalysisManager() {
-//        (cacheManager = new CacheManager()).loadCaches();
-//    }
-//
-//    /**
-//     * True = abort server startup later.
-//     * @see Countermeasures#execute(StaticAnalysis, File, StaticAnalysis.Result)
-//     */
-//    public boolean analyzeJar(File inputJar) {
-//        boolean abortServerStartup = false;
-//
-//        InspectionCache cache = cacheManager.getCache(inputJar);
-//        Map<String, StaticAnalysis.Result> caches;
-//
-//        if (cache != null) {
-//            KeikoPluginInspector.debug("Successfully loaded caches " +
-//                    "for file %s (%s)", inputJar.getAbsolutePath(), cache.getFileHash());
-//            caches = cache.getAnalysesResults();
-//        } else {
-//            KeikoPluginInspector.info("File %s has not been inspected for a long period of time " +
-//                    "or at all. It may take slight time to analyze it...", inputJar.getAbsolutePath());
-//            caches = new HashMap<>();
-//        }
-//
-//        String inputJarName = inputJar.getName();
-//        Collection<ClassNode> classes = Bytecoding.loadClasses(inputJar).values();
-//        Reflections reflections = new Reflections("me.darksidecode.keiko.staticanalysis");
-//
-//        for (Class inspectionClass : reflections.getTypesAnnotatedWith(ManagedInspection.class)) {
-//            if (!(StaticAnalysis.class.isAssignableFrom(inspectionClass)))
-//                throw new RuntimeException("illegal managed inspection " +
-//                        "(annotated but invalid type): " + inspectionClass.getName());
-//
-//            ManagedInspection miAnno = (ManagedInspection)
-//                    inspectionClass.getAnnotation(ManagedInspection.class);
-//
-//            String name = miAnno.name();
-//            String configName = name.toLowerCase().
-//                    replace(".", "_").
-//                    replace("static_", "static.");
-//
-//            if (InspectionsConfig.getYaml().getBoolean(configName + ".enabled", true)) {
-//                try {
-//                    String inputJarPath = inputJar.getAbsolutePath()
-//                            .replace("\\", "/"); // better Windows compatibility
-//                    String pluginsFolderPath = inputJar.getParentFile().getPath();
-//                    List<String> exclusions = InspectionsConfig.getYaml().
-//                            getStringList(configName + ".exclusions");
-//
-//                    boolean excluded = false;
-//
-//                    for (String exclusion : exclusions) {
-//                        if (exclusion.replace("{plugins_folder}", pluginsFolderPath)
-//                                .replace("\\", "/") // better Windows compatibility
-//                                .equals(inputJarPath)) {
-//                            KeikoPluginInspector.debug(
-//                                    "JAR %s is excluded from analysis %s in config.", inputJarName, name);
-//
-//                            excluded = true;
-//                            break;
-//                        }
-//                    }
-//
-//                    if (excluded)
-//                        continue;
-//
-//                    Constructor<StaticAnalysis> constructor = inspectionClass.
-//                            getDeclaredConstructor(String.class, String.class, Collection.class);
-//                    constructor.setAccessible(true);
-//
-//                    StaticAnalysis analysis = constructor.newInstance(name, inputJarName, classes);
-//                    StaticAnalysis.Result result = caches.get(analysis.getName());
-//
-//                    if (result == null) {
-//                        // Not cached.
-//                        result = analysis.run();
-//                        caches.put(analysis.getName(), result);
-//
-//                        // Update or create caches for this file.
-//                        //
-//                        // We don't do this outside/after this `for` loop because the process
-//                        // may be forcibly terminated in processResult (ABORT_SERVER_STARTUP).
-//                        cacheManager.saveCache(inputJar, caches);
-//                    } else
-//                        KeikoPluginInspector.debug("%s result for %s is cached: %s",
-//                                name, inputJarName, result);
-//
-//                    abortServerStartup = abortServerStartup
-//                            || processResult(inputJar, inputJarName, name, configName, analysis, result, miAnno);
-//                } catch (Exception ex) {
-//                    throw new RuntimeException("invalid managed " +
-//                            "inspection: " + inspectionClass.getName(), ex);
-//                }
-//            }
-//        }
-//
-//        return abortServerStartup;
-//    }
-//
-//    /**
-//     * True = abort server startup later.
-//     * @see Countermeasures#execute(StaticAnalysis, File, StaticAnalysis.Result)
-//     */
-//    private boolean processResult(File inputJar, String inputJarName, String name, String configName,
-//                               StaticAnalysis analysis, StaticAnalysis.Result result, ManagedInspection miAnno) {
-//        KeikoPluginInspector.debug("[Static Analysis] [%s] %s: %s",
-//                name, inputJarName, result.toString());
-//
-//        if (result.getType() != StaticAnalysis.Result.Type.ALL_CLEAN) {
-//            Countermeasures countermeasures = result.getRecommendedCountermeasures();
-//            Countermeasures typeDefaultCountermeasures =
-//                    (result.getType() == StaticAnalysis.Result.Type.MALICIOUS)
-//                            ? miAnno.countermeasuresForMalicious() : miAnno.countermeasuresForSuspicious();
-//
-//            if (countermeasures == null)
-//                countermeasures = typeDefaultCountermeasures;
-//
-//            String configuredCountermeasures = InspectionsConfig.getYaml().getString(
-//                    configName + ".overwrite_countermeasures", "");
-//
-//            KeikoPluginInspector.debug("Countermeasures: recommended: %s, type-default: %s, " +
-//                            "configured: '%s'", result.getRecommendedCountermeasures(),
-//                    typeDefaultCountermeasures, configuredCountermeasures);
-//
-//            if ((configuredCountermeasures != null) && (!(configuredCountermeasures.isEmpty()))) {
-//                try {
-//                    configuredCountermeasures = configuredCountermeasures.
-//                            trim().toUpperCase().replace(" ", "_");
-//                    countermeasures = Countermeasures.valueOf(configuredCountermeasures);
-//                } catch (IllegalArgumentException ex) {
-//                    KeikoPluginInspector.warn("Configuration syntax error: invalid value at " +
-//                            "overwrite_countermeasures for inspection " + name + ": " +
-//                            configuredCountermeasures + "; expected either empty ('') or one of: " +
-//                            Arrays.toString(Countermeasures.values()) + ". Falling back to default " +
-//                            "(recommended) value: " + countermeasures.name());
-//                }
-//            }
-//
-//            KeikoPluginInspector.debug("Executing countermeasures: %s", countermeasures);
-//
-//            return countermeasures.execute(analysis, inputJar, result);
-//        }
-//
-//        return false; // don't abort server startup
-//    }
-//
-//}
+/*
+ * Copyright 2021 German Vekhorev (DarksideCode)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package me.darksidecode.keiko.staticanalysis;
+
+import lombok.NonNull;
+import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
+import me.darksidecode.jminima.phase.PhaseExecutionException;
+import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
+import me.darksidecode.jminima.phase.basic.DisassemblePhase;
+import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
+import me.darksidecode.jminima.phase.basic.WalkClassesPhase;
+import me.darksidecode.jminima.workflow.Workflow;
+import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
+import me.darksidecode.keiko.config.GlobalConfig;
+import me.darksidecode.keiko.config.InspectionsConfig;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.proxy.KeikoLogger;
+import me.darksidecode.keiko.registry.IndexedPlugin;
+import me.darksidecode.keiko.registry.PluginContext;
+import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
+import org.reflections.Reflections;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+public class StaticAnalysisManager {
+
+    private final CacheManager cacheManager = new CacheManager();
+
+    private final Reflections reflections = new Reflections("me.darksidecode.keiko.staticanalysis");
+
+    private final Collection<StaticAnalysisResult> results = new ArrayList<>();
+
+    public boolean inspectAllPlugins(@NonNull PluginContext pluginContext) {
+        Keiko.INSTANCE.getLogger().infoLocalized("staticInspections.beginAll");
+
+        for (IndexedPlugin plugin : pluginContext.getPlugins()) {
+            boolean failed = inspectPlugin(plugin);
+
+            if (failed && GlobalConfig.getAbortOnError())
+                return true; // abort startup
+        }
+
+        return false; // do not abort startup
+    }
+
+    public void addResult(@NonNull StaticAnalysisResult result) {
+        results.add(result);
+    }
+
+    public boolean processResults() {
+        boolean abortStartup = false;
+
+        for (StaticAnalysisResult result : results) {
+            printResult(result);
+
+            if (!abortStartup) { // if already true, then abort anyway - other results don't really matter
+                String countermeasuresType = result.getType().name().toLowerCase();
+                String configScannerName = StaticAnalysis.inspectionNameToConfigName(result.getScannerName());
+                String countermeasuresString = InspectionsConfig.getHandle()
+                        .get("static." + configScannerName + ".countermeasures." + countermeasuresType);
+
+                Countermeasures countermeasures = Countermeasures.fromString(countermeasuresString);
+                abortStartup = countermeasures.getAbortStartupFunc().apply(result);
+            }
+        }
+
+        return abortStartup;
+    }
+
+    private void printResult(StaticAnalysisResult result) {
+        IndexedPlugin analyzedPlugin = result.getAnalyzedPlugin();
+        String analyzedPluginName = analyzedPlugin != null ? analyzedPlugin.getName()           : "???";
+        String analyzedPluginFile = analyzedPlugin != null ? analyzedPlugin.getJar().getName()  : "???";
+
+        String typeI18nKey = "staticInspections." + result.getType().name().toLowerCase();
+        String analysisDescI18nKey = "staticInspections.desc." + result.getScannerName();
+
+        KeikoLogger.Level logLevel = result.getType() == StaticAnalysisResult.Type.CLEAN
+                ? KeikoLogger.Level.DEBUG : KeikoLogger.Level.WARNING;
+
+        Keiko.INSTANCE.getLogger().logLocalized(logLevel, typeI18nKey);
+        Keiko.INSTANCE.getLogger().logLocalized(
+                logLevel, "staticInspections.analysisName", result.getScannerName());
+        Keiko.INSTANCE.getLogger().logLocalized(
+                logLevel, analysisDescI18nKey, analyzedPluginName, analyzedPluginFile);
+        Keiko.INSTANCE.getLogger().logLocalized(logLevel, "staticInspections.details");
+
+        int counter = 0;
+
+        for (String detail : result.getDetails())
+            Keiko.INSTANCE.getLogger().log(logLevel, "    %s. %s", ++counter, detail);
+
+        Keiko.INSTANCE.getLogger().log(logLevel, " ");
+    }
+
+    private boolean inspectPlugin(IndexedPlugin plugin) {
+        return runInspectionWorkflow(plugin, collectInspectors(plugin)); // true = failed, false = succeeded
+    }
+
+    private Collection<Class<? extends StaticAnalysis>> collectInspectors(IndexedPlugin plugin) {
+        Collection<Class<? extends StaticAnalysis>> inspections = new ArrayList<>();
+
+        for (Class<?> inspectionClass : reflections.getTypesAnnotatedWith(ManagedInspection.class)) {
+            if (!StaticAnalysis.class.isAssignableFrom(inspectionClass))
+                throw new RuntimeException("illegal managed inspection " +
+                        "(annotated but invalid type): " + inspectionClass.getName());
+
+            String inspectionName = StaticAnalysis
+                    .classToInspectionName((Class<? extends StaticAnalysis>) inspectionClass);
+            String configName = StaticAnalysis.inspectionNameToConfigName(inspectionName);
+
+            if (InspectionsConfig.getHandle().get(configName + ".enabled", true)) {
+                try {
+                    String inputJarPath = plugin.getJar().getAbsolutePath()
+                            .replace("\\", "/"); // better Windows compatibility
+                    String pluginsFolderPath = Keiko.INSTANCE.getPluginsDir().getAbsolutePath();
+                    List<String> exclusions = InspectionsConfig.getHandle()
+                            .get(configName + ".exclusions", Collections.emptyList());
+
+                    boolean excluded = false;
+
+                    for (String exclusion : exclusions) {
+                        if (exclusion.replace("{plugins_folder}", pluginsFolderPath)
+                                .replace("\\", "/") // better Windows compatibility
+                                .equals(inputJarPath)) {
+                            excluded = true;
+                            break;
+                        }
+                    }
+
+                    if (!excluded)
+                        inspections.add((Class<? extends StaticAnalysis>) inspectionClass);
+                } catch (Exception ex) {
+                    throw new RuntimeException("invalid managed inspection: " + inspectionClass.getName(), ex);
+                }
+            }
+        }
+
+        return inspections;
+    }
+
+    private boolean runInspectionWorkflow(IndexedPlugin plugin,
+                                          Collection<Class<? extends StaticAnalysis>> inspections) {
+        Workflow workflow = new Workflow()
+                .phase(new OpenJarFilePhase(plugin.getJar()))
+                .phase(new DisassemblePhase(SimpleJavaDisassembler.class));
+
+        for (Class<? extends StaticAnalysis> inspection : inspections)
+            workflow.phase(new WalkClassesPhase(inspection));
+
+        workflow.phase(new CloseJarFilePhase());
+
+        WorkflowExecutionResult result = workflow.executeAll();
+
+        if (result != WorkflowExecutionResult.FULL_SUCCESS) {
+            int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
+                    ? 1 /* true */
+                    : 0 /* false */;
+
+            Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
+                    isFatal, plugin.getName(), plugin.getJar().getName());
+
+            for (PhaseExecutionException error : workflow.getAllErrorsChronological())
+                Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
+
+            return true; // inspection failed
+        }
+
+        return false; // inspection succeeded
+    }
+
+}

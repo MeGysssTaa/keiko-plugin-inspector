@@ -18,7 +18,7 @@ package me.darksidecode.keiko.staticanalysis.cache;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
+import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class InspectionCache implements Serializable {
     private final String fileHash;
 
     // String - analysis name
-    private final Map<String, StaticAnalysis.Result> analysesResults;
+    private final Map<String, StaticAnalysisResult> analysesResults;
 
     boolean hasExpired(long lifespanDays, String installedKeikoVersion) {
         return System.currentTimeMillis() > (creationDate + TimeUnit.DAYS.toMillis(lifespanDays))

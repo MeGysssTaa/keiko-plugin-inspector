@@ -43,34 +43,12 @@ make_logs: true
 # Keiko automatically deletes log files that are older than the number of days
 # specified below. If you don't want Keiko to manage its logs automatically,
 # you can disable this feature by setting logs_lifespan_days to -1.
-logs_lifespan_days: 7
+logs_lifespan_days: 14
 
 # Show debug (detailed verbose) messages in console?
 enable_debug: false
 
-# What should Keiko do if it fails to analyse a JAR?
-#
-#     warn     - Just print a warning in console and keep inspecting other JARs.
-#                NOTE: not recommended: this may let some potentially malicious plugins run.
-#
-#     shutdown - Print a warning in console and shut the server down.
-failure_policy: shutdown
-
-# When Keiko encounters a critical issue that could be harmful to your server
-# (e.g. detects malware on server's early boot), it will do its best to shut
-# your server down as soon as possible to avoid it being damaged. The most
-# efficient way of shutting down is so-called "rage quit" - "pkill -9 <pid>".
-#
-# Do you allow Keiko to perform rage quits in special/extreme cases?
-# If you will forbid it to, then Bukkit#shutdown() will be used instead,
-# which is often pretty slow and still lets the installed plugins enable.
-#
-# NOTE #1: this feature may not work properly on some certain servers, since
-#          process ID retrieval is difficult to implement for Java 8 properly.
-#
-# NOTE #2: this feature may cause Keiko to stop the server before logging any
-#          information in server console, which may sometimes look like the
-#          server is getting crashed for no reason. If you're experiencing
-#          this kind of issue make sure to check Keiko logs, which are located
-#          in '.../plugins/Keiko/logs/YYYY-MM-dd.log' files (log name = current date).
-allow_keiko_rage_quit: true
+# Should Keiko abort startup if it fails to analyze at least one of the plugins?
+# Enabling this is strongly (!) recommended. If you disable this, malicious plugins
+# with some tricky obfuscation/encryption may run and harm your server.
+abort_on_error: true

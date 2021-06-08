@@ -20,21 +20,21 @@ import me.darksidecode.kantanj.formatting.CommonJson;
 import me.darksidecode.kantanj.formatting.Hash;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.InspectionsConfig;
-import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
+import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 public class CacheManager {
 
-    private final List<InspectionCache> caches = new ArrayList<>();
+    private final Collection<InspectionCache> caches = new HashSet<>();
 
-    public void loadCaches() {
+    public CacheManager() {
         File cachesFolder = getCachesFolder();
         File[] files = cachesFolder.listFiles();
 
@@ -43,7 +43,6 @@ public class CacheManager {
                 try {
                     String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
                     InspectionCache cache = CommonJson.fromJson(json, InspectionCache.class);
-
                     long cacheLifespanDays = InspectionsConfig.getCachesLifespanDays();
                     String installedKeikoVersion = KeikoPluginInspector.getVersion();
 
@@ -57,7 +56,6 @@ public class CacheManager {
                     }
                 } catch (Exception ex) {
                     KeikoPluginInspector.debug("Skipped and deleted invalid cache %s", file.getName());
-
                     //noinspection ResultOfMethodCallIgnored
                     file.delete();
                 }
@@ -65,10 +63,9 @@ public class CacheManager {
         }
     }
 
-    public void saveCache(File file, Map<String, StaticAnalysis.Result> analysesResults) {
+    public void saveCache(File file, Map<String, StaticAnalysisResult> analysesResults) {
         String hash = hashFile(file);
         String keikoVersion = KeikoPluginInspector.getVersion();
-
         InspectionCache cache = new InspectionCache(
                 System.currentTimeMillis(), keikoVersion, hash, analysesResults);
 

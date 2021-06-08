@@ -17,7 +17,6 @@
 package me.darksidecode.keiko.config;
 
 import lombok.Getter;
-import me.darksidecode.keiko.staticanalysis.FailurePolicy;
 
 public final class GlobalConfig {
 
@@ -39,9 +38,6 @@ public final class GlobalConfig {
     private static Boolean enableDebug = false;
 
     @Getter @Config
-    private static FailurePolicy failurePolicy = FailurePolicy.SHUTDOWN;
-
-    @Getter @Config
-    private static Boolean allowKeikoRageQuit = true;
+    private static Boolean abortOnError = true;
 
 }

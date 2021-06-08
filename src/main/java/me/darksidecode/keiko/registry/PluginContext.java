@@ -18,131 +18,95 @@ package me.darksidecode.keiko.registry;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.KeikoPluginInspector;
-import me.darksidecode.keiko.Platform;
-import org.bukkit.configuration.file.YamlConfiguration;
+import me.darksidecode.jminima.phase.PhaseExecutionException;
+import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
+import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
+import me.darksidecode.jminima.workflow.Workflow;
+import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
+import me.darksidecode.keiko.config.GlobalConfig;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.util.Holder;
 
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.Collection;
 
 @Getter
 @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
 public class PluginContext {
 
-    private final List<IndexedPlugin> plugins;
+    private final Collection<IndexedPlugin> plugins;
 
-    public IndexedPlugin getJarOwner(File pluginJar) {
+    public IndexedPlugin getJarOwner(@NonNull File pluginJar) {
         return plugins.stream().filter(plugin
-                -> plugin.getJar().equals(pluginJar)).findFirst().orElse(null);
+                -> plugin.getJar().equals(pluginJar)).findAny().orElse(null);
     }
 
-    public IndexedPlugin getClassOwner(String className) {
+    public IndexedPlugin getClassOwner(@NonNull String className) {
+        // Note: className in format "x.y.z", NOT "x/y/z"!
         return plugins.stream().filter(plugin
-                -> plugin.getClasses().contains(className)).findFirst().orElse(null);
+                -> plugin.getClasses().contains(className)).findAny().orElse(null);
     }
 
-    public IndexedPlugin getPlugin(String name) {
+    public IndexedPlugin getPlugin(@NonNull String name) {
         return plugins.stream().filter(plugin
-                -> plugin.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+                -> plugin.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
 
-    public static PluginContext getCurrentContext(File pluginsFolder) {
-        KeikoPluginInspector.info("Indexing plugins...");
+    public static PluginContext currentContext(@NonNull File pluginsFolder) {
+        Keiko.INSTANCE.getLogger().infoLocalized("pluginsIndex.beginning");
         File[] files = pluginsFolder.listFiles();
 
         if (files != null) {
-            List<IndexedPlugin> indexedPlugins = new ArrayList<>();
-            boolean bungee = KeikoPluginInspector.getPlatform() == Platform.BUNGEECORD;
+            Collection<IndexedPlugin> indexedPlugins = new ArrayList<>();
 
             for (File file : files) {
-                if ((file.isFile()) && (file.getName().endsWith(".jar"))) {
-                    try {
-                        ZipFile zipFile = new ZipFile(file);
-                        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                if (file.isFile() && file.getName().endsWith(".jar")) {
+                    Holder<IndexedPlugin> indexedPluginHolder = new Holder<>();
+                    Workflow workflow = new Workflow()
+                            .phase(new OpenJarFilePhase(file))
+                            .phase(new IndexPluginPhase()
+                                    .afterExecution((val, err) -> indexedPluginHolder.setValue(val)))
+                            .phase(new CloseJarFilePhase());
 
-                        List<String> pluginClasses = new ArrayList<>();
-                        String pluginName = null;
-                        String pluginMainClass = null;
+                    WorkflowExecutionResult result = workflow.executeAll();
 
-                        while (entries.hasMoreElements()) {
-                            ZipEntry entry = entries.nextElement();
-                            String entryName = entry.getName();
+                    if (result == WorkflowExecutionResult.FATAL_FAILURE) {
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                "pluginsIndex.indexErr", file.getName());
 
-                            if ((entryName.equals("plugin.yml")) || (entryName.equals("bungee.yml"))) {
-                                try {
-                                    YamlConfiguration yaml = new YamlConfiguration();
-                                    yaml.load(new InputStreamReader(zipFile.getInputStream(entry)));
+                        for (PhaseExecutionException error : workflow.getAllErrorsChronological())
+                            Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
 
-                                    // Some BungeeCord plugins only have 'plugin.yml'. But some (like Keiko itself)
-                                    // have got both 'plugin.yml' and 'bungee.yml' at the same time. In order to
-                                    // get the proper plugin data file for our current platform type, we check
-                                    // if plugin name/main are already assigned, and if so, we only overwrite them
-                                    // if the JAR entry currently being read is 'bungee.yml' and the server is
-                                    // BungeeCord. Otherwise we're fine with just 'plugin.yml'.
-                                    if ((pluginName == null) || ((entryName.equals("bungee.yml")) && (bungee)))
-                                        pluginName = yaml.getString("name");
+                        if (GlobalConfig.getAbortOnError())
+                            return null;
+                    } else if (indexedPluginHolder.hasValue()) {
+                        IndexedPlugin plugin = indexedPluginHolder.getValue();
+                        indexedPlugins.add(plugin);
 
-                                    if ((pluginMainClass == null) || ((entryName.equals("bungee.yml")) && (bungee)))
-                                        pluginMainClass = yaml.getString("main");
-                                } catch (Exception ex) {
-                                    KeikoPluginInspector.warn("Invalid plugin.yml in %s", file.getName());
-                                }
-                            } else if (entryName.endsWith(".class")) {
-                                // 'my/cool/Class.class' => 'my.cool.Class'
-                                String className = entryName.
-                                        replace(".class", "").
-                                        replace("/", ".");
+                        Keiko.INSTANCE.getLogger().debugLocalized(
+                                "pluginsIndex.indexedInfo",
+                                plugin.getName(), plugin.getJar().getName(), plugin.getClasses().size());
+                    } else {
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                "pluginsIndex.indexErr", file.getName());
+                        Keiko.INSTANCE.getLogger().error(
+                                "IndexedPlugin Holder has no value, but workflow execution result is %s", result);
 
-                                if (className.contains("$"))
-                                    // 'my.cool.Class$1' => 'my.cool.Class'
-                                    className = className.split(Pattern.quote("$"))[0];
-
-                                if (!(pluginClasses.contains(className)))
-                                    pluginClasses.add(className);
-                            }
-                        }
-
-                        zipFile.close();
-                        String finalPluginMainClass = pluginMainClass;
-
-                        // Validate plugin...
-                        if (pluginName == null)
-                            KeikoPluginInspector.warn("Invalid plugin %s: " +
-                                    "missing 'name' in plugin.yml (or no plugin.yml)", file.getName());
-                        else if (pluginMainClass == null)
-                            KeikoPluginInspector.warn("Invalid plugin %s: " +
-                                    "missing 'main' in plugin.yml (or no plugin.yml)", file.getName());
-                        else if (pluginClasses.stream().noneMatch(finalPluginMainClass::equals))
-                            KeikoPluginInspector.warn("Invalid plugin %s: " +
-                                            "class %s is declared is main in plugin.yml but is missing in the JAR",
-                                    file.getName(), pluginMainClass);
-                        else {
-                            // Plugin is valid, add it to context
-                            indexedPlugins.add(new IndexedPlugin(file, pluginClasses, pluginName, pluginMainClass));
-                            KeikoPluginInspector.debug("Indexed plugin %s with name %s. Classes: %s. Main class: %s",
-                                    file.getName(), pluginName, pluginClasses.size(), pluginMainClass);
-                        }
-                    } catch (Exception ex) {
-                        KeikoPluginInspector.warn("Failed to index plugin %s, is it valid?", file.getName());
-                        KeikoPluginInspector.warn("Stacktrace:");
-
-                        ex.printStackTrace();
+                        if (GlobalConfig.getAbortOnError())
+                            return null;
                     }
                 }
             }
 
-            KeikoPluginInspector.info("Successfully indexed %s plugins.", indexedPlugins.size());
+            Keiko.INSTANCE.getLogger().warningLocalized(
+                    "pluginsIndex.numPluginsIndexed", indexedPlugins.size());
 
             return new PluginContext(indexedPlugins);
         } else
-            throw new RuntimeException("missing plugins folder???");
+            throw new IllegalStateException("missing plugins folder???");
     }
 
 }
