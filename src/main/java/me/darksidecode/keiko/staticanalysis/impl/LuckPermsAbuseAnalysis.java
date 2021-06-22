@@ -24,48 +24,57 @@ import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RegisterStaticAnalysis
-public class ForceOpAnalysis extends StaticAnalysis {
+public class LuckPermsAbuseAnalysis extends StaticAnalysis {
 
-    private boolean hasOpLdcBefore;
+    private static final String[] LUCKPERMS_COMMANDS_PREFIXES = {
+            "lp",
+            "luckperms",
+            "lpb",
+            "luckpermsbungee",
+            "lpv",
+            "luckpermsvelocity",
+            "permissions",
+            "perms",
+            "perm"
+    };
 
-    public ForceOpAnalysis(@NonNull ClassNode cls) {
+    private boolean hasPermLdcBefore;
+
+    public LuckPermsAbuseAnalysis(@NonNull ClassNode cls) {
         super(cls);
     }
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
         List<String> details = new ArrayList<>();
-        hasOpLdcBefore = false; // reset
+        hasPermLdcBefore = false; // reset
 
         for (int i = 0; i < mtd.instructions.size(); i++) {
             AbstractInsnNode insn = mtd.instructions.get(i);
-            inspectBukkitApi(mtd, insn, details);
+            inspectLuckPermsApi(mtd, insn, details);
             inspectConsoleCommand(mtd, insn, details);
         }
 
         if (!details.isEmpty())
             Keiko.INSTANCE.getStaticAnalysisManager().addResult(new StaticAnalysisResult(
-                    cls, getScannerName(), StaticAnalysisResult.Type.MALICIOUS, details));
+                    cls, getScannerName(), StaticAnalysisResult.Type.SUSPICIOUS, details));
     }
 
-    private void inspectBukkitApi(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
+    private void inspectLuckPermsApi(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
         if (insn.getOpcode() == INVOKEINTERFACE) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
-            String mtdOwner = mtdInsn.owner;
 
-            boolean oppableEntity =
-                       mtdOwner.equals("org/bukkit/permissions/ServerOperator")
-                    || mtdOwner.equals("org/bukkit/entity/Player")
-                    || mtdOwner.equals("org/bukkit/entity/HumanEntity")
-                    || mtdOwner.equals("org/bukkit/OfflinePlayer")
-                    || mtdOwner.equals("org/bukkit/command/CommandSender");
+            if (mtdInsn.owner.equals("me/lucko/luckperms/api/manager/UserManager"))
+                details.add("Direct use of LuckPerms UserManager class in " + cls.name + "#" + mtd.name);
 
-            if (oppableEntity && mtdInsn.name.equals("setOp"))
-                // Direct Player#setOp usage.
-                details.add("Direct Bukkit setOp API usage in " + cls.name + "#" + mtd.name);
+            if (mtdInsn.owner.equals("me/lucko/luckperms/api/caching/UserData")
+                    || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/GroupData")
+                    || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/CachedData"))
+                details.add("Direct use of LuckPerms CachedData class in " + cls.name + "#" + mtd.name);
         }
     }
 
@@ -77,21 +86,22 @@ public class ForceOpAnalysis extends StaticAnalysis {
             if (cst instanceof String) {
                 String stringCst = ((String) cst).trim().toLowerCase();
 
-                if (stringCst.startsWith("op ") || stringCst.startsWith("deop "))
-                    // Indicate that a potential `op`/`deop` command was seen recently.
-                    hasOpLdcBefore = true;
+                if (Arrays.stream(LUCKPERMS_COMMANDS_PREFIXES)
+                        .anyMatch(prefix -> stringCst.startsWith(prefix + " ")))
+                    // Indicate that a potential LuckPerms command was seen recently.
+                    hasPermLdcBefore = true;
             }
-        } else if (hasOpLdcBefore
+        } else if (hasPermLdcBefore
                 && (insn.getOpcode() == INVOKESTATIC || insn.getOpcode() == INVOKEINTERFACE)) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
             if (mtdInsn.name.equals("dispatchCommand")
                     && (mtdInsn.owner.equals("org/bukkit/Bukkit")
-                     || mtdInsn.owner.equals("org/bukkit/Server")))
+                    || mtdInsn.owner.equals("org/bukkit/Server")))
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand`) usage with a command
-                // that appears to contain force-op/deop calls.
-                details.add("Console command usage for op/deop in " + cls.name + mtd.name);
+                // that appears to contain LuckPerms interaction calls.
+                details.add("Console command usage for LuckPerms interaction in " + cls.name + mtd.name);
         }
     }
 
