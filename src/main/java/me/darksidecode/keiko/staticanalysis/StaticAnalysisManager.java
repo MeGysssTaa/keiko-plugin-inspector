@@ -204,28 +204,34 @@ public class StaticAnalysisManager {
             cache = InspectionCache.createEmptyCache();
         }
 
-        Map<String, List<StaticAnalysisResult>> cachedResults = cache.getAnalysesResults();
+        InspectionCache finalCache = cache;
+        Map<String, List<StaticAnalysisResult>> cachedAnalysesResults = cache.getAnalysesResults();
 
         try (Workflow workflow = new Workflow()
                 .phase(new OpenJarFilePhase(plugin.getJar()))
                 .phase(new DisassemblePhase(SimpleJavaDisassembler.class))) {
-            boolean allCached = true; // true -> all results are cached -- the workflow doesn't need to be ran
+            int cached = 0;
 
             for (Class<? extends StaticAnalysis> inspection : inspections) {
                 String inspectionName = StaticAnalysis.classToInspectionName(inspection);
-                List<StaticAnalysisResult> cachedResult = cachedResults.get(inspectionName);
+                List<StaticAnalysisResult> cachedResults = cachedAnalysesResults.get(inspectionName);
 
-                if (cachedResult != null)
-                    results.addAll(cachedResult);
-                else {
+                if (cachedResults != null) {
+                    results.addAll(cachedResults);
+                    cached++;
+                } else {
                     workflow.phase(new WalkClassesPhase(inspection));
-                    allCached = false;
+                    cachesToPush
+                            .computeIfAbsent(plugin, k -> finalCache)
+                            .getAnalysesResults()
+                            .put(inspectionName, new ArrayList<>());
                 }
             }
 
             workflow.phase(new CloseJarFilePhase());
 
-            if (!allCached) {
+            if (cached != inspections.size()) {
+                // At least one inspection has not been cached. Let's fix it!
                 WorkflowExecutionResult result = workflow.executeAll();
 
                 if (result != WorkflowExecutionResult.FULL_SUCCESS) {
