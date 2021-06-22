@@ -18,7 +18,6 @@ package me.darksidecode.keiko.staticanalysis;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import org.objectweb.asm.tree.ClassNode;
@@ -27,27 +26,32 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
-@RequiredArgsConstructor
 public class StaticAnalysisResult implements Serializable {
 
     private static final long serialVersionUID = 2209625722066232934L;
 
-    @NonNull
-    private final ClassNode analyzedClass;
+    @Getter
+    private final String analyzedClassName;
 
-    @NonNull
+    @Getter
     private final String scannerName;
 
-    @NonNull
+    @Getter
     private final Type type;
 
-    @NonNull
+    @Getter
     private final List<String> details;
 
+    public StaticAnalysisResult(@NonNull ClassNode analyzedClass, @NonNull String scannerName,
+                                @NonNull Type type, @NonNull List<String> details) {
+        this.analyzedClassName = analyzedClass.name.replace("/", ".");
+        this.scannerName = scannerName;
+        this.type = type;
+        this.details = details;
+    }
+    
     public IndexedPlugin getAnalyzedPlugin() {
-        return Keiko.INSTANCE.getPluginContext().getClassOwner(
-                analyzedClass.name.replace("/", "."));
+        return Keiko.INSTANCE.getPluginContext().getClassOwner(analyzedClassName);
     }
 
     public enum Type {
@@ -62,7 +66,7 @@ public class StaticAnalysisResult implements Serializable {
         if (this == o) return true;
         if (!(o instanceof StaticAnalysisResult)) return false;
         StaticAnalysisResult that = (StaticAnalysisResult) o;
-        return cname().equals(that.cname())
+        return analyzedClassName.equals(that.analyzedClassName)
                 && scannerName.equals(that.scannerName)
                 && type == that.type
                 && details.equals(that.details);
@@ -70,11 +74,7 @@ public class StaticAnalysisResult implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(cname(), scannerName, type, details);
-    }
-
-    private String cname() {
-        return analyzedClass.outerClass + "-->" + analyzedClass.nestHostClass + "-->" + analyzedClass.name;
+        return Objects.hash(analyzedClassName, scannerName, type, details);
     }
 
 }

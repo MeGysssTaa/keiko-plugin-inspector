@@ -89,12 +89,13 @@ public class StaticAnalysisManager {
     }
 
     public void addResult(@NonNull StaticAnalysisResult result) {
-        IndexedPlugin plugin = Keiko.INSTANCE.getPluginContext()
-                .getClassOwner(result.getAnalyzedClass().name.replace("/", "."));
         InspectionCache cache = cachesToPush
-                .computeIfAbsent(plugin, k -> InspectionCache.createEmptyCache());
+                .computeIfAbsent(result.getAnalyzedPlugin(),
+                        k -> InspectionCache.createEmptyCache());
+
         List<StaticAnalysisResult> cachedResults = cache.getAnalysesResults()
-                .computeIfAbsent(result.getScannerName(), k -> new ArrayList<>());
+                .computeIfAbsent(result.getScannerName(),
+                        k -> new ArrayList<>());
 
         cachedResults.add(result);
         results.add(result);
