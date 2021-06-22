@@ -259,10 +259,10 @@ public final class Keiko {
         try {
             KeikoClassLoader loader = new KeikoClassLoader(proxiedExecutable);
             Thread.currentThread().setContextClassLoader(loader);
-            logger.infoLocalized("startup.classLoaderStats",
+            logger.debugLocalized("startup.classLoaderStats",
                     loader.getLoadResult().successes, loader.getLoadResult().failures);
 
-            logger.infoLocalized("startup.proxyBegin", loader.getBootstrapClassName());
+            logger.debugLocalized("startup.proxyBegin", loader.getBootstrapClassName());
             Class<?> bootstrapClass = loader.findClass(loader.getBootstrapClassName());
             Method bootstrapMethod = bootstrapClass.getMethod("main", String[].class);
             bootstrapMethod.invoke(null, (Object) new String[0]);
