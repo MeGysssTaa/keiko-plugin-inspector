@@ -38,7 +38,8 @@ public class I18n {
     static {
         Locale locale;
 
-        if (GlobalConfig.getLocale() != null) {
+        if (GlobalConfig.getLocale() != null
+                && !GlobalConfig.getLocale().equalsIgnoreCase("system")) {
             String[] spl = GlobalConfig.getLocale().split("_");
 
             if (spl.length == 2) {
