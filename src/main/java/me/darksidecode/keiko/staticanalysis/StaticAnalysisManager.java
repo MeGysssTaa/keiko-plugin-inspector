@@ -103,8 +103,15 @@ public class StaticAnalysisManager {
 
     public boolean processResults() {
         boolean abortStartup = false;
+        int warnings = 0, critical = 0;
 
         for (StaticAnalysisResult result : results) {
+            if (result.getType() != StaticAnalysisResult.Type.CLEAN)
+                warnings++;
+
+            if (result.getType() == StaticAnalysisResult.Type.MALICIOUS)
+                critical++;
+
             printResult(result);
 
             if (!abortStartup) { // if already true, then abort anyway - other results don't really matter
@@ -117,6 +124,9 @@ public class StaticAnalysisManager {
                 abortStartup = countermeasures.getAbortStartupFunc().apply(result);
             }
         }
+
+        Keiko.INSTANCE.getLogger().infoLocalized(
+                "staticInspections.finishSummary", warnings, critical);
 
         return abortStartup;
     }
