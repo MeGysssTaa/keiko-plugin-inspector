@@ -30,9 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RegisterStaticAnalysis
-public class NativesLoader extends StaticAnalysis {
+public class NativesLoaderAnalysis extends StaticAnalysis {
 
-    public NativesLoader(@NonNull ClassNode cls) {
+    public NativesLoaderAnalysis(@NonNull ClassNode cls) {
         super(cls);
     }
 

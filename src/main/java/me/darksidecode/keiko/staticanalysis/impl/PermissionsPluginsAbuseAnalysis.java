@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RegisterStaticAnalysis
-public class PermissionsPluginsAbuse extends StaticAnalysis {
+public class PermissionsPluginsAbuseAnalysis extends StaticAnalysis {
 
     private static final String[] PERMISSIONS_PLUGINS_COMMANDS = {
             // PermissionsEx
@@ -50,7 +50,7 @@ public class PermissionsPluginsAbuse extends StaticAnalysis {
 
     private boolean hasPermLdcBefore;
 
-    public PermissionsPluginsAbuse(@NonNull ClassNode cls) {
+    public PermissionsPluginsAbuseAnalysis(@NonNull ClassNode cls) {
         super(cls);
     }
 
