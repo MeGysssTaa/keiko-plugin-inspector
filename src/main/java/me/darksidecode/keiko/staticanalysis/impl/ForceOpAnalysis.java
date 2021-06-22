@@ -18,7 +18,7 @@ package me.darksidecode.keiko.staticanalysis.impl;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.staticanalysis.ManagedInspection;
+import me.darksidecode.keiko.staticanalysis.RegisterStaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 import org.objectweb.asm.tree.*;
@@ -26,7 +26,7 @@ import org.objectweb.asm.tree.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@ManagedInspection
+@RegisterStaticAnalysis
 public class ForceOpAnalysis extends StaticAnalysis {
 
     private boolean hasOpLdcBefore;
@@ -86,8 +86,8 @@ public class ForceOpAnalysis extends StaticAnalysis {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
             if (mtdInsn.name.equals("dispatchCommand")
-                    && (mtdInsn.owner.equals("org.bukkit.Bukkit")
-                     || mtdInsn.owner.equals("org.bukkit.Server")))
+                    && (mtdInsn.owner.equals("org/bukkit/Bukkit")
+                     || mtdInsn.owner.equals("org/bukkit/Server")))
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand` usage with a command
                 // that appears to contain force-op/deop calls.

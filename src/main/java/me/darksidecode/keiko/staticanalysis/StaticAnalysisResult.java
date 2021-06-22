@@ -25,6 +25,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
@@ -51,8 +52,29 @@ public class StaticAnalysisResult implements Serializable {
 
     public enum Type {
         CLEAN,      // almost certainly not malware
+        VULNERABLE, // uses unsafe code, opens potential vulnerabilities
         SUSPICIOUS, // could possibly act as malware
         MALICIOUS   // almost certainly malware
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StaticAnalysisResult)) return false;
+        StaticAnalysisResult that = (StaticAnalysisResult) o;
+        return cname().equals(that.cname())
+                && scannerName.equals(that.scannerName)
+                && type == that.type
+                && details.equals(that.details);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cname(), scannerName, type, details);
+    }
+
+    private String cname() {
+        return analyzedClass.outerClass + "-->" + analyzedClass.nestHostClass + "-->" + analyzedClass.name;
     }
 
 }

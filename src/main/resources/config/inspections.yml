@@ -82,7 +82,6 @@ static:
   direct_leaks:
     enabled: true
     countermeasures:
-      suspicious: always ignore
       malicious: always abort
     exclusions: []
 
@@ -91,7 +90,6 @@ static:
   force_op:
     enabled: true
     countermeasures:
-      suspicious: always ignore
       malicious: always abort
     exclusions: []
 
@@ -103,7 +101,6 @@ static:
   natives_loader:
     enabled: true
     countermeasures:
-      suspicious: always ignore
       malicious: always abort
     exclusions: []
 
@@ -115,9 +112,6 @@ static:
   # (-*-) Keiko is capable of blocking SystemExit at runtime using Domain Access Control.
   system_exit:
     enabled: true
-    countermeasures:
-      suspicious: always ignore
-      malicious: always abort
     exclusions: []
 
   # There are many malicious plugins out there that can harm your server by executing
@@ -131,7 +125,6 @@ static:
   system_process:
     enabled: true
     countermeasures:
-      suspicious: always ignore
       malicious: always abort
     exclusions: []
 
@@ -143,6 +136,5 @@ static:
   code_injection:
     enabled: true
     countermeasures:
-      suspicious: always ignore
       malicious: always abort
     exclusions: []

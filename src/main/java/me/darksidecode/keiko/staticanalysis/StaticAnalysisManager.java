@@ -117,7 +117,7 @@ public class StaticAnalysisManager {
     private Collection<Class<? extends StaticAnalysis>> collectInspectors(IndexedPlugin plugin) {
         Collection<Class<? extends StaticAnalysis>> inspections = new ArrayList<>();
 
-        for (Class<?> inspectionClass : reflections.getTypesAnnotatedWith(ManagedInspection.class)) {
+        for (Class<?> inspectionClass : reflections.getTypesAnnotatedWith(RegisterStaticAnalysis.class)) {
             if (!StaticAnalysis.class.isAssignableFrom(inspectionClass))
                 throw new RuntimeException("illegal managed inspection " +
                         "(annotated but invalid type): " + inspectionClass.getName());
