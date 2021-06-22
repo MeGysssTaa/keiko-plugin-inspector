@@ -85,7 +85,7 @@ public final class Keiko {
         if (GlobalConfig.getEnableDebug())
             logger.debugLocalized("startup.debugEnabled");
 
-        logger.infoLocalized("startup.workDir", workDir.getAbsolutePath());
+        logger.debugLocalized("startup.workDir", workDir.getAbsolutePath());
     }
 
     public static void main(String[] args) {
