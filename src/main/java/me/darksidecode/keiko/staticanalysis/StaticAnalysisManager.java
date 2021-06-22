@@ -45,7 +45,9 @@ public class StaticAnalysisManager {
 
     private final Reflections reflections = new Reflections("me.darksidecode.keiko.staticanalysis");
 
-    private final Collection<StaticAnalysisResult> results = new ArrayList<>();
+    private final Map<IndexedPlugin, InspectionCache> cachesToPush = new HashMap<>();
+
+    private final List<StaticAnalysisResult> results = new ArrayList<>();
 
     public boolean inspectAllPlugins(@NonNull PluginContext pluginContext) {
         Keiko.INSTANCE.getLogger().infoLocalized("staticInspections.beginAll");
@@ -62,6 +64,18 @@ public class StaticAnalysisManager {
 
             if (failed && GlobalConfig.getAbortOnError())
                 return true; // abort startup
+
+            InspectionCache cacheToPush = cachesToPush.get(plugin);
+
+            if (cacheToPush != null) {
+                try {
+                    cacheManager.push(plugin.getSha512(), cacheToPush);
+                    cachesToPush.remove(plugin);
+                } catch (Exception ex) {
+                    Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.cachesError");
+                    Keiko.INSTANCE.getLogger().error("Unhandled exception in: push [%s]", plugin.getName(), ex);
+                }
+            }
         }
 
         try {
@@ -75,6 +89,14 @@ public class StaticAnalysisManager {
     }
 
     public void addResult(@NonNull StaticAnalysisResult result) {
+        IndexedPlugin plugin = Keiko.INSTANCE.getPluginContext()
+                .getClassOwner(result.getAnalyzedClass().name.replace("/", "."));
+        InspectionCache cache = cachesToPush
+                .computeIfAbsent(plugin, k -> InspectionCache.createEmptyCache());
+        List<StaticAnalysisResult> cachedResults = cache.getAnalysesResults()
+                .computeIfAbsent(result.getScannerName(), k -> new ArrayList<>());
+
+        cachedResults.add(result);
         results.add(result);
     }
 
@@ -178,23 +200,23 @@ public class StaticAnalysisManager {
             cache = cacheManager.fetch(plugin.getSha512());
         } catch (Exception ex) {
             Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.cachesError");
-            Keiko.INSTANCE.getLogger().error("Unhandled exception in: fetch", ex);
-            cache = InspectionCache.DEFAULT_EMPTY_CACHE;
+            Keiko.INSTANCE.getLogger().error("Unhandled exception in: fetch [%s]", plugin.getName(), ex);
+            cache = InspectionCache.createEmptyCache();
         }
 
-        Map<String, StaticAnalysisResult> cachedResults = cache.getAnalysesResults();
+        Map<String, List<StaticAnalysisResult>> cachedResults = cache.getAnalysesResults();
 
         try (Workflow workflow = new Workflow()
                 .phase(new OpenJarFilePhase(plugin.getJar()))
                 .phase(new DisassemblePhase(SimpleJavaDisassembler.class))) {
-            boolean allCached = true;
+            boolean allCached = true; // true -> all results are cached -- the workflow doesn't need to be ran
 
             for (Class<? extends StaticAnalysis> inspection : inspections) {
                 String inspectionName = StaticAnalysis.classToInspectionName(inspection);
-                StaticAnalysisResult cachedResult = cachedResults.get(inspectionName);
+                List<StaticAnalysisResult> cachedResult = cachedResults.get(inspectionName);
 
                 if (cachedResult != null)
-                    addResult(cachedResult);
+                    results.addAll(cachedResult);
                 else {
                     workflow.phase(new WalkClassesPhase(inspection));
                     allCached = false;
@@ -208,8 +230,8 @@ public class StaticAnalysisManager {
 
                 if (result != WorkflowExecutionResult.FULL_SUCCESS) {
                     int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
-                            ? 1 /* true */
-                            : 0 /* false */;
+                            ? 1  // true
+                            : 0; // false
 
                     Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
                             isFatal, plugin.getName(), plugin.getJar().getName());

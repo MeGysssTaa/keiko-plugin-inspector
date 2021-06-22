@@ -25,33 +25,24 @@ import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+@Getter
 @RequiredArgsConstructor
 public class InspectionCache implements Serializable {
-
-    public static final InspectionCache DEFAULT_EMPTY_CACHE
-            = new InspectionCache(
-                    System.currentTimeMillis(),
-                    Keiko.INSTANCE.getBuildProperties().getVersion(),
-                    Collections.emptyMap()
-            );
 
     private static final long serialVersionUID = 8682874134440822991L;
 
     @Getter
     private final long creationDate;
 
-    @NonNull @Getter
+    @NonNull
     private final String keikoVersion;
 
-    // String (key) is analysis name
+    // String [key] is analysis (inspection) name.
     @NonNull
-    private final Map<String, StaticAnalysisResult> analysesResults;
-
-    public Map<String, StaticAnalysisResult> getAnalysesResults() {
-        return Collections.unmodifiableMap(analysesResults);
-    }
+    private final Map<String, List<StaticAnalysisResult>> analysesResults;
 
     public String toJson() {
         return CommonJson.toJson(this);
@@ -59,6 +50,14 @@ public class InspectionCache implements Serializable {
 
     public static InspectionCache fromJson(@NonNull String json) {
         return CommonJson.fromJson(json, InspectionCache.class);
+    }
+
+    public static InspectionCache createEmptyCache() {
+        return new InspectionCache(
+                System.currentTimeMillis(),
+                Keiko.INSTANCE.getBuildProperties().getVersion(),
+                Collections.emptyMap()
+        );
     }
 
 }
