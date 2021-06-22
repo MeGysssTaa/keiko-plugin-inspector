@@ -64,8 +64,8 @@ public class ForceOpAnalysis extends StaticAnalysis {
                     || mtdOwner.equals("org/bukkit/command/CommandSender");
 
             if (oppableEntity && mtdInsn.name.equals("setOp"))
-                // Direct Player#setOp usage.
-                details.add("Direct Bukkit setOp API usage in " + cls.name + "#" + mtd.name);
+                // Direct (explicit) Player#setOp usage.
+                details.add("Direct (explicit) Bukkit setOp API usage in " + cls.name + "#" + mtd.name);
         }
     }
 

@@ -69,12 +69,14 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
             if (mtdInsn.owner.equals("me/lucko/luckperms/api/manager/UserManager"))
-                details.add("Direct use of LuckPerms UserManager class in " + cls.name + "#" + mtd.name);
+                details.add("Direct (explicit) use of " +
+                        "LuckPerms UserManager class in " + cls.name + "#" + mtd.name);
 
             if (mtdInsn.owner.equals("me/lucko/luckperms/api/caching/UserData")
                     || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/GroupData")
                     || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/CachedData"))
-                details.add("Direct use of LuckPerms CachedData class in " + cls.name + "#" + mtd.name);
+                details.add("Direct (explicit) use of " +
+                        "LuckPerms CachedData class in " + cls.name + "#" + mtd.name);
         }
     }
 
