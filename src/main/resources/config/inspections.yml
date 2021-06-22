@@ -82,7 +82,7 @@ static:
   direct_leaks:
     enabled: true
     countermeasures:
-      malicious: always abort
+      vulnerable: always abort
     exclusions: []
 
   # ForceOP is usually referred to as code that gives specific player or a group of
@@ -134,5 +134,6 @@ static:
   code_injection:
     enabled: true
     countermeasures:
+      suspicious: always abort
       malicious: always abort
     exclusions: []
