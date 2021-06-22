@@ -221,14 +221,14 @@ public class StaticAnalysisManager {
                 if (cachedResults != null) {
                     Keiko.INSTANCE.getLogger().debugLocalized(
                             "staticInspections.caches.resultCached",
-                            inspection.getName(), plugin.getName(), plugin.getJar().getName(), cachedResults.size());
+                            inspectionName, plugin.getName(), plugin.getJar().getName(), cachedResults.size());
 
                     results.addAll(cachedResults);
                     cached++;
                 } else {
                     Keiko.INSTANCE.getLogger().debugLocalized(
                             "staticInspections.caches.resultNotCached",
-                            inspection.getName(), plugin.getName(), plugin.getJar().getName());
+                            inspectionName, plugin.getName(), plugin.getJar().getName());
 
                     workflow.phase(new WalkClassesPhase(inspection));
                     cachesToPush
