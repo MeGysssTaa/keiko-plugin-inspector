@@ -127,7 +127,6 @@ static:
   code_injection:
     enabled: true
     countermeasures:
-      suspicious: always abort
       malicious: always abort
     exclusions: []
 
