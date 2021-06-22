@@ -28,9 +28,15 @@ import java.util.Arrays;
 import java.util.List;
 
 @RegisterStaticAnalysis
-public class LuckPermsAbuseAnalysis extends StaticAnalysis {
+public class PermissionsPluginsAbuse extends StaticAnalysis {
 
-    private static final String[] LUCKPERMS_COMMANDS_PREFIXES = {
+    private static final String[] PERMISSIONS_PLUGINS_COMMANDS = {
+            // PermissionsEx
+            "permissionsex",
+            "pex",
+            "promote",
+            "demote",
+            // LuckPerms
             "lp",
             "luckperms",
             "lpb",
@@ -44,7 +50,7 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
 
     private boolean hasPermLdcBefore;
 
-    public LuckPermsAbuseAnalysis(@NonNull ClassNode cls) {
+    public PermissionsPluginsAbuse(@NonNull ClassNode cls) {
         super(cls);
     }
 
@@ -55,7 +61,7 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
 
         for (int i = 0; i < mtd.instructions.size(); i++) {
             AbstractInsnNode insn = mtd.instructions.get(i);
-            inspectLuckPermsApi(mtd, insn, details);
+            inspectPluginsApi(mtd, insn, details);
             inspectConsoleCommand(mtd, insn, details);
         }
 
@@ -64,19 +70,26 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
                     cls, getScannerName(), StaticAnalysisResult.Type.SUSPICIOUS, details));
     }
 
-    private void inspectLuckPermsApi(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
-        if (insn.getOpcode() == INVOKEINTERFACE) {
+    private void inspectPluginsApi(MethodNode mtd, AbstractInsnNode insn, List<String> details) {
+        if (insn.getOpcode() == INVOKEINTERFACE || insn.getOpcode() == INVOKEVIRTUAL) {
             MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
-            if (mtdInsn.owner.equals("me/lucko/luckperms/api/manager/UserManager"))
-                details.add("Direct (explicit) use of " +
-                        "LuckPerms UserManager class in " + cls.name + "#" + mtd.name);
-
-            if (mtdInsn.owner.equals("me/lucko/luckperms/api/caching/UserData")
-                    || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/GroupData")
-                    || mtdInsn.owner.equals("me/lucko/luckperms/api/caching/CachedData"))
-                details.add("Direct (explicit) use of " +
-                        "LuckPerms CachedData class in " + cls.name + "#" + mtd.name);
+            if (mtdInsn.owner.startsWith("ru/tehkode/permissions/")
+                    || mtdInsn.owner.startsWith("ca/stellardrift/permissionsex/"))
+                // PermissionsEx
+                details.add("Direct (explicit) interaction with PermissionsEx in "
+                        + cls.name + "#" + mtd.name
+                        + " (invokes " + mtdInsn.owner + "#" + mtdInsn.name + ")");
+            else if (mtdInsn.owner.startsWith("me/lucko/luckperms/"))
+                // LuckPerms
+                details.add("Direct (explicit) interaction with LuckPerms in "
+                        + cls.name + "#" + mtd.name
+                        + " (invokes " + mtdInsn.owner + "#" + mtdInsn.name + ")");
+            else if (mtdInsn.owner.startsWith("net/milkbowl/vault/permission/"))
+                // Vault (permissions)
+                details.add("Direct (explicit) interaction with Vault (permissions) in "
+                        + cls.name + "#" + mtd.name
+                        + " (invokes " + mtdInsn.owner + "#" + mtdInsn.name + ")");
         }
     }
 
@@ -88,9 +101,9 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
             if (cst instanceof String) {
                 String stringCst = ((String) cst).trim().toLowerCase();
 
-                if (Arrays.stream(LUCKPERMS_COMMANDS_PREFIXES)
+                if (Arrays.stream(PERMISSIONS_PLUGINS_COMMANDS)
                         .anyMatch(prefix -> stringCst.startsWith(prefix + " ")))
-                    // Indicate that a potential LuckPerms command was seen recently.
+                    // Indicate that a potential permissions plugin command was seen recently.
                     hasPermLdcBefore = true;
             }
         } else if (hasPermLdcBefore
@@ -102,8 +115,8 @@ public class LuckPermsAbuseAnalysis extends StaticAnalysis {
                     || mtdInsn.owner.equals("org/bukkit/Server")))
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand`) usage with a command
-                // that appears to contain LuckPerms interaction calls.
-                details.add("Console command usage for LuckPerms interaction in " + cls.name + mtd.name);
+                // that appears to contain permissions command calls.
+                details.add("Console command usage for permissions plugin interaction in " + cls.name + mtd.name);
         }
     }
 

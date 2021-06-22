@@ -138,10 +138,12 @@ static:
       malicious: always abort
     exclusions: []
 
-  # Some malicious plugins may give certain players extra permissions using LuckPerms.
-  # That is, this is basically a LuckPerms variant of the Static.ForceOp inspection.
+  # Some malicious plugins may give certain players extra permissions using permissions
+  # plugins APIs (public code that they export) or their commands (e.g. "/lp", "/pex").
+  # That is, this is basically a permissions plugins variant of the Static.ForceOp inspection,
+  # but much more strict - because it checks *any* permissions plugins interaction.
   # Plugins only need the basic Bukkit API to check permissions, so explicit (direct)
   # use of the LuckPerms API may indicate that the plugin is able to harm your server.
-  luck_perms_abuse:
+  permissions_plugins_abuse:
     enabled: true
     exclusions: []
