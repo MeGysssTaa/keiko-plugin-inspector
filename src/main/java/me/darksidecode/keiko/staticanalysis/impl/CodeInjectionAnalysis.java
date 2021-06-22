@@ -32,8 +32,8 @@ import java.util.List;
 @RegisterStaticAnalysis
 public class CodeInjectionAnalysis extends StaticAnalysis {
 
-    private static final int SUSPICIOUS_SCORE = 35;
-    private static final int MALICIOUS_SCORE  = 70;
+    private static final int SUSPICIOUS_SCORE = 50;
+    private static final int MALICIOUS_SCORE  = 75;
 
     private int score;
 
@@ -53,22 +53,19 @@ public class CodeInjectionAnalysis extends StaticAnalysis {
                 MethodInsnNode mtdInsn = (MethodInsnNode) insn;
 
                 if (mtdInsn.owner.equals("java/lang/ClassLoader")) {
-                    score += 20;
+                    score += 5;
                     details.add("ClassLoader API usage in " + cls.name + "#" + mtd.name);
-                } else if (mtdInsn.owner.startsWith("java/security/")) {
-                    score += 25;
-                    details.add("Usage of package 'java.security' in " + cls.name + "#" + mtd.name);
                 } else if (mtdInsn.owner.startsWith("javassist/")) {
-                    score += 35;
+                    score += 25;
                     details.add("JavaAssist library usage in " + cls.name + "#" + mtd.name);
                 } else if (mtdInsn.owner.startsWith("org/objectweb/asm/")) {
-                    score += 35;
+                    score += 25;
                     details.add("ASM library usage in " + cls.name + "#" + mtd.name);
                 }
             }
         }
 
-        if (score > 0) {
+        if (score >= SUSPICIOUS_SCORE && !details.isEmpty()) {
             if (score > 100)
                 score = 100;
 
@@ -78,10 +75,8 @@ public class CodeInjectionAnalysis extends StaticAnalysis {
 
             if (score >= MALICIOUS_SCORE)
                 resultType = StaticAnalysisResult.Type.MALICIOUS;
-            else if (score >= SUSPICIOUS_SCORE)
-                resultType = StaticAnalysisResult.Type.SUSPICIOUS;
             else
-                resultType = StaticAnalysisResult.Type.VULNERABLE;
+                resultType = StaticAnalysisResult.Type.SUSPICIOUS;
 
             Keiko.INSTANCE.getStaticAnalysisManager().addResult(new StaticAnalysisResult(
                     cls, getScannerName(), resultType, details));
