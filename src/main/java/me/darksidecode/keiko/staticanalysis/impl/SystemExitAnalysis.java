@@ -56,7 +56,7 @@ public class SystemExitAnalysis extends StaticAnalysis {
 
         if (!details.isEmpty())
             Keiko.INSTANCE.getStaticAnalysisManager().addResult(new StaticAnalysisResult(
-                    cls, getScannerName(), StaticAnalysisResult.Type.SUSPICIOUS, details));
+                    cls, getScannerName(), StaticAnalysisResult.Type.VULNERABLE, details));
     }
 
 }

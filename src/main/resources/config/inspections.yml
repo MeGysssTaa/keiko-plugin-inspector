@@ -124,8 +124,6 @@ static:
   #       that can harm your server using "SSH-like" system commands.
   system_process:
     enabled: true
-    countermeasures:
-      malicious: always abort
     exclusions: []
 
   # Some of the most aggressive trojans often modify compiled code (bytecode) in other,
