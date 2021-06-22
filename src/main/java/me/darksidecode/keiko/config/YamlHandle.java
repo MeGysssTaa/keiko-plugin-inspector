@@ -43,14 +43,9 @@ public class YamlHandle {
 
     public <T> T get(@NonNull String key, T def) {
         String[] fqKeyPath = key.split("\\.");
-
-        if (fqKeyPath.length == 1)
-            return get(globalSection, key, def);
-        else {
-            Map<String, Object> lastInnerSection = resolveFinalInnerSection(fqKeyPath);
-            return lastInnerSection == null ? def
-                    : get(lastInnerSection, fqKeyPath[fqKeyPath.length - 1], def);
-        }
+        Map<String, Object> lastInnerSection = resolveFinalInnerSection(fqKeyPath);
+        return lastInnerSection == null ? def
+                : (T) lastInnerSection.getOrDefault(fqKeyPath[fqKeyPath.length - 1], def);
     }
 
     private Map<String, Object> resolveFinalInnerSection(String[] fqKeyPath) {
@@ -58,7 +53,8 @@ public class YamlHandle {
 
         for (int i = 0; i < fqKeyPath.length - 1; i++) {
             try {
-                Map<String, Object> innerSection = get(lastInnerSection, fqKeyPath[i], null);
+                Map<String, Object> innerSection
+                        = (Map<String, Object>) lastInnerSection.get(fqKeyPath[i]);
 
                 if (innerSection != null)
                     lastInnerSection = innerSection;
@@ -70,10 +66,6 @@ public class YamlHandle {
         }
 
         return lastInnerSection;
-    }
-
-    private <T> T get(Map<String, Object> src, String key, T def) {
-        return (T) src.getOrDefault(key, def);
     }
 
 }
