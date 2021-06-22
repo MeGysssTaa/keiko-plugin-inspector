@@ -174,7 +174,7 @@ public class KeikoLogger implements Closeable {
 
                             if (daysSinceLastModified > GlobalConfig.getLogsLifespanDays()) {
                                 if (log.delete())
-                                    infoLocalized("logsCleaner.deleteSuccess", log.getName());
+                                    debugLocalized("logsCleaner.deleteSuccess", log.getName());
                                 else
                                     warningLocalized("logsCleaner.deleteErr", log.getName());
                             }
