@@ -24,7 +24,7 @@ import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +56,7 @@ public class InspectionCache implements Serializable {
         return new InspectionCache(
                 System.currentTimeMillis(),
                 Keiko.INSTANCE.getBuildProperties().getVersion(),
-                Collections.emptyMap()
+                new HashMap<>()
         );
     }
 
