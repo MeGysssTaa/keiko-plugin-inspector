@@ -194,18 +194,20 @@ public class StaticAnalysisManager {
 
     private boolean runInspectionWorkflow(IndexedPlugin plugin,
                                           Collection<Class<? extends StaticAnalysis>> inspections) {
-        InspectionCache cache;
+        InspectionCache cache = null;
 
         try {
             cache = cacheManager.fetch(plugin.getSha512());
         } catch (Exception ex) {
             Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.caches.err");
             Keiko.INSTANCE.getLogger().error("Unhandled exception in: fetch [%s]", plugin.getName(), ex);
-            cache = InspectionCache.createEmptyCache();
         }
 
+        if (cache == null)
+            cache = InspectionCache.createEmptyCache();
+
         InspectionCache finalCache = cache;
-        Map<String, List<StaticAnalysisResult>> cachedAnalysesResults = cache.getAnalysesResults();
+        Map<String, List<StaticAnalysisResult>> cachedAnalysesResults = finalCache.getAnalysesResults();
 
         try (Workflow workflow = new Workflow()
                 .phase(new OpenJarFilePhase(plugin.getJar()))
