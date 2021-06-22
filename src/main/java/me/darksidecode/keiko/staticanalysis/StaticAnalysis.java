@@ -26,21 +26,6 @@ import org.objectweb.asm.tree.MethodNode;
 @RequiredArgsConstructor
 public abstract class StaticAnalysis implements ClassWalker {
 
-    /**
-     * Constants used to make the code in analysis classes less cumbersome.
-     */
-//    protected static final String PROCESS_BUILDER_NAME = References.transformedClassName(ProcessBuilder.class);
-//    protected static final String OFFLINE_PLAYER_NAME  = References.transformedClassName(OfflinePlayer.class);
-//    protected static final String COMMAND_SENDER_NAME  = References.transformedClassName(CommandSender.class);
-//    protected static final String HUMAN_ENTITY_NAME    = References.transformedClassName(HumanEntity.class);
-//    protected static final String CLASS_LOADER_NAME    = References.transformedClassName(ClassLoader.class);
-//    protected static final String RUNTIME_NAME         = References.transformedClassName(Runtime.class);
-//    protected static final String SYSTEM_NAME          = References.transformedClassName(System.class);
-//    protected static final String PLAYER_NAME          = References.transformedClassName(Player.class);
-//    protected static final String BUKKIT_NAME          = References.transformedClassName(Bukkit.class);
-//    protected static final String SERVER_NAME          = References.transformedClassName(Server.class);
-//    protected static final String SHELL_NAME           = References.transformedClassName(Shell.class);
-
     @NonNull
     protected final ClassNode cls;
 
