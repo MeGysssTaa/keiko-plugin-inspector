@@ -17,31 +17,48 @@
 package me.darksidecode.keiko.staticanalysis.cache;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.darksidecode.kantanj.formatting.CommonJson;
+import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-@Getter
 @RequiredArgsConstructor
 public class InspectionCache implements Serializable {
 
+    public static final InspectionCache DEFAULT_EMPTY_CACHE
+            = new InspectionCache(
+                    System.currentTimeMillis(),
+                    Keiko.INSTANCE.getBuildProperties().getVersion(),
+                    Collections.emptyMap()
+            );
+
     private static final long serialVersionUID = 8682874134440822991L;
 
+    @Getter
     private final long creationDate;
 
+    @NonNull @Getter
     private final String keikoVersion;
 
-    private final String fileHash;
-
-    // String - analysis name
+    // String (key) is analysis name
+    @NonNull
     private final Map<String, StaticAnalysisResult> analysesResults;
 
-    boolean hasExpired(long lifespanDays, String installedKeikoVersion) {
-        return System.currentTimeMillis() > (creationDate + TimeUnit.DAYS.toMillis(lifespanDays))
-                || !installedKeikoVersion.equals(keikoVersion);
+    public Map<String, StaticAnalysisResult> getAnalysesResults() {
+        return Collections.unmodifiableMap(analysesResults);
+    }
+
+    public String toJson() {
+        return CommonJson.toJson(this);
+    }
+
+    public static InspectionCache fromJson(@NonNull String json) {
+        return CommonJson.fromJson(json, InspectionCache.class);
     }
 
 }

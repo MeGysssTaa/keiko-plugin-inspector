@@ -64,13 +64,6 @@ plugins_integrity:
 #      - {plugins_folder}/ProtocolLib.jar
 static:
 
-  # Keiko caches static analyses' results in order to save time at startup.
-  # Caches are stored based on hash (checksum) of the contents of analyzed files,
-  # and are stored permanently. To help you bear with extensive disk usage, Keiko
-  # will automatically delete all caches that exist for more then this number of
-  # days (automatic space free).
-  caches_lifespan_days: 14
-
   # Pirated copies of premium plugins are often malicious. By using a cracked plugin,
   # you are putting your server under the risk of being accessed or destroyed externally.
   # Usage of pirated plugins is one of the most common reason of servers' databases and

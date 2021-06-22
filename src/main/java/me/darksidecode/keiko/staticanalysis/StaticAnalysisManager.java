@@ -17,6 +17,7 @@
 package me.darksidecode.keiko.staticanalysis;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
 import me.darksidecode.jminima.phase.PhaseExecutionException;
 import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
@@ -32,16 +33,15 @@ import me.darksidecode.keiko.proxy.KeikoLogger;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
+import me.darksidecode.keiko.staticanalysis.cache.InspectionCache;
 import org.reflections.Reflections;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+@RequiredArgsConstructor
 public class StaticAnalysisManager {
 
-    private final CacheManager cacheManager = new CacheManager();
+    private final CacheManager cacheManager;
 
     private final Reflections reflections = new Reflections("me.darksidecode.keiko.staticanalysis");
 
@@ -50,11 +50,25 @@ public class StaticAnalysisManager {
     public boolean inspectAllPlugins(@NonNull PluginContext pluginContext) {
         Keiko.INSTANCE.getLogger().infoLocalized("staticInspections.beginAll");
 
+        try {
+            cacheManager.setup();
+        } catch (Exception ex) {
+            Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.cachesError");
+            Keiko.INSTANCE.getLogger().error("Unhandled exception in: setup", ex);
+        }
+
         for (IndexedPlugin plugin : pluginContext.getPlugins()) {
             boolean failed = inspectPlugin(plugin);
 
             if (failed && GlobalConfig.getAbortOnError())
                 return true; // abort startup
+        }
+
+        try {
+            cacheManager.tearDown();
+        } catch (Exception ex) {
+            Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.cachesError");
+            Keiko.INSTANCE.getLogger().error("Unhandled exception in: tearDown", ex);
         }
 
         return false; // do not abort startup
@@ -158,28 +172,53 @@ public class StaticAnalysisManager {
 
     private boolean runInspectionWorkflow(IndexedPlugin plugin,
                                           Collection<Class<? extends StaticAnalysis>> inspections) {
+        InspectionCache cache;
+
+        try {
+            cache = cacheManager.fetch(plugin.getSha512());
+        } catch (Exception ex) {
+            Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.cachesError");
+            Keiko.INSTANCE.getLogger().error("Unhandled exception in: fetch", ex);
+            cache = InspectionCache.DEFAULT_EMPTY_CACHE;
+        }
+
+        Map<String, StaticAnalysisResult> cachedResults = cache.getAnalysesResults();
+
         try (Workflow workflow = new Workflow()
                 .phase(new OpenJarFilePhase(plugin.getJar()))
                 .phase(new DisassemblePhase(SimpleJavaDisassembler.class))) {
-            for (Class<? extends StaticAnalysis> inspection : inspections)
-                workflow.phase(new WalkClassesPhase(inspection));
+            boolean allCached = true;
+
+            for (Class<? extends StaticAnalysis> inspection : inspections) {
+                String inspectionName = StaticAnalysis.classToInspectionName(inspection);
+                StaticAnalysisResult cachedResult = cachedResults.get(inspectionName);
+
+                if (cachedResult != null)
+                    addResult(cachedResult);
+                else {
+                    workflow.phase(new WalkClassesPhase(inspection));
+                    allCached = false;
+                }
+            }
 
             workflow.phase(new CloseJarFilePhase());
 
-            WorkflowExecutionResult result = workflow.executeAll();
+            if (!allCached) {
+                WorkflowExecutionResult result = workflow.executeAll();
 
-            if (result != WorkflowExecutionResult.FULL_SUCCESS) {
-                int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
-                        ? 1 /* true */
-                        : 0 /* false */;
+                if (result != WorkflowExecutionResult.FULL_SUCCESS) {
+                    int isFatal = result == WorkflowExecutionResult.FATAL_FAILURE
+                            ? 1 /* true */
+                            : 0 /* false */;
 
-                Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
-                        isFatal, plugin.getName(), plugin.getJar().getName());
+                    Keiko.INSTANCE.getLogger().warningLocalized("staticInspections.err",
+                            isFatal, plugin.getName(), plugin.getJar().getName());
 
-                for (PhaseExecutionException error : workflow.getAllErrorsChronological())
-                    Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
+                    for (PhaseExecutionException error : workflow.getAllErrorsChronological())
+                        Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
 
-                return true; // inspection failed
+                    return true; // inspection failed
+                }
             }
 
             return false; // inspection succeeded

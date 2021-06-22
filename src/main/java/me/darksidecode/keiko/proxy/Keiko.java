@@ -24,6 +24,7 @@ import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
+import me.darksidecode.keiko.staticanalysis.cache.LocalFileStorageCacheManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -222,7 +223,8 @@ public final class Keiko {
     }
 
     private void runStaticAnalyses() {
-        staticAnalysisManager = new StaticAnalysisManager();
+        // TODO: 22.06.2021 support for other CacheManager implementations (e.g. cloud-based)
+        staticAnalysisManager = new StaticAnalysisManager(new LocalFileStorageCacheManager());
         boolean abortStartup;
 
         abortStartup = staticAnalysisManager.inspectAllPlugins(pluginContext);

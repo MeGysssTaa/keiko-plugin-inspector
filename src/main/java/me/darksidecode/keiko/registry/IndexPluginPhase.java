@@ -22,6 +22,7 @@ import me.darksidecode.jminima.phase.PhaseExecutionException;
 import me.darksidecode.jminima.util.JarFileData;
 import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
@@ -100,8 +101,11 @@ public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
                     "pluginsIndex.indexedInfo",
                     pluginName, jarFile.getName(), pluginClasses.size());
 
+            File pluginFile = new File(Keiko.INSTANCE.getPluginsDir(), jarFile.getName());
+            String sha512 = StringUtils.sha512(pluginFile);
+
             return new EmittedValue<>(
-                   new IndexedPlugin(new File(jarFile.getName()), pluginClasses, pluginName));
+                   new IndexedPlugin(pluginFile, pluginClasses, pluginName, sha512));
         }
     }
 

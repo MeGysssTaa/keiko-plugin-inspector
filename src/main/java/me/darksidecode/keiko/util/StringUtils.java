@@ -16,6 +16,10 @@
 
 package me.darksidecode.keiko.util;
 
+import lombok.NonNull;
+import me.darksidecode.kantanj.formatting.Hash;
+
+import java.io.File;
 import java.util.regex.Pattern;
 
 public final class StringUtils {
@@ -24,6 +28,10 @@ public final class StringUtils {
 
     private static final String NO_WILDCARDS_PREFIX = "NO_WILDCARDS :: ";
     private static final String ESCAPED_DOT         = Pattern.quote(".");
+
+    public static String sha512(@NonNull File file) {
+        return Hash.SHA512.checksumString(file).toLowerCase();
+    }
 
     public static boolean matchWildcards(String text, String pattern) {
         if (pattern.startsWith(NO_WILDCARDS_PREFIX))

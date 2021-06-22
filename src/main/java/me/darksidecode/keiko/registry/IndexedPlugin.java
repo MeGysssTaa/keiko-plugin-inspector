@@ -32,4 +32,6 @@ public class IndexedPlugin {
 
     private final String name;
 
+    private final String sha512;
+
 }
