@@ -225,11 +225,17 @@ public final class Keiko {
     private void runStaticAnalyses() {
         // TODO: 22.06.2021 support for other CacheManager implementations (e.g. cloud-based)
         staticAnalysisManager = new StaticAnalysisManager(new LocalFileStorageCacheManager());
+        double beginTime = System.nanoTime();
         boolean abortStartup;
 
         abortStartup = staticAnalysisManager.inspectAllPlugins(pluginContext);
 
+        double secondsElapsed = (System.nanoTime() - beginTime) / 10E+9;
+        String secondsElapsedRounded = String.format("%.2f", secondsElapsed);
+        logger.debugLocalized("staticInspections.timeElapsed", secondsElapsedRounded);
+
         if (abortStartup) {
+            // Failed to inspect some plugin(s).
             logger.warningLocalized("staticInspections.abortingLine1");
             logger.warningLocalized("staticInspections.abortingLine2");
             System.exit(1);
@@ -240,6 +246,7 @@ public final class Keiko {
         abortStartup = staticAnalysisManager.processResults();
 
         if (abortStartup) {
+            // Inspection results of some plugin(s) are critical (server startup must not proceed).
             logger.warningLocalized("staticInspections.abortingLine1");
             logger.warningLocalized("staticInspections.abortingLine2");
             System.exit(1);
