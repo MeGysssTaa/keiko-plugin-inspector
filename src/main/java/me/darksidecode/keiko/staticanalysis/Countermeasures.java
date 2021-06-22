@@ -20,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.proxy.Keiko;
 
 import java.util.function.Function;
 
@@ -39,15 +38,12 @@ public enum Countermeasures {
     private final Function<StaticAnalysisResult, Boolean> abortStartupFunc;
 
     public static Countermeasures fromString(String s) {
-        if (s == null) {
-            Keiko.INSTANCE.getLogger().error("Countermeasures string is null");
+        if (s == null)
             return DEFAULT;
-        }
 
         try {
             return valueOf(s.toUpperCase().replace(' ', '_'));
         } catch (IllegalArgumentException ex) {
-            Keiko.INSTANCE.getLogger().error("Countermeasures string is invalid: '%s'", s);
             return DEFAULT;
         }
     }
