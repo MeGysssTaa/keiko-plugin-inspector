@@ -184,7 +184,7 @@ public final class Keiko {
         workDir = new File(KeikoProperties.workDir);
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
-        serverDir = workDir.getParentFile();
+        serverDir = workDir.getAbsoluteFile().getParentFile();
 
         if (!serverDir.isDirectory())
             throw new RuntimeException(
