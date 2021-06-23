@@ -51,7 +51,8 @@ public class KeikoLogger implements Closeable {
     private String lastLogDate;
 
     public void log(@NonNull Level level, @NonNull String s, Object... format) {
-        print(level, System.out, s, format);
+        PrintStream consoleStream = (level == Level.DEBUG || GlobalConfig.getEnableDebug()) ? System.out : null;
+        print(level, consoleStream, s, format);
     }
 
     public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
@@ -64,7 +65,7 @@ public class KeikoLogger implements Closeable {
     }
 
     public void debug(@NonNull String s, Object... format) {
-        print(Level.DEBUG, GlobalConfig.getEnableDebug() ? System.out : null, s, format);
+        log(Level.DEBUG, s, format);
     }
 
     public void debugLocalized(@NonNull String key, Object... args) {
@@ -72,7 +73,7 @@ public class KeikoLogger implements Closeable {
     }
 
     public void info(@NonNull String s, Object... format) {
-        print(Level.INFO, System.out, s, format);
+        log(Level.INFO, s, format);
     }
 
     public void infoLocalized(@NonNull String key, Object... args) {
@@ -80,7 +81,7 @@ public class KeikoLogger implements Closeable {
     }
 
     public void warning(@NonNull String s, Object... format) {
-        print(Level.WARNING, System.out, s, format);
+        log(Level.WARNING, s, format);
     }
 
     public void warningLocalized(@NonNull String key, Object... args) {
@@ -98,7 +99,7 @@ public class KeikoLogger implements Closeable {
                     : Arrays.copyOf(format, format.length - 1);
         }
 
-        print(Level.ERROR, System.out, s, format);
+        log(Level.ERROR, s, format);
 
         if (t != null) {
             error("    " + t);
