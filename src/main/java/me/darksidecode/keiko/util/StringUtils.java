@@ -29,6 +29,19 @@ public final class StringUtils {
     private static final String NO_WILDCARDS_PREFIX = "NO_WILDCARDS :: ";
     private static final String ESCAPED_DOT         = Pattern.quote(".");
 
+    public static String pad(@NonNull String what, char padWith, int finalLength) {
+        if (what.length() >= finalLength)
+            return what;
+
+        StringBuilder result = new StringBuilder(what);
+        int charsToAdd = finalLength - what.length();
+
+        for (int i = 0; i < charsToAdd; i++)
+            result.append(padWith);
+
+        return result.toString();
+    }
+
     public static String sha512(@NonNull File file) {
         return Hash.SHA512.checksumString(file).toLowerCase();
     }

@@ -17,11 +17,11 @@
 package me.darksidecode.keiko.proxy;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.i18n.I18n;
+import me.darksidecode.keiko.util.StringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -121,11 +121,11 @@ public class KeikoLogger implements Closeable {
             String currentTime = LocalTime.now().format(timeFormatter);
 
             if (printStream != null)
-                printStream.println(PREFIX + level.getPrefix() + message);
+                printStream.println(PREFIX + level.localizedPrefix + message);
 
             if (GlobalConfig.getMakeLogs())
                 printToFile(PREFIX + "[" + currentDate + "] " +
-                        "[" + currentTime + "] " + level.getPrefix() + message,
+                        "[" + currentTime + "] " + level.localizedPrefix + message,
                         currentDate);
         }
     }
@@ -211,15 +211,37 @@ public class KeikoLogger implements Closeable {
         }
     }
 
-    @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
     public enum Level {
-        DEBUG   ("DEBUG    "),
-        INFO    ("INFO     "),
-        WARNING ("WARNING  "),
-        ERROR   ("ERROR    ");
+        DEBUG,
+        INFO,
+        WARNING,
+        ERROR;
 
-        @NonNull @Getter
-        private final String prefix;
+        private String localizedPrefix;
+
+        private static final int EXTRA_PADDING = 2;
+
+        static {
+            Level[] levels = values();
+            String[] prefixes = new String[levels.length];
+            int longestLen = 0;
+
+            // Use localized prefixes for better accessibility.
+            for (int i = 0; i < prefixes.length; i++) {
+                String prefix = I18n.get("logLevel." + levels[i].name().toLowerCase());
+                int prefixLen = prefix.length();
+
+                if (prefixLen > longestLen)
+                    longestLen = prefixLen;
+
+                prefixes[i] = prefix;
+            }
+
+            // Pad to the length of the longest prefix.
+            for (int i = 0; i < prefixes.length; i++)
+                levels[i].localizedPrefix = StringUtils
+                        .pad(prefixes[i], ' ', longestLen + EXTRA_PADDING);
+        }
     }
 
 }
