@@ -60,8 +60,9 @@ plugins_integrity:
 # and analyse bytecode (signature check) of all plugins before letting them run,
 # thus detecting potential threats even before a malicious plugin is ran.
 #
-# TIP: you can use placeholder {plugins_folder} in all exclusions. Example:
+# TIP: you can use all typical placeholders in all exclusions. A few examples:
 #      - {plugins_folder}/ProtocolLib.jar
+#      - {server_folder}/some_file.sh
 static:
 
   # Pirated copies of premium plugins are often malicious. By using a cracked plugin,

@@ -18,6 +18,7 @@ package me.darksidecode.keiko.util;
 
 import lombok.NonNull;
 import me.darksidecode.kantanj.formatting.Hash;
+import me.darksidecode.keiko.proxy.Keiko;
 
 import java.io.File;
 import java.util.regex.Pattern;
@@ -28,6 +29,14 @@ public final class StringUtils {
 
     private static final String NO_WILDCARDS_PREFIX = "NO_WILDCARDS :: ";
     private static final String ESCAPED_DOT         = Pattern.quote(".");
+
+    public static String basicReplacements(@NonNull String s) {
+        return s.replace("{keiko_folder}",   Keiko.INSTANCE.getWorkDir   ().getAbsolutePath())
+                .replace("{plugins_folder}", Keiko.INSTANCE.getPluginsDir().getAbsolutePath())
+                .replace("{server_folder}",  Keiko.INSTANCE.getServerDir ().getAbsolutePath())
+                .replace("{java_folder}",    System.getProperty("java.home")                 )
+                .replace('\\', '/'); // better Windows compatibility (THIS REPLACE MUST BE MADE LAST!)
+    }
 
     public static String pad(@NonNull String what, char padWith, int finalLength) {
         if (what.length() >= finalLength)

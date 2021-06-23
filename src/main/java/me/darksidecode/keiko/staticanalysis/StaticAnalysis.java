@@ -52,7 +52,7 @@ public abstract class StaticAnalysis implements ClassWalker {
     }
 
     public static String inspectionNameToConfigName(@NonNull String s) {
-        char[] nameChars = s.replace("Static.", "").toCharArray();
+        char[] nameChars = s.replace("Static.", "static.").toCharArray();
         StringBuilder configNameBuilder = new StringBuilder();
         boolean firstChar = true;
 

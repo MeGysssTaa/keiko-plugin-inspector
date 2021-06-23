@@ -52,6 +52,9 @@ public final class Keiko {
     private BuildProperties buildProperties;
 
     @Getter
+    private File serverDir;
+
+    @Getter
     private File workDir;
 
     @Getter
@@ -181,6 +184,11 @@ public final class Keiko {
         workDir = new File(KeikoProperties.workDir);
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
+        serverDir = workDir.getParentFile();
+
+        if (!serverDir.isDirectory())
+            throw new RuntimeException(
+                    "Keiko JAR must be placed near the original server executable");
 
         KeikoInstaller installer = new KeikoInstaller(workDir);
 

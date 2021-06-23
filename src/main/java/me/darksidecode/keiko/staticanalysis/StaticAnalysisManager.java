@@ -30,6 +30,8 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.KeikoLogger;
+import me.darksidecode.keiko.registry.Identity;
+import me.darksidecode.keiko.registry.IdentityFilter;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
@@ -52,6 +54,8 @@ public class StaticAnalysisManager {
     private final Map<IndexedPlugin, InspectionCache> cachesToPush = new HashMap<>();
 
     private final Map<IndexedPlugin, List<StaticAnalysisResult>> results = new HashMap<>();
+
+    private final Map<String, Collection<IdentityFilter>> exclusions = new HashMap<>();
 
     public boolean inspectAllPlugins() {
         pluginContext.getPlugins().forEach(plugin -> results.put(plugin, new ArrayList<>()));
@@ -114,7 +118,7 @@ public class StaticAnalysisManager {
                 String countermeasuresType = result.getType().name().toLowerCase();
                 String configScannerName = StaticAnalysis.inspectionNameToConfigName(result.getScannerName());
                 String countermeasuresString = InspectionsConfig.getHandle()
-                        .get("static." + configScannerName + ".countermeasures." + countermeasuresType);
+                        .get(configScannerName + ".countermeasures." + countermeasuresType);
 
                 Countermeasures countermeasures = Countermeasures.fromString(countermeasuresString);
 
@@ -124,6 +128,44 @@ public class StaticAnalysisManager {
         }
 
         return false; // no, do not abort startup
+    }
+
+    public boolean isExcluded(@NonNull StaticAnalysis inspection, @NonNull Identity identity) {
+        return getExclusions(inspection).stream()
+                .anyMatch(exclusion -> exclusion.matches(identity));
+    }
+
+    private Collection<IdentityFilter> getExclusions(StaticAnalysis inspection) {
+        String scannerName = inspection.getScannerName();
+
+        return exclusions.computeIfAbsent(scannerName, k -> { // lazy get
+            Collection<IdentityFilter> filters = new ArrayList<>();
+
+            try {
+                String configName = StaticAnalysis.inspectionNameToConfigName(scannerName);
+                List<String> matchers = InspectionsConfig.getHandle().get(configName + ".exclusions");
+
+                for (String matcher : matchers) {
+                    IdentityFilter filter = IdentityFilter.valueOf(matcher);
+
+                    if (filter.getErrorI18nKey() == null)
+                        filters.add(filter); // valid exclusion
+                    else {
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                IdentityFilter.ERR_PREFIX + "skippingInvalidExclusion");
+                        Keiko.INSTANCE.getLogger().warningLocalized(filter.getErrorI18nKey());
+                        Keiko.INSTANCE.getLogger().warning("    - \"%s\"", matcher);
+                    }
+                }
+            } catch (Exception ex) {
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        IdentityFilter.ERR_PREFIX + "skippingInvalidExclusion");
+                Keiko.INSTANCE.getLogger().error(
+                        "Unhandled exception (totally invalid configuration?)", ex);
+            }
+
+            return filters;
+        });
     }
 
     private void printResults() {
