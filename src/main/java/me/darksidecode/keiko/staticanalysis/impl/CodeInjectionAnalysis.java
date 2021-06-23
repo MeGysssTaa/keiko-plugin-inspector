@@ -43,6 +43,9 @@ public class CodeInjectionAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
+        if (isExcluded(mtd))
+            return;
+
         List<String> details = new UniqueElementsList<>();
 
         for (int i = 0; i < mtd.instructions.size(); i++) {

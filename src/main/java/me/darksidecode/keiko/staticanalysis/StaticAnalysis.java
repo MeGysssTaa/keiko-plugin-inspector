@@ -19,6 +19,9 @@ package me.darksidecode.keiko.staticanalysis;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.walking.ClassWalker;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.registry.Identity;
+import me.darksidecode.keiko.registry.IndexedPlugin;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -43,8 +46,29 @@ public abstract class StaticAnalysis implements ClassWalker {
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {}
 
+    protected final boolean isExcluded() {
+        return isExcluded(null);
+    }
+
+    protected final boolean isExcluded(MethodNode mtd) {
+        return Keiko.INSTANCE.getStaticAnalysisManager()
+                .isExcluded(this, identity(cls, mtd));
+    }
+
     protected final String getScannerName() {
         return classToInspectionName(getClass());
+    }
+
+    private static Identity identity(@NonNull ClassNode cls, MethodNode mtd) {
+        String className = cls.name.replace('/', '.');
+        IndexedPlugin plugin = Keiko.INSTANCE.getPluginContext().getClassOwner(className);
+
+        return new Identity(
+                plugin.getJar().getAbsolutePath(),
+                plugin.getName(),
+                className,
+                mtd != null ? mtd.name : null
+        );
     }
 
     public static String classToInspectionName(@NonNull Class<? extends StaticAnalysis> c) {

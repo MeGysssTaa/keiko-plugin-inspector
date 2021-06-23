@@ -34,6 +34,9 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
     public DirectLeaksAnalysis(@NonNull ClassNode cls) {
         super(cls);
 
+        if (isExcluded())
+            return;
+
         List<String> details = new UniqueElementsList<>();
 
         if (cls.name.startsWith("directleaks/"))
@@ -51,6 +54,9 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
+        if (isExcluded(mtd))
+            return;
+
         List<String> details = new UniqueElementsList<>();
 
         if (References.isPrivate(mtd) && References.isStatic(mtd)

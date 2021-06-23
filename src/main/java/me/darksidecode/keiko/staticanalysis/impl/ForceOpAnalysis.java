@@ -37,6 +37,9 @@ public class ForceOpAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
+        if (isExcluded(mtd))
+            return;
+
         List<String> details = new UniqueElementsList<>();
         hasOpLdcBefore = false; // reset
 

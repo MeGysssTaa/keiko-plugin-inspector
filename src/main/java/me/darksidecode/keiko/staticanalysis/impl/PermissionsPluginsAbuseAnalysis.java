@@ -56,6 +56,9 @@ public class PermissionsPluginsAbuseAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
+        if (isExcluded(mtd))
+            return;
+
         List<String> details = new UniqueElementsList<>();
         hasPermLdcBefore = false; // reset
 

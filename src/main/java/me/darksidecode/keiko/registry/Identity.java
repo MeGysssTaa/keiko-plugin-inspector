@@ -23,15 +23,17 @@ public class Identity {
 
     private final String filePath, pluginName, className, methodName;
 
+    private boolean filterBase;
+
     public Identity(String filePath, String pluginName, String className, String methodName) {
         this(false, filePath, pluginName, className, methodName);
     }
 
-    Identity(boolean allowNulls, String filePath, String pluginName, String className, String methodName) {
-        this.filePath   = get(allowNulls, filePath,   "filePath"  );
-        this.pluginName = get(allowNulls, pluginName, "pluginName");
-        this.className  = get(allowNulls, className,  "className" );
-        this.methodName = get(allowNulls, methodName, "methodName");
+    Identity(boolean filterBase, String filePath, String pluginName, String className, String methodName) {
+        this.filePath   = get(filterBase, filePath,   "filePath"  );
+        this.pluginName = get(filterBase, pluginName, "pluginName");
+        this.className  = get(filterBase, className,  "className" );
+        this.methodName = get(true, methodName, "methodName"); // methods are always nullable
     }
 
     private String get(boolean allowNull, String val, @NonNull String what) {
@@ -44,23 +46,20 @@ public class Identity {
             return StringUtils.basicReplacements(val);
     }
 
-    private boolean isFilterBase() {
-        return filePath == null || pluginName == null || className == null || methodName == null;
-    }
-
     boolean matches(@NonNull Identity other) {
-        if (!isFilterBase())
+        if (!filterBase)
             throw new IllegalStateException(
                     "match is only allowed to be called on filter base Identity classes");
 
-        if (other.isFilterBase())
+        if (other.filterBase)
             throw new IllegalStateException(
                     "cannot match a filter base Identity class");
 
         return     (filePath   == null /* match any */ || StringUtils.matchWildcards(other.filePath,   filePath  ))
                 && (pluginName == null /* match any */ || StringUtils.matchWildcards(other.pluginName, pluginName))
                 && (className  == null /* match any */ || StringUtils.matchWildcards(other.className,  className ))
-                && (methodName == null /* match any */ || StringUtils.matchWildcards(other.methodName, methodName));
+                && (methodName == null /* match any */ || (other.methodName != null // methods are always nullable
+                                                       && StringUtils.matchWildcards(other.methodName, methodName)));
     }
 
 }
