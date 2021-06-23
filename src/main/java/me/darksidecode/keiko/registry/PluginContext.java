@@ -103,7 +103,7 @@ public class PluginContext {
                 }
             }
 
-            Keiko.INSTANCE.getLogger().warningLocalized(
+            Keiko.INSTANCE.getLogger().debugLocalized(
                     "pluginsIndex.numPluginsIndexed", indexedPlugins.size());
 
             return new PluginContext(indexedPlugins);
