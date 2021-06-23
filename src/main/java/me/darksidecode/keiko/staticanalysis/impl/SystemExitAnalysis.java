@@ -21,12 +21,12 @@ import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.staticanalysis.RegisterStaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
+import me.darksidecode.keiko.util.UniqueElementsList;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RegisterStaticAnalysis
@@ -38,7 +38,7 @@ public class SystemExitAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
-        List<String> details = new ArrayList<>();
+        List<String> details = new UniqueElementsList<>();
 
         for (int i = 0; i < mtd.instructions.size(); i++) {
             AbstractInsnNode insn = mtd.instructions.get(i);

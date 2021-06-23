@@ -224,11 +224,12 @@ public final class Keiko {
 
     private void runStaticAnalyses() {
         // TODO: 22.06.2021 support for other CacheManager implementations (e.g. cloud-based)
-        staticAnalysisManager = new StaticAnalysisManager(new LocalFileStorageCacheManager());
+        staticAnalysisManager = new StaticAnalysisManager(
+                pluginContext, new LocalFileStorageCacheManager());
         double beginTime = System.nanoTime();
         boolean abortStartup;
 
-        abortStartup = staticAnalysisManager.inspectAllPlugins(pluginContext);
+        abortStartup = staticAnalysisManager.inspectAllPlugins();
 
         double secondsElapsed = (System.nanoTime() - beginTime) / 10E+9;
         String secondsElapsedRounded = String.format("%.2f", secondsElapsed);

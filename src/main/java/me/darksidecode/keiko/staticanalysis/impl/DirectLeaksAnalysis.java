@@ -22,10 +22,10 @@ import me.darksidecode.keiko.staticanalysis.RegisterStaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysis;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 import me.darksidecode.keiko.util.References;
+import me.darksidecode.keiko.util.UniqueElementsList;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RegisterStaticAnalysis
@@ -34,7 +34,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
     public DirectLeaksAnalysis(@NonNull ClassNode cls) {
         super(cls);
 
-        List<String> details = new ArrayList<>();
+        List<String> details = new UniqueElementsList<>();
 
         if (cls.name.startsWith("directleaks/"))
             // Their new anti-releak blatantly creates an own package with the website name.
@@ -51,7 +51,7 @@ public class DirectLeaksAnalysis extends StaticAnalysis {
 
     @Override
     public void visitMethod(@NonNull MethodNode mtd) {
-        List<String> details = new ArrayList<>();
+        List<String> details = new UniqueElementsList<>();
 
         if (References.isPrivate(mtd) && References.isStatic(mtd)
                 && References.isBridge(mtd) && References.isSynthetic(mtd)

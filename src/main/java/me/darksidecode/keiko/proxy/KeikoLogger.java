@@ -118,13 +118,14 @@ public class KeikoLogger implements Closeable {
 
             String currentDate = LocalDate.now().format(dateFormatter);
             String currentTime = LocalTime.now().format(timeFormatter);
-            message = PREFIX + "[" + currentDate + "] [" + currentTime + "] " + level.getPrefix() + message;
 
             if (printStream != null)
-                printStream.println(message);
+                printStream.println(PREFIX + level.getPrefix() + message);
 
             if (GlobalConfig.getMakeLogs())
-                printToFile(message, currentDate);
+                printToFile(PREFIX + "[" + currentDate + "] " +
+                        "[" + currentTime + "] " + level.getPrefix() + message,
+                        currentDate);
         }
     }
 
@@ -211,10 +212,10 @@ public class KeikoLogger implements Closeable {
 
     @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
     public enum Level {
-        DEBUG   ("DEBUG    :  "),
-        INFO    ("INFO     :  "),
-        WARNING ("WARNING  :  "),
-        ERROR   ("ERROR    :  ");
+        DEBUG   ("DEBUG    "),
+        INFO    ("INFO     "),
+        WARNING ("WARNING  "),
+        ERROR   ("ERROR    ");
 
         @NonNull @Getter
         private final String prefix;

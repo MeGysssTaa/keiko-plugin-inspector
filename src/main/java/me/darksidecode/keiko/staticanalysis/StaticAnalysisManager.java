@@ -41,15 +41,20 @@ import java.util.*;
 @RequiredArgsConstructor
 public class StaticAnalysisManager {
 
+    @NonNull
+    private final PluginContext pluginContext;
+
+    @NonNull
     private final CacheManager cacheManager;
 
     private final Reflections reflections = new Reflections("me.darksidecode.keiko.staticanalysis");
 
     private final Map<IndexedPlugin, InspectionCache> cachesToPush = new HashMap<>();
 
-    private final List<StaticAnalysisResult> results = new ArrayList<>();
+    private final Map<IndexedPlugin, List<StaticAnalysisResult>> results = new HashMap<>();
 
-    public boolean inspectAllPlugins(@NonNull PluginContext pluginContext) {
+    public boolean inspectAllPlugins() {
+        pluginContext.getPlugins().forEach(plugin -> results.put(plugin, new ArrayList<>()));
         Keiko.INSTANCE.getLogger().infoLocalized("staticInspections.beginAll");
 
         try {
@@ -98,63 +103,82 @@ public class StaticAnalysisManager {
                         k -> new ArrayList<>());
 
         cachedResults.add(result);
-        results.add(result);
+        results.get(result.getAnalyzedPlugin()).add(result);
     }
 
     public boolean processResults() {
-        boolean abortStartup = false;
-        int warnings = 0, critical = 0;
+        printResults();
 
-        for (StaticAnalysisResult result : results) {
-            if (result.getType() != StaticAnalysisResult.Type.CLEAN)
-                warnings++;
-
-            if (result.getType() == StaticAnalysisResult.Type.MALICIOUS)
-                critical++;
-
-            printResult(result);
-
-            if (!abortStartup) { // if already true, then abort anyway - other results don't really matter
+        for (List<StaticAnalysisResult> list : results.values()) {
+            for (StaticAnalysisResult result : list) {
                 String countermeasuresType = result.getType().name().toLowerCase();
                 String configScannerName = StaticAnalysis.inspectionNameToConfigName(result.getScannerName());
                 String countermeasuresString = InspectionsConfig.getHandle()
                         .get("static." + configScannerName + ".countermeasures." + countermeasuresType);
 
                 Countermeasures countermeasures = Countermeasures.fromString(countermeasuresString);
-                abortStartup = countermeasures.getAbortStartupFunc().apply(result);
+
+                if (countermeasures.getAbortStartupFunc().apply(result))
+                    return true; // yes, abort startup
             }
         }
 
-        Keiko.INSTANCE.getLogger().infoLocalized(
-                "staticInspections.finishSummary", warnings, critical);
-
-        return abortStartup;
+        return false; // no, do not abort startup
     }
 
-    private void printResult(StaticAnalysisResult result) {
-        IndexedPlugin analyzedPlugin = result.getAnalyzedPlugin();
-        String analyzedPluginName = analyzedPlugin != null ? analyzedPlugin.getName()           : "???";
-        String analyzedPluginFile = analyzedPlugin != null ? analyzedPlugin.getJar().getName()  : "???";
+    private void printResults() {
+        int warningsTotal = 0, criticalTotal = 0;
 
-        String typeI18nKey = "staticInspections." + result.getType().name().toLowerCase();
-        String analysisDescI18nKey = "staticInspections.desc." + result.getScannerName();
+        for (IndexedPlugin plugin : results.keySet()) {
+            List<StaticAnalysisResult> pluginResults = results.get(plugin);
+            int warnings = 0, critical = 0;
 
-        KeikoLogger.Level logLevel = result.getType() == StaticAnalysisResult.Type.CLEAN
-                ? KeikoLogger.Level.DEBUG : KeikoLogger.Level.WARNING;
+            for (StaticAnalysisResult result : pluginResults) {
+                if (result.getType() != StaticAnalysisResult.Type.CLEAN    ) warnings++;
+                if (result.getType() == StaticAnalysisResult.Type.MALICIOUS) critical++;
+            }
 
-        Keiko.INSTANCE.getLogger().logLocalized(logLevel, typeI18nKey);
-        Keiko.INSTANCE.getLogger().logLocalized(
-                logLevel, "staticInspections.analysisName", result.getScannerName());
-        Keiko.INSTANCE.getLogger().logLocalized(
-                logLevel, analysisDescI18nKey, analyzedPluginName, analyzedPluginFile);
-        Keiko.INSTANCE.getLogger().logLocalized(logLevel, "staticInspections.details");
+            warningsTotal += warnings;
+            criticalTotal += critical;
 
-        int counter = 0;
+            // Log level depends on whether there was at least a single warning or not.
+            // If the plugin is fully clean, then just debug it. Otherwise really warn.
+            KeikoLogger.Level logLevel = warnings == 0
+                    ? KeikoLogger.Level.DEBUG : KeikoLogger.Level.WARNING;
 
-        for (String detail : result.getDetails())
-            Keiko.INSTANCE.getLogger().log(logLevel, "    %s. %s", ++counter, detail);
+            Keiko.INSTANCE.getLogger().logLocalized(
+                    logLevel, "staticInspections.pluginResults",
+                    plugin.getName(), plugin.getJar().getName());
 
-        Keiko.INSTANCE.getLogger().log(logLevel, " ");
+            for (StaticAnalysisResult result : pluginResults) {
+                String typeI18nKey = "staticInspections." + result.getType().name().toLowerCase();
+                String analysisDescI18nKey = "staticInspections.desc." + result.getScannerName();
+
+                Keiko.INSTANCE.getLogger().logLocalized(logLevel, typeI18nKey);
+                Keiko.INSTANCE.getLogger().logLocalized(
+                        logLevel, "staticInspections.analysisName", result.getScannerName());
+                Keiko.INSTANCE.getLogger().logLocalized(
+                        logLevel, analysisDescI18nKey, plugin.getName(), plugin.getJar().getName());
+                Keiko.INSTANCE.getLogger().logLocalized(logLevel, "staticInspections.details");
+
+                int counter = 0;
+
+                for (String detail : result.getDetails())
+                    Keiko.INSTANCE.getLogger().log(logLevel, "|            %s. %s", ++counter, detail);
+
+                Keiko.INSTANCE.getLogger().log(logLevel, "|            ");
+            }
+
+            Keiko.INSTANCE.getLogger().logLocalized(
+                    logLevel, "staticInspections.pluginSummary",
+                    warningsTotal, criticalTotal, plugin.getName(), plugin.getJar().getName());
+
+            Keiko.INSTANCE.getLogger().log(logLevel, " ");
+            Keiko.INSTANCE.getLogger().log(logLevel, " ");
+        }
+
+        Keiko.INSTANCE.getLogger().infoLocalized(
+                "staticInspections.finishSummary", warningsTotal, criticalTotal);
     }
 
     private boolean inspectPlugin(IndexedPlugin plugin) {
@@ -234,7 +258,7 @@ public class StaticAnalysisManager {
                             "staticInspections.caches.resultCached",
                             inspectionName, plugin.getName(), plugin.getJar().getName(), cachedResults.size());
 
-                    results.addAll(cachedResults);
+                    results.get(plugin).addAll(cachedResults);
                     cached++;
                 } else {
                     Keiko.INSTANCE.getLogger().debugLocalized(
