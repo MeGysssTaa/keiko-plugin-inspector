@@ -51,7 +51,7 @@ public class KeikoLogger implements Closeable {
     private String lastLogDate;
 
     public void log(@NonNull Level level, @NonNull String s, Object... format) {
-        PrintStream consoleStream = (level == Level.DEBUG || GlobalConfig.getEnableDebug()) ? System.out : null;
+        PrintStream consoleStream = (GlobalConfig.getEnableDebug() || level != Level.DEBUG) ? System.out : null;
         print(level, consoleStream, s, format);
     }
 
