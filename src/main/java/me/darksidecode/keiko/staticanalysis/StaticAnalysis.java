@@ -76,7 +76,7 @@ public abstract class StaticAnalysis implements ClassWalker {
     }
 
     public static String inspectionNameToConfigName(@NonNull String s) {
-        char[] nameChars = s.replace("Static.", "static.").toCharArray();
+        char[] nameChars = s.replace("Static.", "").toCharArray();
         StringBuilder configNameBuilder = new StringBuilder();
         boolean firstChar = true;
 
@@ -89,7 +89,7 @@ public abstract class StaticAnalysis implements ClassWalker {
             configNameBuilder.append(Character.toLowerCase(c));
         }
 
-        return configNameBuilder.toString();
+        return "static." + configNameBuilder;
     }
 
 }
