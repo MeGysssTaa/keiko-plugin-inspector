@@ -155,6 +155,8 @@ public class IdentityFilterTest {
 
     @ParameterizedTest
     @ValueSource (strings = {
+            "SOURCE=my.fq.ClassName",
+            "SOURCE=my.fq.*",
             "SOURCE=my.fq.ClassName#goodMethod",
             "SOURCE=my.fq.ClassName#good?*d",
             "SOURCE=my.fq.*#goodMethod",
