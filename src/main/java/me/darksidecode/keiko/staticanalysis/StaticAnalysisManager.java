@@ -213,7 +213,7 @@ public class StaticAnalysisManager {
 
             Keiko.INSTANCE.getLogger().logLocalized(
                     logLevel, "staticInspections.pluginSummary",
-                    warningsTotal, criticalTotal, plugin.getName(), plugin.getJar().getName());
+                    warnings, critical, plugin.getName(), plugin.getJar().getName());
 
             Keiko.INSTANCE.getLogger().log(logLevel, " ");
             Keiko.INSTANCE.getLogger().log(logLevel, " ");
