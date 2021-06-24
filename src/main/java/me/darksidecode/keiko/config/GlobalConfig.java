@@ -17,6 +17,7 @@
 package me.darksidecode.keiko.config;
 
 import lombok.Getter;
+import me.darksidecode.keiko.proxy.KeikoLogger;
 
 public final class GlobalConfig {
 
@@ -29,13 +30,13 @@ public final class GlobalConfig {
     private static Integer updatesCheckFreqMins = 120;
 
     @Getter @Config
-    private static Boolean makeLogs = true;
-
-    @Getter @Config
     private static Integer logsLifespanDays = 14;
 
-    @Getter @Config
-    private static Boolean enableDebug = false;
+    @Getter @Config ("log_level.console")
+    private static KeikoLogger.Level logLevelConsole = KeikoLogger.Level.INFO;
+
+    @Getter @Config ("log_level.file")
+    private static KeikoLogger.Level logLevelFile = KeikoLogger.Level.DEBUG;
 
     @Getter @Config
     private static Boolean abortOnError = true;

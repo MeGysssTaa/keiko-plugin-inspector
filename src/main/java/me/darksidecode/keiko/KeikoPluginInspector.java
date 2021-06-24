@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class KeikoPluginInspector {
@@ -222,8 +221,8 @@ public class KeikoPluginInspector {
     }
 
     public static void debug(String s, Object... format) {
-        if (GlobalConfig.getEnableDebug())
-            log(System.out, "DEBUG   :  " + s, format);
+//        if (GlobalConfig.getEnableDebug())
+//            log(System.out, "DEBUG   :  " + s, format);
     }
 
     public static void info(String s, Object... format) {
@@ -235,39 +234,39 @@ public class KeikoPluginInspector {
     }
 
     private static void log(PrintStream printStream, String s, Object... format) {
-        synchronized (outputLock) {
-            if ((format != null) && (format.length > 0))
-                s = String.format(s, format);
-
-            printStream.println("[Keiko] " + s);
-
-            if (GlobalConfig.getMakeLogs()) {
-                try {
-                    Date date = new Date();
-                    String currentDate = dateFormat.format(date);
-
-                    if (lastLogDate == null) {
-                        // This is the first entry to log.
-                        logWriter = new FileWriter(getLogFile(currentDate), true);
-                        lastLogDate = currentDate;
-
-                        deleteOldLogs();
-                    } else if (!(currentDate.equals(lastLogDate))) {
-                        // Day changed, and there was no server restart.
-                        logWriter = new FileWriter(getLogFile(currentDate), true);
-                        lastLogDate = currentDate;
-                    }
-
-                    s = timeFormat.format(date) + " " + s;
-
-                    logWriter.append(s).append('\n');
-                    logWriter.flush();
-                } catch (IOException ex) {
-                    System.err.println("Failed to log in file. Stacktrace:");
-                    ex.printStackTrace();
-                }
-            }
-        }
+//        synchronized (outputLock) {
+//            if ((format != null) && (format.length > 0))
+//                s = String.format(s, format);
+//
+//            printStream.println("[Keiko] " + s);
+//
+//            if (GlobalConfig.getMakeLogs()) {
+//                try {
+//                    Date date = new Date();
+//                    String currentDate = dateFormat.format(date);
+//
+//                    if (lastLogDate == null) {
+//                        // This is the first entry to log.
+//                        logWriter = new FileWriter(getLogFile(currentDate), true);
+//                        lastLogDate = currentDate;
+//
+//                        deleteOldLogs();
+//                    } else if (!(currentDate.equals(lastLogDate))) {
+//                        // Day changed, and there was no server restart.
+//                        logWriter = new FileWriter(getLogFile(currentDate), true);
+//                        lastLogDate = currentDate;
+//                    }
+//
+//                    s = timeFormat.format(date) + " " + s;
+//
+//                    logWriter.append(s).append('\n');
+//                    logWriter.flush();
+//                } catch (IOException ex) {
+//                    System.err.println("Failed to log in file. Stacktrace:");
+//                    ex.printStackTrace();
+//                }
+//            }
+//        }
     }
 
     private static void deleteOldLogs() {

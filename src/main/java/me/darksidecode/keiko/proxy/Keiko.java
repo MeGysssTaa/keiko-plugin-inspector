@@ -85,10 +85,6 @@ public final class Keiko {
         installEverything();
 
         logger = new KeikoLogger(new File(workDir, "logs"));
-
-        if (GlobalConfig.getEnableDebug())
-            logger.debugLocalized("startup.debugEnabled");
-
         logger.debugLocalized("startup.workDir", workDir.getAbsolutePath());
     }
 

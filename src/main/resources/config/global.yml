@@ -36,18 +36,19 @@ locale: system
 #       not check for updates at all (not recommended!).
 updates_check_freq_mins: 120
 
-# Should Keiko save all its output in own log files (.../plugins/Keiko/logs/)?
-# This will allow you to perform deep analysis any time in case something happens.
-# Debug data is also written in logs, even if "enable_debug" is set to "false".
-make_logs: true
-
 # Keiko automatically deletes log files that are older than the number of days
 # specified below. If you don't want Keiko to manage its logs automatically,
 # you can disable this feature by setting logs_lifespan_days to -1.
 logs_lifespan_days: 14
 
-# Show debug (detailed verbose) messages in console?
-enable_debug: false
+# Minimum level (severity) of messages that Keiko should log.
+# Available level names (ordered by severity, ascending):
+# --  debug  info  warning  error  off
+#                                  ^^^ Disables logging completely.
+log_level:
+  console: info
+  file: debug
+
 
 # Should Keiko abort startup if it fails to analyze at least one of the plugins?
 # Enabling this is strongly (!) recommended. If you disable this, malicious plugins

@@ -51,8 +51,7 @@ public class KeikoLogger implements Closeable {
     private String lastLogDate;
 
     public void log(@NonNull Level level, @NonNull String s, Object... format) {
-        PrintStream consoleStream = (GlobalConfig.getEnableDebug() || level != Level.DEBUG) ? System.out : null;
-        print(level, consoleStream, s, format);
+        print(level, System.out, s, format);
     }
 
     public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
@@ -112,18 +111,23 @@ public class KeikoLogger implements Closeable {
         }
     }
 
-    private void print(@NonNull Level level, PrintStream printStream, @NonNull String message, Object... format) {
-        synchronized (writeLock) {
-            if (format != null && format.length > 0)
-                message = String.format(message, format);
+    private void print(@NonNull Level level, @NonNull PrintStream printStream,
+                       @NonNull String message, Object... format) {
+        if (level == Level.OFF)
+            throw new IllegalArgumentException(
+                    "Level.OFF must not be used for logging explicitly");
 
+        if (format != null && format.length > 0)
+            message = String.format(message, format);
+
+        synchronized (writeLock) {
             String currentDate = LocalDate.now().format(dateFormatter);
             String currentTime = LocalTime.now().format(timeFormatter);
 
-            if (printStream != null)
+            if (level.hasMinimum(GlobalConfig.getLogLevelConsole()))
                 printStream.println(PREFIX + level.localizedPrefix + message);
 
-            if (GlobalConfig.getMakeLogs())
+            if (level.hasMinimum(GlobalConfig.getLogLevelFile()))
                 printToFile(PREFIX + "[" + currentDate + "] " +
                         "[" + currentTime + "] " + level.localizedPrefix + message,
                         currentDate);
@@ -215,11 +219,16 @@ public class KeikoLogger implements Closeable {
         DEBUG,
         INFO,
         WARNING,
-        ERROR;
+        ERROR,
+        OFF;
 
-        private String localizedPrefix;
+        private String localizedPrefix; // null for Level.OFF
 
         private static final int EXTRA_PADDING = 2;
+
+        private boolean hasMinimum(@NonNull Level minimum) {
+            return ordinal() >= minimum.ordinal();
+        }
 
         static {
             Level[] levels = values();
@@ -227,7 +236,8 @@ public class KeikoLogger implements Closeable {
             int longestLen = 0;
 
             // Use localized prefixes for better accessibility.
-            for (int i = 0; i < prefixes.length; i++) {
+            // * End before prefixes.length because Level.OFF does not need a prefix.
+            for (int i = 0; i < prefixes.length - 1; i++) {
                 String prefix = I18n.get("logLevel." + levels[i].name().toLowerCase());
                 int prefixLen = prefix.length();
 
@@ -238,7 +248,8 @@ public class KeikoLogger implements Closeable {
             }
 
             // Pad to the length of the longest prefix.
-            for (int i = 0; i < prefixes.length; i++)
+            // * End before prefixes.length because Level.OFF does not need a prefix.
+            for (int i = 0; i < prefixes.length - 1; i++)
                 levels[i].localizedPrefix = StringUtils
                         .pad(prefixes[i], ' ', longestLen + EXTRA_PADDING);
         }
