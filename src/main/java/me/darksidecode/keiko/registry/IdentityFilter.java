@@ -16,12 +16,9 @@
 
 package me.darksidecode.keiko.registry;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor (access = AccessLevel.PRIVATE)
 public class IdentityFilter {
 
     public static final String ERR_PREFIX = "identityFilter.err.";
@@ -31,12 +28,56 @@ public class IdentityFilter {
     @Getter
     private final String errorI18nKey;
 
-    private IdentityFilter(Identity filter) {
-        this(filter, null);
-    }
+    public IdentityFilter(@NonNull String s) {
+        String[] tokens = s.trim().split("=");
+        Identity filter = null;
+        String errorI18nKey = null;
 
-    private IdentityFilter(String errorI18nKey) {
-        this(null, errorI18nKey);
+        if (tokens.length == 2) {
+            String filterType = tokens[0].trim().toUpperCase();
+            String matcher = tokens[1].trim();
+
+            switch (filterType) {
+                case "FILE":
+                    filter = new Identity(
+                            true, matcher, null, null, null);
+
+                    break;
+
+                case "PLUGIN":
+                    filter = new Identity(
+                            true, null, matcher, null, null);
+
+                    break;
+
+                case "SOURCE":
+                    String[] sourceMatcher = matcher.split("#");
+                    String classMatcher = sourceMatcher[0].trim();
+                    String methodMatcher;
+
+                    if (sourceMatcher.length == 2)
+                        methodMatcher = sourceMatcher[1].trim();
+                    else if (sourceMatcher.length == 1)
+                        methodMatcher = null;
+                    else {
+                        errorI18nKey = ERR_PREFIX + "invalidSyntax";
+                        break;
+                    }
+
+                    filter = new Identity(
+                            true, null, null, classMatcher, methodMatcher);
+
+                    break;
+
+                default:
+                    errorI18nKey = ERR_PREFIX + "invalidFilterType";
+                    break;
+            }
+        } else
+            errorI18nKey = ERR_PREFIX + "invalidSyntax";
+
+        this.filter = filter;
+        this.errorI18nKey = errorI18nKey;
     }
 
     public boolean matches(@NonNull Identity other) {
@@ -44,44 +85,6 @@ public class IdentityFilter {
             return filter.matches(other);
         else
             throw new UnsupportedOperationException("invalid filter (error key: " + errorI18nKey + ")");
-    }
-
-    public static IdentityFilter valueOf(@NonNull String s) {
-        String[] tokens = s.trim().split("=");
-
-        if (tokens.length != 2)
-            return new IdentityFilter(ERR_PREFIX + "invalidSyntax");
-
-        String filterType = tokens[0].trim().toUpperCase();
-        String matcher = tokens[1].trim();
-
-        switch (filterType) {
-            case "FILE":
-                return new IdentityFilter(new Identity(
-                        true, matcher, null, null, null));
-
-            case "PLUGIN":
-                return new IdentityFilter(new Identity(
-                        true, null, matcher, null, null));
-
-            case "SOURCE":
-                String[] sourceMatcher = matcher.split("#");
-                String classMatcher = sourceMatcher[0].trim();
-                String methodMatcher;
-
-                if (sourceMatcher.length == 2)
-                    methodMatcher = sourceMatcher[1].trim();
-                else if (sourceMatcher.length == 1)
-                    methodMatcher = null;
-                else
-                    return new IdentityFilter(ERR_PREFIX + "invalidSyntax");
-
-                return new IdentityFilter(new Identity(
-                        true, null, null, classMatcher, methodMatcher));
-
-            default:
-                return new IdentityFilter(ERR_PREFIX + "invalidFilterType");
-        }
     }
 
 }

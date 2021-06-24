@@ -31,10 +31,12 @@ public final class StringUtils {
     private static final String ESCAPED_DOT         = Pattern.quote(".");
 
     public static String basicReplacements(@NonNull String s) {
-        return s.replace("{keiko_folder}",   Keiko.INSTANCE.getWorkDir   ().getAbsolutePath())
-                .replace("{plugins_folder}", Keiko.INSTANCE.getPluginsDir().getAbsolutePath())
-                .replace("{server_folder}",  Keiko.INSTANCE.getServerDir ().getAbsolutePath())
-                .replace("{java_folder}",    System.getProperty("java.home")                 )
+        if (Keiko.INSTANCE.isStarted())
+            s = s.replace("{keiko_folder}",   Keiko.INSTANCE.getWorkDir   ().getAbsolutePath())
+                 .replace("{plugins_folder}", Keiko.INSTANCE.getPluginsDir().getAbsolutePath())
+                 .replace("{server_folder}",  Keiko.INSTANCE.getServerDir ().getAbsolutePath());
+
+        return s.replace("{java_folder}", System.getProperty("java.home"))
                 .replace('\\', '/'); // better Windows compatibility (THIS REPLACE MUST BE MADE LAST!)
     }
 

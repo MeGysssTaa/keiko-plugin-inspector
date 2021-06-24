@@ -46,6 +46,7 @@ public final class Keiko {
 
     public static final Keiko INSTANCE = new Keiko();
 
+    @Getter
     private volatile boolean started;
 
     @Getter

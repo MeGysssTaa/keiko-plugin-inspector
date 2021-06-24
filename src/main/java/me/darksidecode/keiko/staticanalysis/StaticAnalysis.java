@@ -67,7 +67,7 @@ public abstract class StaticAnalysis implements ClassWalker {
                 plugin.getJar().getAbsolutePath(),
                 plugin.getName(),
                 className,
-                mtd != null ? mtd.name : null
+                mtd != null ? mtd.name : ""
         );
     }
 

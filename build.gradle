@@ -63,6 +63,7 @@ shadowJar {
 }
 
 tasks.shadowJar.dependsOn tasks.relocateShadowJar
+tasks.shadowJar.finalizedBy tasks.test
 
 // Dependencies
 repositories {
@@ -86,6 +87,7 @@ repositories {
 
 def asmVersion = '9.1'
 def lombokVersion = '1.18.6'
+def junit5Version = '5.7.1'
 
 dependencies {
     // Embed in JAR (required)
@@ -105,4 +107,14 @@ dependencies {
     // Annotation processors
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
+
+    // Testing
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${junit5Version}"
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "${junit5Version}"
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "${junit5Version}"
+}
+
+test {
+    useJUnitPlatform()
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }

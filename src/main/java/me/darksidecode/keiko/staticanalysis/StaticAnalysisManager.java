@@ -146,7 +146,7 @@ public class StaticAnalysisManager {
                 List<String> matchers = InspectionsConfig.getHandle().get(configName + ".exclusions");
 
                 for (String matcher : matchers) {
-                    IdentityFilter filter = IdentityFilter.valueOf(matcher);
+                    IdentityFilter filter = new IdentityFilter(matcher);
 
                     if (filter.getErrorI18nKey() == null)
                         filters.add(filter); // valid exclusion

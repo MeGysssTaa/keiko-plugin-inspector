@@ -23,17 +23,18 @@ public class Identity {
 
     private final String filePath, pluginName, className, methodName;
 
-    private boolean filterBase;
+    private final boolean filterBase;
 
     public Identity(String filePath, String pluginName, String className, String methodName) {
         this(false, filePath, pluginName, className, methodName);
     }
 
     Identity(boolean filterBase, String filePath, String pluginName, String className, String methodName) {
+        this.filterBase = filterBase;
         this.filePath   = get(filterBase, filePath,   "filePath"  );
         this.pluginName = get(filterBase, pluginName, "pluginName");
         this.className  = get(filterBase, className,  "className" );
-        this.methodName = get(true, methodName, "methodName"); // methods are always nullable
+        this.methodName = get(filterBase, methodName, "methodName");
     }
 
     private String get(boolean allowNull, String val, @NonNull String what) {
@@ -58,8 +59,7 @@ public class Identity {
         return     (filePath   == null /* match any */ || StringUtils.matchWildcards(other.filePath,   filePath  ))
                 && (pluginName == null /* match any */ || StringUtils.matchWildcards(other.pluginName, pluginName))
                 && (className  == null /* match any */ || StringUtils.matchWildcards(other.className,  className ))
-                && (methodName == null /* match any */ || (other.methodName != null // methods are always nullable
-                                                       && StringUtils.matchWildcards(other.methodName, methodName)));
+                && (methodName == null /* match any */ || StringUtils.matchWildcards(other.methodName, methodName));
     }
 
 }
