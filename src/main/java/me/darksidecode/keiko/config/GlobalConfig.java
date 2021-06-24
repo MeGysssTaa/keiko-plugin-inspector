@@ -23,6 +23,9 @@ public final class GlobalConfig {
 
     private GlobalConfig() {}
 
+    @Getter
+    private static YamlHandle handle;
+
     @Getter @Config
     private static String locale = "system";
 

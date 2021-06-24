@@ -230,7 +230,7 @@ public class KeikoLogger implements Closeable {
             return ordinal() >= minimum.ordinal();
         }
 
-        static {
+        public static void initLocalizedLevelNames() { // cannot use <clinit> because its used early in GlobalConfig
             Level[] levels = values();
             String[] prefixes = new String[levels.length];
             int longestLen = 0;

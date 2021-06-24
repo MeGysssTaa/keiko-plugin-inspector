@@ -192,6 +192,8 @@ public final class Keiko {
         ConfigurationLoader.load(installer, GlobalConfig.class);
         ConfigurationLoader.load(installer, InspectionsConfig.class);
         ConfigurationLoader.load(installer, RuntimeProtectConfig.class);
+
+        KeikoLogger.Level.initLocalizedLevelNames();
     }
 
     private void launch() {
