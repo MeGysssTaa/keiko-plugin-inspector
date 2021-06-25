@@ -33,11 +33,12 @@ public class Identity {
         this.filterBase = filterBase;
         this.filePath   = get(filterBase, filePath,   "filePath"  );
         this.pluginName = get(filterBase, pluginName, "pluginName");
-        this.className  = get(filterBase, className,  "className" );
+        this.className  = replaceIfNotNull(
+                          get(filterBase, className,  "className" ), '/', '.');
         this.methodName = get(filterBase, methodName, "methodName");
     }
 
-    private String get(boolean allowNull, String val, @NonNull String what) {
+    private static String get(boolean allowNull, String val, @NonNull String what) {
         if (val == null) {
             if (allowNull)
                 return null;
@@ -45,6 +46,10 @@ public class Identity {
                 throw new NullPointerException(what + " cannot be null");
         } else
             return StringUtils.basicReplacements(val);
+    }
+
+    private static String replaceIfNotNull(String s, char oldChar, char newChar) {
+        return s == null ? null : s.replace(oldChar, newChar);
     }
 
     boolean matches(@NonNull Identity other) {
