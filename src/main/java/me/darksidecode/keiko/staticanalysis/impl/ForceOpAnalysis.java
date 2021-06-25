@@ -94,7 +94,7 @@ public class ForceOpAnalysis extends StaticAnalysis {
                 // `Bukkit.dispatchCommand` or `Bukkit.getServer()#dispatchCommand` (or something similar
                 // that retrieves current Server object and invokes `dispatchCommand`) usage with a command
                 // that appears to contain force-op/deop calls.
-                details.add("Console command usage for op/deop in " + cls.name + mtd.name);
+                details.add("Console command usage for op/deop in " + cls.name + "#" + mtd.name);
         }
     }
 
