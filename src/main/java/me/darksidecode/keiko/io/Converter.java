@@ -39,8 +39,6 @@ final class Converter<T> {
     T convert(String s) {
         try {
             return (T) valueOf.invoke(null, s);
-        } catch (ReflectiveOperationException ex) {
-            throw new RuntimeException("fatal reflective operation exception", ex); // fatal
         } catch (Exception ex) {
             return null; // invalid user input
         }
