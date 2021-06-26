@@ -24,6 +24,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
 public class UserInputRequest<T> {
@@ -40,7 +43,7 @@ public class UserInputRequest<T> {
 
     private volatile int maxAttempts = INFINITE_ATTEMPTS;
 
-    private volatile boolean trim = true;
+    private final List<Function<String, String>> lineTransformers = new ArrayList<>();
 
     private volatile int attemptsMade = 1;
 
@@ -95,7 +98,9 @@ public class UserInputRequest<T> {
     }
 
     private synchronized T tryConvert(String line) {
-        if (trim) line = line.trim();
+        for (Function<String, String> transformer : lineTransformers)
+            line = transformer.apply(line);
+
         if (line.isEmpty()) return null;
         return cvt.convert(line);
     }
@@ -127,8 +132,13 @@ public class UserInputRequest<T> {
             return this;
         }
 
-        public Builder<T> trim(boolean trim) {
-            result.trim = trim;
+        public Builder<T> lineTransformer(@NonNull Function<String, String> transformer) {
+            result.lineTransformers.add(transformer);
+            return this;
+        }
+
+        public Builder<T> lineTransformers(@NonNull List<Function<String, String>> transformers) {
+            result.lineTransformers.addAll(transformers);
             return this;
         }
 

@@ -28,8 +28,11 @@ import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
+import me.darksidecode.keiko.i18n.I18n;
+import me.darksidecode.keiko.io.UserInputRequest;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.io.KeikoLogger;
+import me.darksidecode.keiko.proxy.KeikoProperties;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IdentityFilter;
 import me.darksidecode.keiko.registry.IndexedPlugin;
@@ -111,7 +114,7 @@ public class StaticAnalysisManager {
     }
 
     public boolean processResults() {
-        printResults();
+        int warningsTotal = printResultsAndCountWarnings();
 
         for (List<StaticAnalysisResult> list : results.values()) {
             for (StaticAnalysisResult result : list) {
@@ -125,6 +128,20 @@ public class StaticAnalysisManager {
                 if (countermeasures.getAbortStartupFunc().apply(result))
                     return true; // yes, abort startup
             }
+        }
+
+        if (warningsTotal > 0) { // ask the user whether to abort startup or not // IMPORTANT: negate result (see below)
+            if (KeikoProperties.staticInspWarnsYes != null)
+                // System startup property set. Just use its predefined result and don't prompt anything.
+                return !KeikoProperties.staticInspWarnsYes;
+            else
+                // Prompt the user to enter "y[es]" or "n[o]" explicitly.
+                return !UserInputRequest.newBuilder(System.in, Boolean.class)
+                        .prompt(Keiko.INSTANCE.getLogger(), I18n.get("staticInspections.proceedAnywayPrompt"))
+                        .lineTransformer(line -> line.trim().toLowerCase())
+                        .lineTransformer(line -> line.startsWith("y") ? "true" : "false")
+                        .build()
+                        .block(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
         }
 
         return false; // no, do not abort startup
@@ -168,7 +185,7 @@ public class StaticAnalysisManager {
         });
     }
 
-    private void printResults() {
+    private int printResultsAndCountWarnings() {
         int warningsTotal = 0, criticalTotal = 0;
 
         for (IndexedPlugin plugin : results.keySet()) {
@@ -221,6 +238,8 @@ public class StaticAnalysisManager {
 
         Keiko.INSTANCE.getLogger().infoLocalized(
                 "staticInspections.finishSummary", warningsTotal, criticalTotal);
+
+        return warningsTotal;
     }
 
     private boolean inspectPlugin(IndexedPlugin plugin) {

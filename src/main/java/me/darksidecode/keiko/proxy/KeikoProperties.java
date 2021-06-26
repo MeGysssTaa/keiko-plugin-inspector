@@ -24,4 +24,11 @@ public class KeikoProperties {
     public static final String workDir =
             System.getProperty("keiko.workDir", "keiko");
 
+    public static final Boolean staticInspWarnsYes; // IMPORTANT: no default value!
+
+    static {
+        String prop = System.getProperty("keiko.staticInspWarnsYes");
+        staticInspWarnsYes = prop == null ? null : Boolean.parseBoolean(prop);
+    }
+
 }
