@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package me.darksidecode.keiko.proxy;
+package me.darksidecode.keiko.io;
 
-import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.config.GlobalConfig;
@@ -33,8 +32,8 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings ("UseOfSystemOutOrSystemErr")
-@RequiredArgsConstructor (access = AccessLevel.PACKAGE)
-public class KeikoLogger implements Closeable {
+@RequiredArgsConstructor
+public class KeikoLogger implements Prompter, Closeable {
 
     private static final String PREFIX = "[Keiko] ";
 
@@ -49,6 +48,11 @@ public class KeikoLogger implements Closeable {
     private FileWriter logWriter;
 
     private String lastLogDate;
+
+    @Override
+    public void prompt(@NonNull String message) {
+        info(message);
+    }
 
     public void log(@NonNull Level level, @NonNull String s, Object... format) {
         print(level, System.out, s, format);

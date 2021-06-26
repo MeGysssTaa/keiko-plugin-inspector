@@ -17,7 +17,7 @@
 package me.darksidecode.keiko.config;
 
 import lombok.Getter;
-import me.darksidecode.keiko.proxy.KeikoLogger;
+import me.darksidecode.keiko.io.KeikoLogger;
 
 public final class GlobalConfig {
 

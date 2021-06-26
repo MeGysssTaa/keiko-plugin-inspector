@@ -22,6 +22,3 @@ target/
 gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
-
-# Keiko work dir (local tests)
-keiko/

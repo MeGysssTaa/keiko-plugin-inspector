@@ -22,6 +22,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
 import me.darksidecode.keiko.staticanalysis.cache.LocalFileStorageCacheManager;

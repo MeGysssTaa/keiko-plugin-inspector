@@ -29,7 +29,7 @@ import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.proxy.KeikoLogger;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IdentityFilter;
 import me.darksidecode.keiko.registry.IndexedPlugin;
