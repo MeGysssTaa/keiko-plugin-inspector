@@ -135,14 +135,19 @@ public class StaticAnalysisManager {
             if (KeikoProperties.staticInspWarnsYes != null)
                 // System startup property set. Just use its predefined result and don't prompt anything.
                 return !KeikoProperties.staticInspWarnsYes;
-            else
+            else {
+                // Message like "Continue anyway? [yes/no]"
+                String prompt = I18n.get("staticInspections.proceedAnywayPrompt")
+                        + " [" + I18n.get("prompts.yes") + "/" + I18n.get("prompts.no") + "]";
+
                 // Prompt user to enter "yes" or "no" explicitly.
                 return !UserInputRequest.newBuilder(System.in, YesNo.class)
-                        .prompt(Keiko.INSTANCE.getLogger(), I18n.get("staticInspections.proceedAnywayPrompt"))
+                        .prompt(Keiko.INSTANCE.getLogger(), prompt)
                         .lineTransformer(String::trim)
                         .build()
                         .block()
                         .toBoolean(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
+            }
         }
 
         return false; // no, do not abort startup
