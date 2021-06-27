@@ -30,6 +30,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.io.UserInputRequest;
+import me.darksidecode.keiko.io.YesNo;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.KeikoProperties;
@@ -130,18 +131,18 @@ public class StaticAnalysisManager {
             }
         }
 
-        if (warningsTotal > 0) { // ask the user whether to abort startup or not // IMPORTANT: negate result (see below)
+        if (warningsTotal > 0) { // ask user whether to abort startup or not // IMPORTANT: negate result (see below)
             if (KeikoProperties.staticInspWarnsYes != null)
                 // System startup property set. Just use its predefined result and don't prompt anything.
                 return !KeikoProperties.staticInspWarnsYes;
             else
-                // Prompt the user to enter "y[es]" or "n[o]" explicitly.
-                return !UserInputRequest.newBuilder(System.in, Boolean.class)
+                // Prompt user to enter "y[es]" or "n[o]" explicitly.
+                return !UserInputRequest.newBuilder(System.in, YesNo.class)
                         .prompt(Keiko.INSTANCE.getLogger(), I18n.get("staticInspections.proceedAnywayPrompt"))
-                        .lineTransformer(line -> line.trim().toLowerCase())
-                        .lineTransformer(line -> line.startsWith("y") ? "true" : "false")
+                        .lineTransformer(String::trim)
                         .build()
-                        .block(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
+                        .block()
+                        .toBoolean(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
         }
 
         return false; // no, do not abort startup
