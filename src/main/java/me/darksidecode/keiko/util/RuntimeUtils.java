@@ -31,8 +31,8 @@ public final class RuntimeUtils {
             String callerClassName = e.getClassName();
             String callerMethodName = e.getMethodName();
 
-            IndexedPlugin plugin = Keiko.INSTANCE.
-                    getPluginContext().getClassOwner(callerClassName);
+            IndexedPlugin plugin = Keiko.INSTANCE
+                    .getPluginContext().getClassOwner(callerClassName);
 
             if (plugin != null)
                 return new Identity(
