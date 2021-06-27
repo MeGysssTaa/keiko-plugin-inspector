@@ -30,6 +30,17 @@ import java.util.NoSuchElementException;
 
 class Rule {
 
+    // Particular classes seem to be loaded lazily when calling #filterCaller for the first time.
+    // So we have to exclude this first call. Otherwise we'll get a stack overflow error caused by
+    // that class load calling KeikoSecurityManager#checkPackageAccess
+    //                         ---> #checkAccess
+    //                         ---> #filterCaller
+    //                         ---> ---> #checkPackageAccess (again)
+    //                         ---> ---> ... (again)
+    //                         ... and so on.
+    @Getter
+    private static volatile boolean loaded = false;
+
     private final String originStr;
 
     @Getter (AccessLevel.PACKAGE)
@@ -130,6 +141,8 @@ class Rule {
     }
 
     boolean filterCaller(@NonNull Identity caller) {
+        loaded = true;
+
         switch (identityFilter) {
             default: // ALL
                 return true;

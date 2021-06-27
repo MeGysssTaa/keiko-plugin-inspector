@@ -34,6 +34,10 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
+    // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
+    // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
+    private static final String dacPkg = KeikoSecurityManager.class.getPackage().getName();
+
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
 
@@ -293,8 +297,9 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     @Override
     public void checkPackageAccess(String pkg) {
-        checkAccess(arg -> StringUtils.matchWildcards(
-                pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
+        if (Rule.isLoaded())
+            checkAccess(arg -> !pkg.equals(dacPkg) && StringUtils.matchWildcards(
+                    pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
     }
 
     private void checkNoArgs(Operation op) {
@@ -309,7 +314,6 @@ public class KeikoSecurityManager extends DomainAccessController {
         // the Minecraft server/Bukkit/Bungee, or some other dark magic.
         if (caller != null) {
             Rule.Type defaultRule = defaultRules.get(op);
-
             debugAccess(caller, op, details);
             boolean deny = defaultRule == Rule.Type.DENY;
 
@@ -341,7 +345,7 @@ public class KeikoSecurityManager extends DomainAccessController {
 
             if (deny) {
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "runtimeProtect.vioDetected", caller, op.fancyName(), details);
+                        "runtimeProtect.dac.vioDetected", caller, op.fancyName(), details);
                 throw new SecurityException("access denied by Keiko Domain Access Control");
             }
         }
