@@ -136,7 +136,7 @@ public class StaticAnalysisManager {
                 // System startup property set. Just use its predefined result and don't prompt anything.
                 return !KeikoProperties.staticInspWarnsYes;
             else
-                // Prompt user to enter "y[es]" or "n[o]" explicitly.
+                // Prompt user to enter "yes" or "no" explicitly.
                 return !UserInputRequest.newBuilder(System.in, YesNo.class)
                         .prompt(Keiko.INSTANCE.getLogger(), I18n.get("staticInspections.proceedAnywayPrompt"))
                         .lineTransformer(String::trim)
