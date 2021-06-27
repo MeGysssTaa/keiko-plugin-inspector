@@ -30,7 +30,15 @@ class ChecksumsCacheFile {
     private static final String CACHE_FILE_EXTENSION = ".dat";
 
     Map<String, String> read() {
-        return JsonFileUtils.readCompressedJsonUtf8(getFile(), HashMap.class);
+        File file = getFile();
+
+        try {
+            return JsonFileUtils.readCompressedJsonUtf8(file, HashMap.class);
+        } catch (Exception ex) {
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+            return new HashMap<>();
+        }
     }
 
     void save(@NonNull Map<String, String> checksums) {
