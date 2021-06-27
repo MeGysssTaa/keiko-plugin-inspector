@@ -19,7 +19,6 @@ package me.darksidecode.keiko.staticanalysis.cache;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.kantanj.formatting.CommonJson;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisResult;
 
@@ -43,14 +42,6 @@ public class InspectionCache implements Serializable {
     // String [key] is analysis (inspection) name.
     @NonNull
     private final Map<String, List<StaticAnalysisResult>> analysesResults;
-
-    public String toJson() {
-        return CommonJson.toJson(this);
-    }
-
-    public static InspectionCache fromJson(@NonNull String json) {
-        return CommonJson.fromJson(json, InspectionCache.class);
-    }
 
     public static InspectionCache createEmptyCache() {
         return new InspectionCache(

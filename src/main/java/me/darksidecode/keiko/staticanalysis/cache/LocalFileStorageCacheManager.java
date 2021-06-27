@@ -17,11 +17,11 @@
 package me.darksidecode.keiko.staticanalysis.cache;
 
 import lombok.NonNull;
+import me.darksidecode.kantanj.system.FileUtils;
 import me.darksidecode.keiko.proxy.Keiko;
-import org.apache.commons.io.FileUtils;
+import me.darksidecode.keiko.util.JsonFileUtils;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 public class LocalFileStorageCacheManager implements CacheManager {
 
@@ -33,8 +33,7 @@ public class LocalFileStorageCacheManager implements CacheManager {
         InspectionCache result = null;
 
         if (cacheFile.isFile()) {
-            String json = FileUtils.readFileToString(cacheFile, StandardCharsets.UTF_8.name());
-            InspectionCache cache = InspectionCache.fromJson(json);
+            InspectionCache cache = JsonFileUtils.readCompressedJsonUtf8(cacheFile, InspectionCache.class);
             String installedKeikoVersion = Keiko.INSTANCE.getBuildProperties().getVersion();
 
             if (installedKeikoVersion.equals(cache.getKeikoVersion()))
@@ -54,7 +53,7 @@ public class LocalFileStorageCacheManager implements CacheManager {
         if (cacheFile.exists() && !cacheFile.delete())
             return false; // failed to delete cache file that already exists
 
-        FileUtils.writeStringToFile(cacheFile, cache.toJson(), StandardCharsets.UTF_8.name());
+        JsonFileUtils.writeCompressedJsonUtf8(cacheFile, cache, FileUtils.OverwriteMode.OVERWRITE);
 
         return true;
     }
