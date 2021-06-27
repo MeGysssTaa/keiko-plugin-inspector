@@ -16,7 +16,7 @@
 
 package me.darksidecode.keiko.util;
 
-import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 
@@ -31,7 +31,7 @@ public final class RuntimeUtils {
             String callerClassName = e.getClassName();
             String callerMethodName = e.getMethodName();
 
-            IndexedPlugin plugin = KeikoPluginInspector.
+            IndexedPlugin plugin = Keiko.INSTANCE.
                     getPluginContext().getClassOwner(callerClassName);
 
             if (plugin != null)
