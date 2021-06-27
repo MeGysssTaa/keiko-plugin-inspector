@@ -20,7 +20,10 @@ import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.config.YamlHandle;
-import me.darksidecode.keiko.runtimeprotect.CallerInfo;
+import me.darksidecode.keiko.i18n.I18n;
+import me.darksidecode.keiko.io.KeikoLogger;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import me.darksidecode.keiko.util.StringUtils;
 
@@ -50,11 +53,9 @@ public class KeikoSecurityManager extends DomainAccessController {
             try {
                 defaultRules.put(op, Rule.Type.valueOf(defaultRuleStr.toUpperCase().trim()));
             } catch (NullPointerException | IllegalArgumentException ex) {
-                KeikoPluginInspector.warn("Invalid Domain Access Control default configuration " +
-                                "for operation %s: %s, expected one of: %s. Falling back to 'ALLOW'",
-                        op, defaultRuleStr, Arrays.toString(Rule.Type.values()));
-
                 defaultRules.put(op, Rule.Type.ALLOW);
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "runtimeProtect.dac.invalidDefCfg", op.fancyName(), defaultRuleStr);
             }
 
             rules.put(op, new ArrayList<>());
@@ -68,16 +69,16 @@ public class KeikoSecurityManager extends DomainAccessController {
                 Rule rule = new Rule(ruleStr);
 
                 if (rule.getFilterType() == defaultRules.get(op))
-                    KeikoPluginInspector.warn("Ignoring contradictory rule %s for " +
-                            "operation %s (default rule is of the same type).", rule.getFilterType(), op);
+                    Keiko.INSTANCE.getLogger().warningLocalized(
+                            "runtimeProtect.dac.ignoringContraRule", op.fancyName(), ruleStr);
                 else
                     rules.get(op).add(rule);
             } catch (Exception ex) {
                 // Invalid rule. Skip it and warn.
                 String cause = (ex.getCause() == null) ? "?" : ex.getCause().getMessage();
-                KeikoPluginInspector.warn(
-                        "Invalid Domain Access Control rules configuration for operation %s. " +
-                                "These rules will be ignored. Details: %s (%s).", op, ex.getMessage(), cause);
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "runtimeProtect.dac.ignoringInvalidRule",
+                        op.fancyName(), ruleStr, ex.getMessage(), cause);
             }
         }
     }
@@ -117,17 +118,17 @@ public class KeikoSecurityManager extends DomainAccessController {
                 String[] args = arg.split(" PORT ");
 
                 if (args.length != 2) {
-                    KeikoPluginInspector.warn("Invalid rule for operation %s: " +
-                                    "illegal number of arguments separated by ' PORT ': " +
-                                    "expected exactly two ('host PORT port'): \"%s\". Ignoring this rule!",
-                            op, arg);
+                    Keiko.INSTANCE.getLogger().warningLocalized(
+                            "runtimeProtect.dac.ignoringInvalidRule",
+                            op.fancyName(), "... " + arg,
+                            "unexpected number of arguments separated by \" PORT \"",
+                            "expected 2, got " + args.length);
 
                     return false;
                 }
 
                 String allowedHost = args[0].trim();
                 String allowedPortStr = StringUtils.replacePortByName(args[1].trim());
-
                 int allowedPort;
 
                 if (allowedPortStr.equals("*"))
@@ -135,20 +136,15 @@ public class KeikoSecurityManager extends DomainAccessController {
                 else {
                     try {
                         allowedPort = Integer.parseInt(allowedPortStr);
+
+                        if (allowedPort < 0 || allowedPort > 65535)
+                            throw new NumberFormatException();
                     } catch (NumberFormatException ex) {
-                        KeikoPluginInspector.warn("Invalid rule for operation %s: " +
-                                        "invalid port (port must be an integer in range 0 to 65535): %s." +
-                                        "Ignoring this rule!",
-                                op, allowedPortStr);
-
-                        return false;
-                    }
-
-                    if ((allowedPort < 0) || (allowedPort > 65535)) {
-                        KeikoPluginInspector.warn("Invalid rule for operation %s: " +
-                                        "invalid port (port must be an integer in range 0 to 65535): %s." +
-                                        "Ignoring this rule!",
-                                op, allowedPortStr);
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                "runtimeProtect.dac.ignoringInvalidRule",
+                                op.fancyName(), "... " + arg,
+                                "invalid port number",
+                                "expected an integer in range 0 to 65535 or a special port name (example: \"HTTPS\")");
 
                         return false;
                     }
@@ -159,12 +155,15 @@ public class KeikoSecurityManager extends DomainAccessController {
 
                 return allowHost && allowPort;
             } else {
-                KeikoPluginInspector.warn("Invalid rule for operation %s: missing port specification; " +
-                        "required syntax: 'host PORT port'. Ignoring this rule!", op);
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "runtimeProtect.dac.ignoringInvalidRule",
+                        op.fancyName(), "... " + arg,
+                        "missing port number",
+                        "argument syntax: \"(host) PORT (port)");
 
                 return false;
             }
-        }, op, "Host: " + host + " | Port: " + port);
+        }, op, I18n.get("runtimeProtect.dac.hostPort", host, port));
     }
 
     @Override
@@ -195,11 +194,10 @@ public class KeikoSecurityManager extends DomainAccessController {
     private void checkFileAccess(String file, Operation op) {
         file = new File(file).getAbsolutePath(); // transform 'file' to get the full path
         file = file.replace("\\", "/"); // Windows's directory separator + Regex != love
-
         String finalFile = file;
 
         checkAccess(arg -> StringUtils.matchWildcards(
-                finalFile, arg), op, "File: " + file);
+                finalFile, arg), op, I18n.get("runtimeProtect.dac.file", file));
     }
 
     @Override
@@ -212,13 +210,13 @@ public class KeikoSecurityManager extends DomainAccessController {
             boolean allowLibPath = StringUtils.matchWildcards(libPath, arg);
 
             return allowLibName || allowLibPath;
-        }, Operation.NATIVES_LINKAGE, "Library: " + lib + " | Path: " + libPath);
+        }, Operation.NATIVES_LINKAGE, I18n.get("runtimeProtect.dac.nativeLib", lib, libPath));
     }
 
     @Override
     public void checkExec(String cmd) {
         checkAccess(arg -> StringUtils.matchWildcards(cmd, arg),
-                Operation.COMMAND_EXECUTION, "Command: " + cmd);
+                Operation.COMMAND_EXECUTION, I18n.get("runtimeProtect.dac.sysCmd", cmd));
     }
 
     @Override
@@ -232,16 +230,18 @@ public class KeikoSecurityManager extends DomainAccessController {
                 try {
                     allowedStatus = Integer.parseInt(arg);
                 } catch (NumberFormatException ex) {
-                    KeikoPluginInspector.warn("Invalid rule for operation %s: " +
-                                    "invalid exit status: %s (must be an integer). Ignoring this rule!",
-                            Operation.SYSTEM_EXIT, arg);
+                    Keiko.INSTANCE.getLogger().warningLocalized(
+                            "runtimeProtect.dac.ignoringInvalidRule",
+                            Operation.SYSTEM_EXIT, "... " + arg,
+                            "invalid exit code",
+                            "exit code must be an integer");
 
                     return false;
                 }
             }
 
             return allowedStatus == -0xCAFE || status == allowedStatus;
-        }, Operation.SYSTEM_EXIT, "Status: " + status);
+        }, Operation.SYSTEM_EXIT, I18n.get("runtimeProtect.dac.statusCode"));
     }
 
     @Override
@@ -283,40 +283,38 @@ public class KeikoSecurityManager extends DomainAccessController {
             // which requires the 'suppressAccessChecks' permission, thus executing method
             // 'SecurityManager#checkPermission', and therefore returning us to this point.
             checkAccess(arg -> StringUtils.matchWildcards(
-                    action, arg), Operation.MISCELLANEOUS, "Action: " + action);
+                    action, arg), Operation.MISCELLANEOUS, I18n.get("runtimeProtect.dac.action", action));
         }
     }
 
     private void checkPropertyAccess(String property, Operation op) {
         checkAccess(arg -> StringUtils.matchWildcards(
-                property, arg), op, "Property: " + property);
+                property, arg), op, I18n.get("runtimeProtect.dac.prop", property));
     }
 
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
-        checkAccess(arg -> true, op, "no details");
+        checkAccess(arg -> true, op, "-");
     }
 
     private void checkAccess(Function<String, Boolean> ruleFunc, Operation op, String details) {
-        CallerInfo callerInfo = RuntimeUtils.getCallerInfo();
+        Identity caller = RuntimeUtils.getCaller();
 
-        // If callerInfo is null, then this means that the caller is either
-        // Keiko, the Minecraft server/Bukkit/Spigot, or some other dark magic.
-        if (callerInfo != null) {
+        // If caller is null, then this means that the caller is either
+        // the Minecraft server/Bukkit/Bungee, or some other dark magic.
+        if (caller != null) {
             Rule.Type defaultRule = defaultRules.get(op);
 
-            debugAccess(callerInfo, op, details);
+            debugAccess(caller, op, details);
             boolean deny = defaultRule == Rule.Type.DENY;
 
             // Self-defense
-            if ((RuntimeProtectConfig.getSelfDefense())
-                    && ((op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE))
-                    && (details.contains("/" + KeikoPluginInspector.getWorkDir().getName()))) { // "File: {file_name}"
-                KeikoPluginInspector.warn(
-                        "(Self-Defense) Detected security violation by %s on operation %s (%s)",
-                        callerInfo, op, details);
-
-                throw new SecurityException("(Self-Defense) access denied by Keiko Domain Access Control");
+            if (RuntimeProtectConfig.getSelfDefense()
+                    && (op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE)
+                    && details.contains(KeikoPluginInspector.getWorkDir().getAbsolutePath())) { // "File: {file_name}"
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "runtimeProtect.dac.vioDetected", caller, op.fancyName(), details);
+                throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");
             }
 
             // Rules/filters
@@ -325,11 +323,10 @@ public class KeikoSecurityManager extends DomainAccessController {
 
                 if (rule.getIdentityFilter() == Rule.IdentityFilter.ALL)
                     arg = arg.
-                            replace("{plugin_name}", callerInfo.getPlugin().getName()).
-                            replace("{plugin_jar_path}", callerInfo.getPlugin().getJar().getAbsolutePath().
-                                    replace("\\", "/") /* better Windows compatibility */);
+                            replace("{plugin_name}", caller.getPluginName()).
+                            replace("{plugin_jar_path}", caller.getFilePath());
 
-                boolean filtered = rule.filterCaller(callerInfo);
+                boolean filtered = rule.filterCaller(caller);
                 boolean allowArg = ruleFunc.apply(arg);
                 boolean match = filtered && allowArg;
 
@@ -338,23 +335,18 @@ public class KeikoSecurityManager extends DomainAccessController {
             }
 
             if (deny) {
-                KeikoPluginInspector.warn(
-                        "Detected security violation by %s on operation %s (%s)",
-                        callerInfo, op, details);
-
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "runtimeProtect.vioDetected", caller, op.fancyName(), details);
                 throw new SecurityException("access denied by Keiko Domain Access Control");
             }
         }
     }
 
-    private void debugAccess(CallerInfo callerInfo, Operation op, String details) {
-        String message = String.format("Registered %s call initiated by %s. %s",
-                op.name().toLowerCase().replace("_", " "), callerInfo, details);
-
-        if (conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false))
-            KeikoPluginInspector.info(message);
-        else
-            KeikoPluginInspector.debug(message);
+    private void debugAccess(Identity caller, Operation op, String details) {
+        boolean notify = conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false);
+        KeikoLogger.Level level = notify ? KeikoLogger.Level.INFO : KeikoLogger.Level.DEBUG;
+        Keiko.INSTANCE.getLogger().logLocalized(
+                level, "runtimeProtect.dac.actionDebug", caller, op.fancyName(), details);
     }
 
     @RequiredArgsConstructor
@@ -373,7 +365,11 @@ public class KeikoSecurityManager extends DomainAccessController {
         PROPERTIES_ACCESS,
         PROPERTY_WRITE,
         PROPERTY_READ,
-        MISCELLANEOUS
+        MISCELLANEOUS;
+
+        String fancyName() {
+            return name().toLowerCase().replace('_', ' ');
+        }
     }
 
 }

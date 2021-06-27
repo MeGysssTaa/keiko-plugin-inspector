@@ -16,11 +16,13 @@
 
 package me.darksidecode.keiko.registry;
 
+import lombok.Getter;
 import lombok.NonNull;
 import me.darksidecode.keiko.util.StringUtils;
 
 public class Identity {
 
+    @Getter
     private final String filePath, pluginName, className, methodName;
 
     private final boolean filterBase;
@@ -50,6 +52,11 @@ public class Identity {
 
     private static String replaceIfNotNull(String s, char oldChar, char newChar) {
         return s == null ? null : s.replace(oldChar, newChar);
+    }
+
+    @Override
+    public String toString() {
+        return "[Plugin: " + pluginName + ", Source: " + className + "#" + methodName + "]";
     }
 
     boolean matches(@NonNull Identity other) {

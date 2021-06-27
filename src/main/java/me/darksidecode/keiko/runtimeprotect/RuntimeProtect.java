@@ -17,50 +17,23 @@
 package me.darksidecode.keiko.runtimeprotect;
 
 import lombok.Getter;
-import me.darksidecode.keiko.KeikoPluginInspector;
-import me.darksidecode.keiko.Platform;
+import me.darksidecode.keiko.config.RuntimeProtectConfig;
+import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.runtimeprotect.dac.KeikoSecurityManager;
 
 public class RuntimeProtect {
-
-    private static final String HELP_URL = "https://github.com/MeGysssTaa/keiko-plugin-inspector" +
-            "/wiki/Common-Issues#2jvm-security-manager-is-already-set-error-on-bungeecord";
 
     @Getter
     private boolean enabled;
 
     public void setupDomainAccessControl() {
-        KeikoPluginInspector.debug("Setting up Keiko security manager");
+        if (!RuntimeProtectConfig.getDomainAccessControlEnabled())
+            return;
 
-        SecurityManager curSec    = System.getSecurityManager();
-        String curSecurityManager = System.getProperty("java.security.manager");
-        String curSecurityPolicy  = System.getProperty("java.security.policy");
-
-        if ((curSec != null) || (curSecurityManager != null) || (curSecurityPolicy != null))
-            KeikoPluginInspector.warn("JVM security manager is already set (%s). " +
-                    "Domain access control may not work properly. Check your start command arguments for: " +
-                    "'java.security.manager' (%s), 'java.security.policy' (%s).",
-                    (curSec == null) ? "N/A" : curSec.getClass().getName(), curSecurityManager, curSecurityPolicy);
-
-        try {
-            SecurityManager mgr = new KeikoSecurityManager();
-            System.setSecurityManager(mgr);
-
-            enabled = true; // indicate that Keiko DAC was successfully enabled
-        } catch (SecurityException ex) {
-            KeikoPluginInspector.warn("Failed to setup Keiko Domain Access Control.");
-            KeikoPluginInspector.warn("Keiko will be unable to protect your server at runtime.");
-
-            if (KeikoPluginInspector.getPlatform() == Platform.BUNGEECORD) {
-                KeikoPluginInspector.warn("Visit Keiko wiki for help:");
-                KeikoPluginInspector.warn("> %s", HELP_URL);
-            } else {
-                KeikoPluginInspector.warn("This kind of issue is unusual for Bukkit/Spigot servers.");
-                KeikoPluginInspector.warn("Please report this on Github or Discord!");
-            }
-
-            ex.printStackTrace();
-        }
+        SecurityManager mgr = new KeikoSecurityManager();
+        System.setSecurityManager(mgr);
+        enabled = true; // indicate that Keiko DAC was successfully enabled
+        Keiko.INSTANCE.getLogger().debugLocalized("runtimeProtect.dac.enabled");
     }
 
 }

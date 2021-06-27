@@ -16,29 +16,21 @@
 
 package me.darksidecode.keiko.runtimeprotect.dac;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IndexedPlugin;
-import me.darksidecode.keiko.runtimeprotect.CallerInfo;
+import me.darksidecode.keiko.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Supplier;
 
 class Rule {
 
-    private static final Map<String, Supplier<String>> placeholders =
-            ImmutableMap.<String, Supplier<String>>builder().
-                    put("{plugins_folder}", () -> KeikoPluginInspector.getPluginsFolder().
-                            getAbsolutePath().replace("\\", "/")). // better Windows compatibility
-                    put("{server_folder}", () -> KeikoPluginInspector.getServerFolder().
-                            getAbsolutePath().replace("\\", "/")). // better Windows compatibility
-                    put("{java_folder}", KeikoPluginInspector::getJrePath). // "\" -> "/" is done on init for jrePath
-            build();
+    private final String originStr;
 
     @Getter (AccessLevel.PACKAGE)
     private final Type filterType;
@@ -46,7 +38,6 @@ class Rule {
     @Getter (AccessLevel.PACKAGE)
     private final IdentityFilter identityFilter;
 
-    @Getter (AccessLevel.PACKAGE)
     private final Object filteredObject;
 
     @Getter (AccessLevel.PACKAGE)
@@ -56,17 +47,15 @@ class Rule {
 
         // TODO: 30.03.2019 complex checking for contradictory rules
 
-        if (s.contains("\\")) {
-            KeikoPluginInspector.warn("NOTE: Rule \"%s\" contains backslash characters ('\\'). " +
-                    "Automatically replacing them with regular slashes ('/') (those also work fine on Windows!)");
-            s = s.replace("\\", "/"); // Windows's directory separator + Regex != love
-        }
+        this.originStr = s; // must be done before any replacements!
+        s = StringUtils.basicReplacements(s);
 
         try {
             String[] tokens = s.split(" ");
 
             if (tokens.length < 3)
-                throw new IllegalArgumentException("insufficient number of words/commands (tokens), required: 3+");
+                throw new IllegalArgumentException(
+                        "insufficient number of words/commands (tokens), required: 3+");
 
             String typeStr = tokens[0].toUpperCase().trim();
 
@@ -97,12 +86,12 @@ class Rule {
 
             if (identityFilter == IdentityFilter.PLUGIN) {
                 String pluginName = identityArgs[1].trim();
-                filteredPlugin = KeikoPluginInspector.getPluginContext().getPlugin(pluginName);
+                filteredPlugin = Keiko.INSTANCE.getPluginContext().getPlugin(pluginName);
 
                 if (filteredPlugin == null)
                     throw new NoSuchElementException("no such plugin installed: \"" + pluginName + "\"");
 
-                filteredObject = filteredPlugin;
+                filteredObject = filteredPlugin.getName();
             } else if (identityFilter == IdentityFilter.SOURCE) {
                 String source = identityArgs[1].trim();
 
@@ -125,11 +114,7 @@ class Rule {
             // Omit the first two elements (rule type and identity type).
             String[] args = new String[tokens.length - 2];
             System.arraycopy(tokens, 2, args, 0, args.length);
-
             String arg = String.join(" ", args); // support for args like "/directory/with spaces/meh"
-
-            for (String placeholder : placeholders.keySet())
-                arg = arg.replace(placeholder, placeholders.get(placeholder).get());
 
             if (filteredPlugin != null)
                 arg = arg.
@@ -144,20 +129,26 @@ class Rule {
         }
     }
 
-    boolean filterCaller(CallerInfo callerInfo) {
+    boolean filterCaller(@NonNull Identity caller) {
         switch (identityFilter) {
             default: // ALL
                 return true;
 
             case PLUGIN:
-                return callerInfo.getPlugin() == filteredObject;
+                return caller.getPluginName().equals(filteredObject);
 
             case SOURCE:
                 FilteredSource source = (FilteredSource) filteredObject;
-                return callerInfo.getClazz().equals(source.getClassName())
-                        && ((source.getMethodName() == null)
-                            || (callerInfo.getMethod().equals(source.getMethodName())));
+
+                return caller.getClassName().equals(source.getClassName())
+                        && (source.getMethodName() == null
+                            || caller.getMethodName().equals(source.getMethodName()));
         }
+    }
+
+    @Override
+    public String toString() {
+        return originStr;
     }
 
     enum Type {

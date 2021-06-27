@@ -17,26 +17,14 @@
 package me.darksidecode.keiko.util;
 
 import me.darksidecode.keiko.KeikoPluginInspector;
+import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IndexedPlugin;
-import me.darksidecode.keiko.runtimeprotect.CallerInfo;
-
-import java.io.File;
-import java.util.Objects;
 
 public final class RuntimeUtils {
 
     private RuntimeUtils() {}
 
-    public static File getSourceJar(Class clazz) {
-        try {
-            return new File(Objects.requireNonNull(clazz, "clazz cannot be null").
-                    getProtectionDomain().getCodeSource().getLocation().toURI());
-        } catch (Exception ex) {
-            throw new RuntimeException("failed to get source jar for class: " + clazz.getName(), ex);
-        }
-    }
-
-    public static CallerInfo getCallerInfo() {
+    public static Identity getCaller() {
         StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
 
         for (StackTraceElement e : stacktrace) {
@@ -46,8 +34,11 @@ public final class RuntimeUtils {
             IndexedPlugin plugin = KeikoPluginInspector.
                     getPluginContext().getClassOwner(callerClassName);
 
-            if ((plugin != null) && (!(plugin.getJar().equals(KeikoPluginInspector.getKeikoJar()))))
-                return new CallerInfo(plugin, callerClassName, callerMethodName);
+            if (plugin != null)
+                return new Identity(
+                        plugin.getJar().getAbsolutePath(), plugin.getName(),
+                        callerClassName, callerMethodName
+                );
         }
 
         return null;

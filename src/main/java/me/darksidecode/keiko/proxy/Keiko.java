@@ -25,6 +25,7 @@ import me.darksidecode.keiko.installer.KeikoInstaller;
 import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;
+import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
 import me.darksidecode.keiko.staticanalysis.cache.LocalFileStorageCacheManager;
 
@@ -71,6 +72,9 @@ public final class Keiko {
 
     @Getter
     private StaticAnalysisManager staticAnalysisManager;
+
+    @Getter
+    private RuntimeProtect runtimeProtect;
 
     private File proxiedExecutable;
 
@@ -211,6 +215,7 @@ public final class Keiko {
         indexPlugins();
         ensurePluginsIntegrity();
         runStaticAnalyses();
+        setupRuntimeProtect();
         launchProxy();
     }
 
@@ -279,6 +284,11 @@ public final class Keiko {
             logger.warningLocalized("staticInspections.abortingLine2");
             System.exit(1);
         }
+    }
+
+    private void setupRuntimeProtect() {
+        runtimeProtect = new RuntimeProtect();
+        runtimeProtect.setupDomainAccessControl();
     }
 
     private void launchProxy() {
