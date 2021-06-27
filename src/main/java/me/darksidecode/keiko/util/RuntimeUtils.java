@@ -25,7 +25,7 @@ public final class RuntimeUtils {
     private RuntimeUtils() {}
 
     public static Identity getCaller() {
-        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        StackTraceElement[] stacktrace = new Exception().getStackTrace();
 
         for (StackTraceElement e : stacktrace) {
             String callerClassName = e.getClassName();
