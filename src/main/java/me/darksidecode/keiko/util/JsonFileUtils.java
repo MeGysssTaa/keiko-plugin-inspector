@@ -16,6 +16,7 @@
 
 package me.darksidecode.keiko.util;
 
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import me.darksidecode.kantanj.formatting.CommonJson;
 import me.darksidecode.kantanj.system.FileUtils;
@@ -26,13 +27,14 @@ import java.nio.charset.StandardCharsets;
 @UtilityClass
 public class JsonFileUtils {
 
-    public static <T> T readCompressedJsonUtf8(File file, Class<T> type) {
+    public static <T> T readCompressedJsonUtf8(@NonNull File file, @NonNull Class<T> type) {
         byte[] bytes = FileUtils.readGZIP(file);
         String json = new String(bytes, StandardCharsets.UTF_8);
         return CommonJson.fromJson(json, type);
     }
 
-    public static void writeCompressedJsonUtf8(File file, Object obj, FileUtils.OverwriteMode mode) {
+    public static void writeCompressedJsonUtf8(@NonNull File file, @NonNull Object obj,
+                                               @NonNull FileUtils.OverwriteMode mode) {
         String json = CommonJson.toJson(obj);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
         FileUtils.writeGZIP(file, bytes, mode);
