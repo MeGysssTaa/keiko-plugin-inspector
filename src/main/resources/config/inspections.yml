@@ -20,6 +20,13 @@
 
 
 
+# Names of plugins whose integrity should not be ensured. Keiko will exclude them
+# from checksum checking. It is strongly not recommended to list many plugins here.
+integrity_exclusions: []
+
+
+
+
 # Static inspections configuration.
 #
 # Static inspections are inspections that always run at server's early boot stage

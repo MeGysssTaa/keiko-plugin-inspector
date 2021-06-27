@@ -22,6 +22,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
@@ -190,8 +191,8 @@ public final class Keiko {
 
         KeikoInstaller installer = new KeikoInstaller(workDir);
 
-        ConfigurationLoader.load(installer, GlobalConfig.class);
-        ConfigurationLoader.load(installer, InspectionsConfig.class);
+        ConfigurationLoader.load(installer, GlobalConfig        .class);
+        ConfigurationLoader.load(installer, InspectionsConfig   .class);
         ConfigurationLoader.load(installer, RuntimeProtectConfig.class);
 
         KeikoLogger.Level.initLocalizedLevelNames();
@@ -204,6 +205,7 @@ public final class Keiko {
         started = true;
 
         indexPlugins();
+        ensurePluginsIntegrity();
         runStaticAnalyses();
         launchProxy();
     }
@@ -230,10 +232,23 @@ public final class Keiko {
         }
     }
 
+    private void ensurePluginsIntegrity() {
+        IntegrityChecker checker = new IntegrityChecker();
+        boolean abortStartup = checker.run(pluginContext);
+
+        if (abortStartup) {
+            // Some plugins' integrity has been violated.
+            logger.warningLocalized("integrityChecker.abortingLine1");
+            logger.warningLocalized("integrityChecker.abortingLine2");
+            System.exit(1);
+        }
+    }
+
     private void runStaticAnalyses() {
         // TODO: 22.06.2021 support for other CacheManager implementations (e.g. cloud-based)
         staticAnalysisManager = new StaticAnalysisManager(
                 pluginContext, new LocalFileStorageCacheManager());
+
         double beginTime = System.nanoTime();
         boolean abortStartup;
 

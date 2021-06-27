@@ -64,7 +64,7 @@ public class LocalFileStorageCacheManager implements CacheManager {
     }
 
     private File getCachesFolder() {
-        File cachesFolder = new File(Keiko.INSTANCE.getWorkDir(), ".caches/");
+        File cachesFolder = new File(Keiko.INSTANCE.getWorkDir(), ".artifacts/static-inspections-caches/");
         //noinspection ResultOfMethodCallIgnored
         cachesFolder.mkdirs();
 
