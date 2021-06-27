@@ -32,7 +32,7 @@ final class Converter<T> {
                 throw new NoSuchMethodException("the method exists, but is not public or is not static");
         } catch (ReflectiveOperationException ex) {
             throw new IllegalArgumentException("cannot create a Converter for type "
-                    + targetType.getName() + ": missing public static method 'valueOf(java.lang.String)'");
+                    + targetType.getName() + ": missing public static method 'valueOf(java.lang.String)'", ex);
         }
     }
 
