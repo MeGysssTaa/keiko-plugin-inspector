@@ -291,6 +291,12 @@ public class KeikoSecurityManager extends DomainAccessController {
                 property, arg), op, I18n.get("runtimeProtect.dac.prop", property));
     }
 
+    @Override
+    public void checkPackageAccess(String pkg) {
+        checkAccess(arg -> StringUtils.matchWildcards(
+                pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
+    }
+
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
         checkAccess(arg -> true, op, "-");
@@ -364,6 +370,7 @@ public class KeikoSecurityManager extends DomainAccessController {
         PROPERTIES_ACCESS,
         PROPERTY_WRITE,
         PROPERTY_READ,
+        PACKAGE_ACCESS,
         MISCELLANEOUS;
 
         String fancyName() {

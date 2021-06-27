@@ -319,6 +319,30 @@ domain_access_control:
     default: ALLOW
     rules: []
 
+  # Package (code location) access control.
+  #
+  # Controls plugins' access to particular packages on the classpath.
+  # Can be used to prevent a plugin from calling a function from another
+  # plugin, or, for example, to prevent all plugins from interacting with
+  # Keiko directly.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> <package name>
+  #
+  # Examples:
+  #
+  #     # Allow all plugins to access all packages on the classpath:
+  #     - ALLOW ALL *
+  #
+  #     # Forbid all plugins to access Keiko's package (so that they cannot hack Keiko programmatically):
+  #     - DENY ALL me.darksidecode.keiko.*
+  package_access:
+    notify: false
+    default: ALLOW
+    rules:
+      - DENY ALL me.darksidecode.keiko.*
+
   # Miscellaneous JVM actions (permissions) control.
   #
   # Allows to control plugins' access to specific JVM permissions.
