@@ -20,10 +20,7 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +40,8 @@ public class UserInputRequest<T> {
     private volatile String prompt;
 
     private volatile int maxAttempts = INFINITE_ATTEMPTS;
+
+    private volatile boolean closeAfterRead;
 
     private final List<Function<String, String>> lineTransformers = new ArrayList<>();
 
@@ -70,10 +69,25 @@ public class UserInputRequest<T> {
         used = true;
         T input = null;
 
-        while (hasMoreAttempts() && (input = tryRead()) == null)
-            attemptsMade++;
+        BufferedReader reader = null;
 
-        return input;
+        try {
+            reader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            while (hasMoreAttempts() && (input = tryRead(reader)) == null)
+                attemptsMade++;
+
+            return input;
+        } catch (IOException ex) {
+            throw new RuntimeException("fatal i/o exception", ex);
+        } finally {
+            if (reader != null && closeAfterRead) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {}
+            }
+        }
     }
 
     private synchronized void expectState(boolean expectUsed) {
@@ -83,20 +97,15 @@ public class UserInputRequest<T> {
             throw new IllegalStateException("not used yet");
     }
 
-    private synchronized T tryRead() {
+    private synchronized T tryRead(BufferedReader reader) throws IOException {
         prompter.prompt(prompt);
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String line = reader.readLine();
+        String line = reader.readLine();
 
-            if (line == null)
-                throw new IllegalStateException("unexpected end of input stream"); // fatal
+        if (line == null)
+            throw new EOFException("unexpected end of user input stream"); // fatal
 
-            return tryConvert(line);
-        } catch (IOException ex) {
-            throw new RuntimeException("failed to read the specified input stream", ex); // fatal
-        }
+        return tryConvert(line);
     }
 
     private synchronized T tryConvert(String line) {
@@ -131,6 +140,11 @@ public class UserInputRequest<T> {
                 throw new IllegalArgumentException("maxAttempts cannot be smaller than 1");
 
             result.maxAttempts = maxAttempts;
+            return this;
+        }
+
+        public Builder<T> closeAfterRead(boolean closeAfterRead) {
+            result.closeAfterRead = closeAfterRead;
             return this;
         }
 
