@@ -32,7 +32,9 @@ public class YesNo {
         return value;
     }
 
+    @SuppressWarnings ("unused") // called reflectively from Converter
     public static YesNo valueOf(String s) {
+        // Use localized words for "yes" and "no" for better user experience.
         if (s.equalsIgnoreCase(I18n.get("prompts.yes")))
             return YES;
         else if (s.equalsIgnoreCase(I18n.get("prompts.no")))
