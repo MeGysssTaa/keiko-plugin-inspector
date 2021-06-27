@@ -138,6 +138,10 @@ public final class Keiko {
                     "Keiko must be ran without a pre-set SecurityManager " +
                     "(detected: " + securityManager.getClass().getName() + ")");
 
+        if (System.getProperty("java.security.manager") != null
+                || System.getProperty("java.security.policy") != null)
+            throw new IllegalStateException("Keiko must be ran without pre-set Java security policies");
+
         String propSysLoader = System.getProperty("java.system.class.loader");
 
         if (propSysLoader != null)
