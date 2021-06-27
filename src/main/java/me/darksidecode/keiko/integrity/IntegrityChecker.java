@@ -60,9 +60,12 @@ public class IntegrityChecker {
                 updateChecksum(checksums, plugName, actualChecksum);
             else if (!cachedChecksum.equalsIgnoreCase(actualChecksum)) {
                 // Checksum has changed. Ask the user whether they want to update it or abort server startup.
-                Keiko.INSTANCE.getLogger().warningLocalized("integrityChecker.violationPlugin", plugName      );
-                Keiko.INSTANCE.getLogger().warningLocalized("integrityChecker.violationCached", cachedChecksum);
-                Keiko.INSTANCE.getLogger().warningLocalized("integrityChecker.violationActual", actualChecksum);
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "integrityChecker.violationPlugin", plugName);
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "integrityChecker.violationCached", shorten(cachedChecksum));
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "integrityChecker.violationActual", shorten(actualChecksum));
 
                 // Message like "Update checksum? [yes/no]"
                 String prompt = I18n.get("integrityChecker.updatePrompt")
@@ -98,6 +101,12 @@ public class IntegrityChecker {
     private void updateChecksum(Map<String, String> checksums, String plugName, String checksum) {
         checksums.put(plugName, checksum);
         Keiko.INSTANCE.getLogger().debugLocalized("integrityChecker.updated", plugName, checksum);
+    }
+
+    private static String shorten(String checksum) {
+        // Only display the first 7 and the last 7 characters of the checksum,
+        // because the entire string is huge - 128 characters long for SHA-512.
+        return checksum.substring(0, 7) + "..." + checksum.substring(checksum.length() - 7);
     }
 
 }
