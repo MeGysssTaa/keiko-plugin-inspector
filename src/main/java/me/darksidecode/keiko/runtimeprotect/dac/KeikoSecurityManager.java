@@ -17,7 +17,6 @@
 package me.darksidecode.keiko.runtimeprotect.dac;
 
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.KeikoPluginInspector;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.i18n.I18n;
@@ -311,7 +310,7 @@ public class KeikoSecurityManager extends DomainAccessController {
             // Self-defense
             if (RuntimeProtectConfig.getSelfDefense()
                     && (op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE)
-                    && details.contains(KeikoPluginInspector.getWorkDir().getAbsolutePath())) { // "File: {file_name}"
+                    && details.contains(Keiko.INSTANCE.getWorkDir().getAbsolutePath())) { // "File: {file_name}"
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.vioDetected", caller, op.fancyName(), details);
                 throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");
