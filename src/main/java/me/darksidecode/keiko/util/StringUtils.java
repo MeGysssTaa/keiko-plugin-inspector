@@ -34,7 +34,7 @@ public final class StringUtils {
     private static final String ESCAPED_DOT         = Pattern.quote(".");
 
     public static String basicReplacements(@NonNull String s) {
-        if (Keiko.INSTANCE.isStarted())
+        if (Keiko.INSTANCE.getLaunchState() != Keiko.LaunchState.NOT_LAUNCHED) // might be called, e.g., from tests
             s = s.replace("{keiko_folder}",   Keiko.INSTANCE.getWorkDir   ().getAbsolutePath())
                  .replace("{plugins_folder}", Keiko.INSTANCE.getPluginsDir().getAbsolutePath())
                  .replace("{server_folder}",  Keiko.INSTANCE.getServerDir ().getAbsolutePath());
