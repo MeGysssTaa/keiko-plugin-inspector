@@ -20,6 +20,7 @@
 package me.darksidecode.keiko.io;
 
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.i18n.I18n;
 
@@ -36,7 +37,7 @@ public class YesNo {
     }
 
     @SuppressWarnings ("unused") // called reflectively from Converter
-    public static YesNo valueOf(String s) {
+    public static YesNo valueOf(@NonNull String s) {
         // Use localized words for "yes" and "no" for better user experience.
         if (s.equalsIgnoreCase(I18n.get("prompts.yes")))
             return YES;
