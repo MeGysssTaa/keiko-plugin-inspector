@@ -32,8 +32,11 @@ public final class GlobalConfig {
     @Getter @Config
     private static String locale = "system";
 
-    @Getter @Config
-    private static Integer updatesCheckFreqMins = 120;
+    @Getter @Config ("updater.interval_minutes")
+    private static Integer updaterIntervalMinutes = 120;
+
+    @Getter @Config ("updater.download")
+    private static Boolean updaterDownload = true;
 
     @Getter @Config
     private static Integer logsLifespanDays = 14;

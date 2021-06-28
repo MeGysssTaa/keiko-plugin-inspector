@@ -25,6 +25,7 @@ import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installation.KeikoInstaller;
+import me.darksidecode.keiko.installation.KeikoUpdater;
 import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;
@@ -36,8 +37,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 public final class Keiko {
 
@@ -53,10 +57,13 @@ public final class Keiko {
     public static final Keiko INSTANCE = new Keiko();
 
     @Getter
-    private volatile boolean started;
+    private volatile LaunchState launchState = LaunchState.NOT_LAUNCHED;
 
     @Getter
     private BuildProperties buildProperties;
+
+    @Getter
+    private File keikoExecutable;
 
     @Getter
     private File serverDir;
@@ -210,11 +217,13 @@ public final class Keiko {
     }
 
     private void launch() {
-        if (started)
+        if (launchState != LaunchState.NOT_LAUNCHED)
             throw new IllegalStateException("cannot start twice");
 
-        started = true;
+        launchState = LaunchState.LAUNCHING;
 
+        findKeikoExecutable();
+        checkForUpdates();
         indexPlugins();
         ensurePluginsIntegrity();
         runStaticAnalyses();
@@ -231,6 +240,38 @@ public final class Keiko {
 
         //noinspection UseOfSystemOutOrSystemErr
         System.out.println("[Keiko] Bye!");
+    }
+
+    private void findKeikoExecutable() {
+        try {
+            keikoExecutable = new File(getClass()
+                    .getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException ex) {
+            throw new RuntimeException("failed to find the Keiko executable", ex);
+        }
+
+        if (!keikoExecutable.isFile())
+            throw new RuntimeException("the Keiko executable is not a file");
+
+        if (!keikoExecutable.canRead())
+            throw new RuntimeException("the Keiko executable cannot be read from");
+
+        if (!keikoExecutable.canWrite())
+            throw new RuntimeException("the Keiko executable cannot be written to");
+    }
+
+    private void checkForUpdates() {
+        int intervalMinutes = GlobalConfig.getUpdaterIntervalMinutes();
+        KeikoUpdater updater = new KeikoUpdater(
+                buildProperties.getVersion(), GlobalConfig.getUpdaterDownload());
+
+        if (intervalMinutes != -1 /* disable */) {
+            updater.run(); // run in this thread immediately
+
+            if (intervalMinutes != 0 /* only check at startup */)
+                new Timer().schedule(updater, 0,
+                        TimeUnit.MINUTES.toMillis(intervalMinutes));
+        }
     }
 
     private void indexPlugins() {
@@ -307,11 +348,20 @@ public final class Keiko {
             Class<?> bootstrapClass = loader.findClass(loader.getBootstrapClassName());
             Method bootstrapMethod = bootstrapClass.getMethod("main", String[].class);
             bootstrapMethod.invoke(null, (Object) new String[0]);
+
+            launchState = LaunchState.LAUNCHED_PROXY;
         } catch (Exception ex) {
             logger.warningLocalized("startup.proxyErr");
             logger.error("Failed to launch Keiko proxy", ex);
             System.exit(1);
         }
+    }
+
+    public enum LaunchState {
+        NOT_LAUNCHED,
+        LAUNCHING,
+        LAUNCHED_PROXY,
+        LAUNCHED_TOOL
     }
 
 }

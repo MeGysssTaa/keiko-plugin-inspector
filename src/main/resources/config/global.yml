@@ -23,18 +23,17 @@
 # 'system' means that Keiko will attempt to use the current system (OS) locale.
 locale: system
 
-# How often should Keiko check for its own updates? When a newer version
-# of Keiko is out, you will automatically be notified about that.
-# This value is measured in minutes (default: 120 minutes = check every 2 hours).
-#
-# Special options:
-#
-#     * set to 0 to disable periodic updates checking. Keiko will still
-#       check for updates on startup (remember - updating is important!);
-#
-#     * set to -1 to disable updates checking completely. Keiko will
-#       not check for updates at all (not recommended!).
-updates_check_freq_mins: 120
+# Keiko updater options.
+updater:
+
+  # Updates check interval, in minutes. If set to 0, Keiko will only check for updates
+  # at startup, and will not run any periodic checks. If set to -1, Keiko will not check
+  # for updates at all (not recommended!).
+  interval_minutes: 120
+
+  # Should Keiko download and install updates automatially when it finds them?
+  # You will still have to restart your server manually for the changes to apply!
+  download: true
 
 # Keiko automatically deletes log files that are older than the number of days
 # specified below. If you don't want Keiko to manage its logs automatically,
