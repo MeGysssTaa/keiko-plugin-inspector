@@ -19,30 +19,26 @@
 
 package me.darksidecode.keiko;
 
-import me.darksidecode.keiko.config.GlobalConfig;
-import me.darksidecode.keiko.installer.UpdatesCheckerTask;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings ("all")
 public class KeikoBungee extends Plugin {
-
-    static {
-        // (Pre-)load before any other plugins.
-        KeikoPluginInspector.earlyBoot(Platform.BUNGEECORD);
-    }
 
     @Override
     public void onEnable() {
-        int updatesCheckFreqMins = GlobalConfig.getUpdatesCheckFreqMins();
-
-        if (updatesCheckFreqMins >= 0) { // -1 = don't ever check for updates
-            if (updatesCheckFreqMins == 0) // Periodic checking is disabled - only check for updates once, at startup.
-                getProxy().getScheduler().runAsync(this, new UpdatesCheckerTask());
-            else
-                getProxy().getScheduler().schedule(this,
-                        new UpdatesCheckerTask(), 0, updatesCheckFreqMins, TimeUnit.MINUTES);
-        }
+        getProxy().getScheduler().schedule(this, () -> {
+            getLogger().warning(" ");
+            getLogger().warning("-----------------------------------------------------------------");
+            getLogger().warning(" KEIKO IS NOT A PLUGIN!");
+            getLogger().warning(" ");
+            getLogger().warning(" Do not put Keiko in your 'plugins' folder!");
+            getLogger().warning(" Please see the installation instructions at:");
+            getLogger().warning(" >> https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Installation-Instructions");
+            getLogger().warning("-----------------------------------------------------------------");
+            getLogger().warning(" ");
+        }, 1, 5, TimeUnit.SECONDS);
     }
 
 }

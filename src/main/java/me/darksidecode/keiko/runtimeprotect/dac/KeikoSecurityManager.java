@@ -283,7 +283,7 @@ public class KeikoSecurityManager extends DomainAccessController {
             // required to access members of Java classes that are otherwise not accessible
             // using Reflection (see java.lang.reflect.AccessibleObject#setAccessible).
             // If we did not ignore this permission, a StackOverflowError would be thrown
-            // at line with 'RuntimeUtils.getCallerInfo()' on some JVMs. This is because 'getCallerInfo()'
+            // at line with 'RuntimeUtils.resolveCallerPlugin()' on some JVMs. This is because 'resolveCallerPlugin()'
             // calls `PluginContext#getClassOwner(String)', which uses Streams API, specifically,
             // 'findFirst()', which natively calls 'java.lang.invoke.InnerClassLambdaMetafactory#buildCallSite',
             // which requires the 'suppressAccessChecks' permission, thus executing method
@@ -311,7 +311,7 @@ public class KeikoSecurityManager extends DomainAccessController {
     }
 
     private void checkAccess(Function<String, Boolean> ruleFunc, Operation op, String details) {
-        Identity caller = RuntimeUtils.getCaller();
+        Identity caller = RuntimeUtils.resolveCallerPlugin();
 
         // If caller is null, then this means that the caller is either
         // the Minecraft server/Bukkit/Bungee, or some other dark magic.

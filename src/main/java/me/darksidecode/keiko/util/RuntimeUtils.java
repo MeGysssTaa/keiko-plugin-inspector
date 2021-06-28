@@ -27,7 +27,7 @@ public final class RuntimeUtils {
 
     private RuntimeUtils() {}
 
-    public static Identity getCaller() {
+    public static Identity resolveCallerPlugin() {
         StackTraceElement[] stacktrace = new Exception().getStackTrace();
 
         for (StackTraceElement e : stacktrace) {
