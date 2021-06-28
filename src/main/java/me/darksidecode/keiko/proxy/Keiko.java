@@ -267,10 +267,10 @@ public final class Keiko {
 
         if (intervalMinutes != -1 /* disable */) {
             updater.run(); // run in this thread immediately
+            long millis = TimeUnit.MINUTES.toMillis(intervalMinutes);
 
             if (intervalMinutes != 0 /* only check at startup */)
-                new Timer().schedule(updater, 0,
-                        TimeUnit.MINUTES.toMillis(intervalMinutes));
+                new Timer().schedule(updater, millis, millis);
         }
     }
 

@@ -36,8 +36,8 @@ import java.util.TimerTask;
 @RequiredArgsConstructor
 public class KeikoUpdater extends TimerTask {
 
-    private static final String LATEST_RELEASE_URL
-            = "https://api.github.com/repos/MeGysssTaa/keiko-plugin-inspector/releases/latest";
+    private static final String GITHUB_API_URL = "https://api.github.com";
+    private static final String LATEST_RELEASE = "repos/MeGysssTaa/keiko-plugin-inspector/releases/latest";
 
     private final String installedVersion;
 
@@ -76,7 +76,8 @@ public class KeikoUpdater extends TimerTask {
     private String getReleasesJson() {
         try {
             GetHttpRequest request = new GetHttpRequest()
-                    .baseUrl(LATEST_RELEASE_URL)
+                    .baseUrl(GITHUB_API_URL)
+                    .path(LATEST_RELEASE)
                     .userAgent("keiko-plugin-inspector/v" + installedVersion)
                     .requestProperty("Accept", "application/vnd.github.v3+json")
                     .connectTimeout(5000)
