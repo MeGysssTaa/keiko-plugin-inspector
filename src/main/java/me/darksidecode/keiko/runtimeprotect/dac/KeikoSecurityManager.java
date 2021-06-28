@@ -58,7 +58,7 @@ public class KeikoSecurityManager extends DomainAccessController {
             } catch (NullPointerException | IllegalArgumentException ex) {
                 defaultRules.put(op, Rule.Type.ALLOW);
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "runtimeProtect.dac.invalidDefCfg", op.fancyName(), defaultRuleStr);
+                        "runtimeProtect.dac.invalidDefCfg", op.localizedName, defaultRuleStr);
             }
 
             rules.put(op, new ArrayList<>());
@@ -73,7 +73,7 @@ public class KeikoSecurityManager extends DomainAccessController {
 
                 if (rule.getFilterType() == defaultRules.get(op))
                     Keiko.INSTANCE.getLogger().warningLocalized(
-                            "runtimeProtect.dac.ignoringContraRule", op.fancyName(), ruleStr);
+                            "runtimeProtect.dac.ignoringContraRule", op.localizedName, ruleStr);
                 else
                     rules.get(op).add(rule);
             } catch (Exception ex) {
@@ -81,7 +81,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                 String cause = (ex.getCause() == null) ? "?" : ex.getCause().getMessage();
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.ignoringInvalidRule",
-                        op.fancyName(), ruleStr, ex.getMessage(), cause);
+                        op.localizedName, ruleStr, ex.getMessage(), cause);
             }
         }
     }
@@ -123,7 +123,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                 if (args.length != 2) {
                     Keiko.INSTANCE.getLogger().warningLocalized(
                             "runtimeProtect.dac.ignoringInvalidRule",
-                            op.fancyName(), "... " + arg,
+                            op.localizedName, "... " + arg,
                             "unexpected number of arguments separated by \" PORT \"",
                             "expected 2, got " + args.length);
 
@@ -145,7 +145,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                     } catch (NumberFormatException ex) {
                         Keiko.INSTANCE.getLogger().warningLocalized(
                                 "runtimeProtect.dac.ignoringInvalidRule",
-                                op.fancyName(), "... " + arg,
+                                op.localizedName, "... " + arg,
                                 "invalid port number",
                                 "expected an integer in range 0 to 65535 or a special port name (example: \"HTTPS\")");
 
@@ -160,7 +160,7 @@ public class KeikoSecurityManager extends DomainAccessController {
             } else {
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.ignoringInvalidRule",
-                        op.fancyName(), "... " + arg,
+                        op.localizedName, "... " + arg,
                         "missing port number",
                         "argument syntax: \"(host) PORT (port)");
 
@@ -322,7 +322,7 @@ public class KeikoSecurityManager extends DomainAccessController {
                     && (op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE)
                     && details.contains(Keiko.INSTANCE.getWorkDir().getAbsolutePath())) { // "File: {file_name}"
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "runtimeProtect.dac.vioDetected", caller, op.fancyName(), details);
+                        "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");
             }
 
@@ -345,7 +345,7 @@ public class KeikoSecurityManager extends DomainAccessController {
 
             if (deny) {
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "runtimeProtect.dac.vioDetected", caller, op.fancyName(), details);
+                        "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control");
             }
         }
@@ -355,7 +355,7 @@ public class KeikoSecurityManager extends DomainAccessController {
         boolean notify = conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false);
         KeikoLogger.Level level = notify ? KeikoLogger.Level.INFO : KeikoLogger.Level.DEBUG;
         Keiko.INSTANCE.getLogger().logLocalized(
-                level, "runtimeProtect.dac.actionDebug", caller, op.fancyName(), details);
+                level, "runtimeProtect.dac.actionDebug", caller, op.localizedName, details);
     }
 
     @RequiredArgsConstructor
@@ -377,8 +377,14 @@ public class KeikoSecurityManager extends DomainAccessController {
         PACKAGE_ACCESS,
         MISCELLANEOUS;
 
-        String fancyName() {
-            return name().toLowerCase().replace('_', ' ');
+        private String localizedName;
+
+        static {
+            Operation[] ops = values();
+
+            // Use localized names for better accessibility.
+            for (Operation op : ops) 
+                op.localizedName = I18n.get("runtimeProtect.dac.op." + op.name().toLowerCase());
         }
     }
 
