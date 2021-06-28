@@ -24,7 +24,7 @@ import me.darksidecode.keiko.config.ConfigurationLoader;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
-import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.installation.KeikoInstaller;
 import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;

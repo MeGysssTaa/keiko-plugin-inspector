@@ -20,7 +20,7 @@
 package me.darksidecode.keiko.config;
 
 import lombok.NonNull;
-import me.darksidecode.keiko.installer.KeikoInstaller;
+import me.darksidecode.keiko.installation.KeikoInstaller;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
