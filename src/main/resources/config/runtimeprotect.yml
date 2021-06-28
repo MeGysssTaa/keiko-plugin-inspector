@@ -342,6 +342,7 @@ domain_access_control:
     default: ALLOW
     rules:
       - DENY ALL me.darksidecode.keiko.*
+      - DENY ALL keiko_internals.*
 
   # Miscellaneous JVM actions (permissions) control.
   #
