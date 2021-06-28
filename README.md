@@ -57,4 +57,4 @@ echo "Use './gradlew shadowJar' in its root folder (you are browsing it at the m
 
 ## License
 
-**[Apache License 2.0](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**
+**[GNU GPLv3](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**
