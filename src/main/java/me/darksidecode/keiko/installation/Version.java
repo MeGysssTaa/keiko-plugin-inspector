@@ -72,6 +72,14 @@ public class Version implements Comparable<Version> {
         return result;
     }
 
+    public boolean isNewerThan(@NonNull Version o) {
+        return compareTo(o) > 0; // this > o  =>  this was published later than o
+    }
+
+    public boolean isOlderThan(@NonNull Version o) {
+        return compareTo(o) < 0; // this < o  =>  this was published earlier than o
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
