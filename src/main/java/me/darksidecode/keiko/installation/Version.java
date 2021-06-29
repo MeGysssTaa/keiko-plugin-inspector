@@ -60,10 +60,6 @@ public class Version implements Comparable<Version> {
 
     @Override
     public String toString() {
-        return major + "." + minor + "." + patch + "-" + type.name().toLowerCase();
-    }
-
-    public String toCanonicalString() {
         String result = major + "." + minor + "." + patch;
 
         if (type != Type.RELEASE)

@@ -114,7 +114,6 @@ public class VersionTest {
         Version version = Version.valueOf(originString);
         assertEquals(0, version.compareTo(base));
         assertEquals(base.toString(), version.toString());
-        assertEquals(base.toCanonicalString(), version.toCanonicalString());
     }
 
 }
