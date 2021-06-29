@@ -59,9 +59,12 @@ public class Injector {
                 .replace(".class/", "")
                 .replace(".class", "");
 
-        if (collector.collectInjections(className, null, null).isEmpty()) {
+        if (!className.startsWith("net/md_5/bungee/") && collector
+                .collectInjections(className, null, null).isEmpty()) {
             // We have nothing to inject in this class. Read its bytes as is from the JAR.
             // This is faster than blindly disassembling and reassembling all classes with ASM.
+            // Note that this does not apply to BungeeCord classes, since we do some extra
+            // modifications to them // this is so awful......
             try (InputStream inputStream = jar.getInputStream(entry)) {
                 return IOUtils.toByteArray(inputStream);
             } catch (IOException ex) {
@@ -101,10 +104,11 @@ public class Injector {
     }
     
     private void checkBungeeTransform(ClassNode cls, MethodNode mtd) {
-        // BungeeCord uses an own, almost useless, SecurityManager.
-        // Remove code that creates and sets it (just at runtime).
         if (cls.name.equals("net/md_5/bungee/BungeeCord") && mtd.name.equals("<init>"))
-            BungeeSecMgrRemover.apply(cls, mtd);
+            BungeeCompatibility.removeBungeeSecurityManager(cls, mtd);
+        else if ((cls.name.equals("net/md_5/bungee/api/plugin/PluginClassloader") && mtd.name.equals("<init>"))
+                || (cls.name.equals("net/md_5/bungee/api/plugin/LibraryLoader") && mtd.name.equals("createLoader")))
+            BungeeCompatibility.respectKeikoClassLoader(cls, mtd);
     }
 
 }
