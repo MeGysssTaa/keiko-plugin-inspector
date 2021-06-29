@@ -146,6 +146,7 @@ public final class Keiko {
     }
 
     private void checkEnvironment() {
+        // Check Java security manager and security policies.
         SecurityManager securityManager = System.getSecurityManager();
 
         if (securityManager != null)
@@ -157,6 +158,7 @@ public final class Keiko {
                 || System.getProperty("java.security.policy") != null)
             throw new IllegalStateException("Keiko must be ran without pre-set Java security policies");
 
+        // Check system class loader.
         String propSysLoader = System.getProperty("java.system.class.loader");
 
         if (propSysLoader != null)
@@ -234,6 +236,28 @@ public final class Keiko {
         KeikoLogger.Level.initLocalizedLevelNames();
     }
 
+    private void ensureUnambiguous() {
+        // Simple search for other Keiko JARs installed in the same directory.
+        // Such installations might be confusing, especially when the user is
+        // constantly switching between release and development builds.
+        File[] files = workDir.listFiles();
+
+        if (files == null)
+            throw new IllegalStateException("workDir has no files (null)");
+
+        for (File file : files) {
+            if (!file.equals(keikoExecutable)
+                    && file.getName().toLowerCase().contains("keiko")
+                    && file.getName().endsWith(".jar")) {
+                // Two or more Keiko executables found on the same path.
+                // This might be confusing for the user. Warn and exit.
+                logger.warningLocalized("startup.ambiguousInstallation",
+                        keikoExecutable.getName(), file.getName());
+                System.exit(1);
+            }
+        }
+    }
+
     private void launch() {
         if (launchState != LaunchState.NOT_LAUNCHED)
             throw new IllegalStateException("cannot start twice");
@@ -241,6 +265,7 @@ public final class Keiko {
         launchState = LaunchState.LAUNCHING;
 
         findKeikoExecutable();
+        ensureUnambiguous();
         checkForUpdates();
         indexPlugins();
         ensurePluginsIntegrity();
