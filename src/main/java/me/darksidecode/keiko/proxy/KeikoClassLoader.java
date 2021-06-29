@@ -74,6 +74,7 @@ class KeikoClassLoader extends URLClassLoader {
 
         injector = new Injector(jar, new SimpleJavaDisassembler(jar));
 
+        // Load classes and inject our code.
         Workflow workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
                 .phase(new LoadClassesPhase(this)
@@ -83,6 +84,13 @@ class KeikoClassLoader extends URLClassLoader {
 
         if (result == WorkflowExecutionResult.FATAL_FAILURE)
             throw new IllegalStateException("fatal class loader failure");
+
+        // Print some stats regarding injection. (Non-localized: this is a very low-level debug.)
+        long appliedInjections = injector.getAppliedInjections();
+        long skippedInjections = injector.getSkippedInjections();
+
+        Keiko.INSTANCE.getLogger().debug("Injections applied: %d/%d (%d skipped)",
+                appliedInjections, appliedInjections + skippedInjections, skippedInjections);
     }
 
     @Override

@@ -45,6 +45,14 @@ public class Injector {
 
     private final InjectionsCollector collector = new InjectionsCollector();
 
+    public long getAppliedInjections() {
+        return collector.getAppliedInjections();
+    }
+
+    public long getSkippedInjections() {
+        return collector.getSkippedInjections();
+    }
+
     public byte[] inject(@NonNull JarEntry entry) throws ClassNotFoundException, InjectionException {
         // Check whether we have anything to inject into this class or not.
         String className = entry.getName()

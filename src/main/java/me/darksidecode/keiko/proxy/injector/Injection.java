@@ -19,10 +19,7 @@
 
 package me.darksidecode.keiko.proxy.injector;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -39,6 +36,8 @@ class Injection implements Opcodes {
     @NonNull
     private final Inject.Position position;
 
+    private boolean applied;
+
     void apply(@NonNull ClassNode cls, @NonNull MethodNode mtd) {
         MethodInsnNode call = generateInjectionCall();
 
@@ -46,6 +45,8 @@ class Injection implements Opcodes {
             mtd.instructions.add(call);
         else
             mtd.instructions.insertBefore(mtd.instructions.getFirst(), call);
+
+        applied = true;
     }
 
     private MethodInsnNode generateInjectionCall() {

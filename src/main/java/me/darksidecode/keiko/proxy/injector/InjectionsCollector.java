@@ -44,6 +44,18 @@ class InjectionsCollector {
                 .collect(Collectors.toList());
     }
 
+    long getAppliedInjections() {
+        return injections.stream()
+                .filter(Injection::isApplied)
+                .count();
+    }
+
+    long getSkippedInjections() {
+        return injections.stream()
+                .filter(injection -> !injection.isApplied())
+                .count();
+    }
+
     private static Collection<Injection> collectInjections() {
         Collection<Injection> injections = new ArrayList<>();
         Reflections reflections = new Reflections(
