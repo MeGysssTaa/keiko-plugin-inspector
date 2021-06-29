@@ -33,12 +33,14 @@ import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
 import me.darksidecode.keiko.staticanalysis.cache.LocalFileStorageCacheManager;
+import me.darksidecode.keiko.tool.KeikoTools;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Timer;
@@ -54,6 +56,8 @@ public final class Keiko {
             "    | . \\|  __/| ||   <| (_) |\n" +
             "    |_|\\_\\\\___||_||_|\\_\\\\___/ \n" +
             "\n";
+
+    private static final String TOOL_PREFIX = "tool:";
 
     public static final Keiko INSTANCE = new Keiko();
 
@@ -106,6 +110,8 @@ public final class Keiko {
     }
 
     public static void main(String[] args) {
+        INSTANCE.preLaunch();
+
         if (args.length == 0) {
             INSTANCE.getLogger().warningLocalized("startup.noArgsErr.line1");
             INSTANCE.getLogger().warningLocalized("startup.noArgsErr.line2");
@@ -115,6 +121,26 @@ public final class Keiko {
             return;
         }
 
+        String firstArgLower = args[0].toLowerCase();
+
+        if (firstArgLower.toLowerCase().startsWith(TOOL_PREFIX)) {
+            // Run a Keiko tool.
+            String toolName = args[0].equals(TOOL_PREFIX)
+                    ? ""
+                    : firstArgLower.substring(TOOL_PREFIX.length());
+
+            String[] toolArgs = args.length == 1
+                    ? new String[0]
+                    : Arrays.copyOfRange(args, 1, args.length);
+
+            INSTANCE.launchState = LaunchState.LAUNCHED_TOOL;
+            int status = KeikoTools.executeToolWithArgs(toolName, toolArgs);
+            System.exit(status);
+
+            return;
+        }
+
+        // Run the Keiko proxy.
         File proxiedExecutable = new File(String.join(" ", args));
 
         if (!proxiedExecutable.exists()) {
@@ -258,15 +284,21 @@ public final class Keiko {
         }
     }
 
-    private void launch() {
+    private void preLaunch() {
         if (launchState != LaunchState.NOT_LAUNCHED)
-            throw new IllegalStateException("cannot start twice");
+            throw new IllegalStateException(launchState.name());
 
         launchState = LaunchState.LAUNCHING;
 
         findKeikoExecutable();
         ensureUnambiguous();
         checkForUpdates();
+    }
+
+    private void launch() {
+        if (launchState != LaunchState.LAUNCHING)
+            throw new IllegalStateException(launchState.name());
+
         indexPlugins();
         ensurePluginsIntegrity();
         runStaticAnalyses();
