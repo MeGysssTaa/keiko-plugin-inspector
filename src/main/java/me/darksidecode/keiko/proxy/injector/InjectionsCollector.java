@@ -32,15 +32,22 @@ import java.util.stream.Collectors;
 
 class InjectionsCollector {
 
+    private static final String INVALID_IN_METHOD
+            = "invalid inMethod value: expected methodName(DescriptorPart1)DescriptorPart2; / string: ";
+
     private final Collection<Injection> injections = collectInjections();
 
-    Collection<Injection> collectInjections(@NonNull String cls, String mtd) {
-        // Parameter 'mtd' may be null in case the caller is interested in /any/ injections related to
+    Collection<Injection> collectInjections(@NonNull String cls, String mtdName, String mtdDesc) {
+        // Parameter 'mtdName' may be null in case the caller is interested in /any/ injections related to
         // the given class 'cls'. May be used to decide whether to run the injection process at all or not.
+        // If 'mtdName' is null, then 'mtdDesc' is treated as null as well.
+        String fmtdDesc = mtdName != null ? mtdDesc : null; // ignore explicitly
+        
         return injections.stream()
                 .filter(injection ->
-                        injection.getInClass ().equals(cls)
-                    && (injection.getInMethod().equals(mtd) || mtd == null))
+                        injection.getInClass     ().equals(cls)
+                    && (injection.getInMethodName().equals(mtdName ) || mtdName  == null)
+                    && (injection.getInMethodDesc().equals(fmtdDesc) || fmtdDesc == null))
                 .collect(Collectors.toList());
     }
 
@@ -66,9 +73,12 @@ class InjectionsCollector {
             validateInjection(method);
 
             Inject anno = method.getAnnotation(Inject.class);
+            String[] inMethod = tokenizeAndValidateInMethod(Objects.requireNonNull(anno.inMethod()));
+
             injections.add(new Injection(
                     Objects.requireNonNull(anno.inClass().replace('.', '/')),
-                    Objects.requireNonNull(anno.inMethod()),
+                    inMethod[0], // method name
+                    inMethod[1], // method descriptor
                     Objects.requireNonNull(method.getDeclaringClass().getName().replace('.', '/')),
                     Objects.requireNonNull(method.getName()),
                     Objects.requireNonNull(anno.at())
@@ -100,6 +110,24 @@ class InjectionsCollector {
             throw new IllegalArgumentException(
                     "method is annotated with @Inject but has non-void return type - a call to it cannot be injected: "
                             + method.getDeclaringClass().getName() + "#" + method.getName());
+    }
+
+    private static String[] tokenizeAndValidateInMethod(String inMethod) {
+        String[] parts = inMethod.split("\\(");
+
+        if (parts.length != 2)
+            throw new IllegalArgumentException(INVALID_IN_METHOD + inMethod);
+
+        if (parts[1].indexOf(')') == -1)
+            throw new IllegalArgumentException(INVALID_IN_METHOD + inMethod);
+
+        if (parts[1].indexOf('L') != -1 && parts[1].indexOf(';') == -1)
+            throw new IllegalArgumentException(INVALID_IN_METHOD + inMethod);
+
+        return new String[] {
+                parts[0],      // method name
+                '(' + parts[1] // method descriptor
+        };
     }
 
 }

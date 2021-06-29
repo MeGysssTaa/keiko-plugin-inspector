@@ -59,7 +59,7 @@ public class Injector {
                 .replace(".class/", "")
                 .replace(".class", "");
 
-        if (collector.collectInjections(className, null).isEmpty()) {
+        if (collector.collectInjections(className, null, null).isEmpty()) {
             // We have nothing to inject in this class. Read its bytes as is from the JAR.
             // This is faster than blindly disassembling and reassembling all classes with ASM.
             try (InputStream inputStream = jar.getInputStream(entry)) {
@@ -84,7 +84,8 @@ public class Injector {
             if (cls.methods != null) {
                 for (MethodNode mtd : cls.methods) {
                     checkBungeeTransform(cls, mtd); // TODO: 29.06.2021 awful; replace with sth proper & scalable
-                    Collection<Injection> injections = collector.collectInjections(cls.name, mtd.name);
+                    Collection<Injection> injections = collector
+                            .collectInjections(cls.name, mtd.name, mtd.desc);
                     injections.forEach(injection -> injection.apply(cls, mtd));
                 }
             }

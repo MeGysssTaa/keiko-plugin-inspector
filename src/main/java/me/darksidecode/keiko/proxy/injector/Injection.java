@@ -20,6 +20,7 @@
 package me.darksidecode.keiko.proxy.injector;
 
 import lombok.*;
+import me.darksidecode.keiko.proxy.Keiko;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -30,8 +31,8 @@ import org.objectweb.asm.tree.MethodNode;
 class Injection implements Opcodes {
 
     @NonNull
-    private final String inClass    , inMethod    , // where the call is injected
-                         targetClass, targetMethod; // call to which method is injected
+    private final String inClass    , inMethodName, inMethodDesc, // where the call is injected
+                         targetClass, targetMethod;               // call to which method is injected
 
     @NonNull
     private final Inject.Position position;
@@ -45,6 +46,11 @@ class Injection implements Opcodes {
             mtd.instructions.add(call);
         else
             mtd.instructions.insertBefore(mtd.instructions.getFirst(), call);
+
+        // Some non-localized low-level debug & stats.
+        Keiko.INSTANCE.getLogger().debug("Injected call to method %s#%s at the %s of %s#%s%s",
+                targetClass, targetMethod,
+                position.name().toLowerCase(), inClass, inMethodName, inMethodDesc);
 
         applied = true;
     }
