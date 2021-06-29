@@ -25,6 +25,7 @@ import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import me.darksidecode.keiko.util.StringUtils;
@@ -37,9 +38,13 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
-    // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
-    // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
-    private static final String dacPkg = KeikoSecurityManager.class.getPackage().getName();
+    private static final List<String> allowedKeikoPackages = Arrays.asList(
+            // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
+            // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
+            KeikoSecurityManager.class.getPackage().getName(),
+            // Also exclude the "injections" package so that the code we @Inject actually works.
+            Inject.class.getPackage().getName() + ".injections"
+    );
 
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
@@ -300,9 +305,11 @@ public class KeikoSecurityManager extends DomainAccessController {
 
     @Override
     public void checkPackageAccess(String pkg) {
-        if (Rule.isLoaded())
-            checkAccess(arg -> !pkg.equals(dacPkg) && StringUtils.matchWildcards(
+        if (Rule.isLoaded()) {
+            boolean allowedKeikoPackage = allowedKeikoPackages.stream().anyMatch(pkg::equals);
+            checkAccess(arg -> !allowedKeikoPackage && StringUtils.matchWildcards(
                     pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
+        }
     }
 
     private void checkNoArgs(Operation op) {
