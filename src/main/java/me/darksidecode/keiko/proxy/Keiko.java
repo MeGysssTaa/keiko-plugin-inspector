@@ -26,6 +26,7 @@ import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.installation.KeikoInstaller;
 import me.darksidecode.keiko.installation.KeikoUpdater;
+import me.darksidecode.keiko.installation.MalformedVersionException;
 import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.registry.PluginContext;
@@ -192,7 +193,7 @@ public final class Keiko {
             Properties properties = new Properties();
             properties.load(stream);
             buildProperties = new BuildProperties(properties);
-        } catch (IOException ex) {
+        } catch (IOException | MalformedVersionException | NullPointerException ex) {
             throw new RuntimeException("failed to load build.properties", ex);
         }
     }

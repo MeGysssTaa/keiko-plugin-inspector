@@ -36,10 +36,13 @@ import java.util.TimerTask;
 @RequiredArgsConstructor
 public class KeikoUpdater extends TimerTask {
 
+    private static final String LINE
+            = "==========================================================================================";
+
     private static final String GITHUB_API_URL = "https://api.github.com";
     private static final String LATEST_RELEASE = "repos/MeGysssTaa/keiko-plugin-inspector/releases/latest";
 
-    private final String installedVersion;
+    private final Version installedVersion;
 
     private final boolean download;
 
@@ -52,24 +55,31 @@ public class KeikoUpdater extends TimerTask {
             // Error.
             return;
 
-        JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
-        JsonArray assets = json.getAsJsonArray("assets");
-        JsonObject release = assets.get(0).getAsJsonObject();
+        try {
+            JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
+            JsonArray assets = json.getAsJsonArray("assets");
+            JsonObject release = assets.get(0).getAsJsonObject();
 
-        String latestVersion = json.get("name").getAsString();
-        String downloadUrl = release.get("browser_download_url").getAsString();
+            String latestVersionStr = json.get("name").getAsString();
+            String downloadUrl = release.get("browser_download_url").getAsString();
 
-        if (latestVersion.startsWith("v"))
-            latestVersion = latestVersion.substring(1); // omit the "v" (version) prefix
+            if (latestVersionStr.startsWith("v"))
+                latestVersionStr = latestVersionStr.substring(1); // omit the "v" (version) prefix
 
-        if (!latestVersion.equals(installedVersion)) {
-            // We found an update!
-            Keiko.INSTANCE.getLogger().warningLocalized("updater.updFound", latestVersion);
+            Version latestVersion = Version.valueOf(latestVersionStr);
 
-            if (download) {
-                Keiko.INSTANCE.getLogger().warningLocalized("updater.downloading", latestVersion);
-                downloadAndInstall(downloadUrl);
+            if (latestVersion.isNewerThan(installedVersion)) {
+                // We found an update!
+                Keiko.INSTANCE.getLogger().warningLocalized("updater.updFound", latestVersion);
+
+                if (download) {
+                    Keiko.INSTANCE.getLogger().warningLocalized("updater.downloading", latestVersion);
+                    downloadAndInstall(downloadUrl);
+                }
             }
+        } catch (Exception ex) {
+            Keiko.INSTANCE.getLogger().warningLocalized("updater.checkErr");
+            Keiko.INSTANCE.getLogger().error("Failed to check for updates", ex);
         }
     }
 
@@ -109,10 +119,10 @@ public class KeikoUpdater extends TimerTask {
             FileUtils.copyURLToFile(url, keikoExecutable, 5000, 60000);
 
             Keiko.INSTANCE.getLogger().warning(" ");
-            Keiko.INSTANCE.getLogger().warning("=================================================================");
+            Keiko.INSTANCE.getLogger().warning(LINE);
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine1");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine2");
-            Keiko.INSTANCE.getLogger().warning("=================================================================");
+            Keiko.INSTANCE.getLogger().warning(LINE);
             Keiko.INSTANCE.getLogger().warning(" ");
 
             if (Keiko.INSTANCE.getLaunchState() == Keiko.LaunchState.LAUNCHING) {

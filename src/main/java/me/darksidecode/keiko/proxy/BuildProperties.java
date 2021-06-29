@@ -21,6 +21,8 @@ package me.darksidecode.keiko.proxy;
 
 import lombok.Getter;
 import lombok.NonNull;
+import me.darksidecode.keiko.installation.MalformedVersionException;
+import me.darksidecode.keiko.installation.Version;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -28,11 +30,14 @@ import java.util.Properties;
 public class BuildProperties {
 
     @Getter
-    private final String version, timestamp;
+    private final Version version;
 
-    BuildProperties(@NonNull Properties properties) {
-        version = Objects.requireNonNull(properties.getProperty("version"),
-                "invalid build.properties: missing \"version\"");
+    @Getter
+    private final String timestamp;
+
+    BuildProperties(@NonNull Properties properties) throws MalformedVersionException {
+        version = Version.valueOf(Objects.requireNonNull(properties.getProperty("version"),
+                "invalid build.properties: missing \"version\""));
 
         timestamp = Objects.requireNonNull(properties.getProperty("timestamp"),
                 "invalid build.properties: missing \"timestamp\"");
