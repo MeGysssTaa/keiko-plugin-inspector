@@ -199,6 +199,7 @@ public final class Keiko {
     }
 
     private void installEverything() {
+        // Initialize Keiko working directory.
         workDir = new File(KeikoProperties.workDir);
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
@@ -210,10 +211,26 @@ public final class Keiko {
 
         KeikoInstaller installer = new KeikoInstaller(workDir);
 
+        // Create a local copy of Keiko license.
+        // (Always do this on startup to prevent accidential modification.)
+        File license = new File(workDir, "LICENSE");
+
+        if (license.exists()) {
+            if (license.isFile()) {
+                if (!license.delete())
+                    throw new IllegalStateException("failed to delete the local license file");
+            } else
+                throw new IllegalStateException("the local license file is a directory");
+        }
+
+        installer.checkInstallation(license, license.getName());
+
+        // Install default configuration files, if some are missing.
         ConfigurationLoader.load(installer, GlobalConfig        .class);
         ConfigurationLoader.load(installer, InspectionsConfig   .class);
         ConfigurationLoader.load(installer, RuntimeProtectConfig.class);
 
+        // Initialize static code that depends on some configurations (e.g. locale).
         KeikoLogger.Level.initLocalizedLevelNames();
     }
 
