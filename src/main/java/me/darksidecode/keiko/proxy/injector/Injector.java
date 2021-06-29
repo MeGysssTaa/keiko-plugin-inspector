@@ -104,7 +104,7 @@ public class Injector {
         // BungeeCord uses an own, almost useless, SecurityManager.
         // Remove code that creates and sets it (just at runtime).
         if (cls.name.equals("net/md_5/bungee/BungeeCord") && mtd.name.equals("<init>"))
-            BungeeCordSecurityManagerRemover.apply(cls, mtd);
+            BungeeSecMgrRemover.apply(cls, mtd);
     }
 
 }

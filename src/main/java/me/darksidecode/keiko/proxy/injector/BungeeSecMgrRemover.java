@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @UtilityClass
-class BungeeCordSecurityManagerRemover implements Opcodes {
+class BungeeSecMgrRemover implements Opcodes {
 
     static void apply(@NonNull ClassNode cls, @NonNull MethodNode mtd) {
         /*
