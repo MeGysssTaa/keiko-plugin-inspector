@@ -240,10 +240,10 @@ public final class Keiko {
         // Simple search for other Keiko JARs installed in the same directory.
         // Such installations might be confusing, especially when the user is
         // constantly switching between release and development builds.
-        File[] files = workDir.listFiles();
+        File[] files = keikoExecutable.getParentFile().listFiles();
 
         if (files == null)
-            throw new IllegalStateException("workDir has no files (null)");
+            throw new IllegalStateException("keikoExecutable#parent has no files (null)");
 
         for (File file : files) {
             if (!file.equals(keikoExecutable)
