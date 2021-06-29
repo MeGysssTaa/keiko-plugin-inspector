@@ -49,7 +49,7 @@ public class InspectionCache implements Serializable {
     public static InspectionCache createEmptyCache() {
         return new InspectionCache(
                 System.currentTimeMillis(),
-                Keiko.INSTANCE.getBuildProperties().getVersion(),
+                Keiko.INSTANCE.getBuildProperties().getVersion().toString(),
                 new HashMap<>()
         );
     }

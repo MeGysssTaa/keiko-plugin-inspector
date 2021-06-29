@@ -21,6 +21,7 @@ package me.darksidecode.keiko.staticanalysis.cache;
 
 import lombok.NonNull;
 import me.darksidecode.kantanj.system.FileUtils;
+import me.darksidecode.keiko.installation.Version;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.util.JsonFileUtils;
 
@@ -36,14 +37,21 @@ public class LocalFileStorageCacheManager implements CacheManager {
         InspectionCache result = null;
 
         if (cacheFile.isFile()) {
-            InspectionCache cache = JsonFileUtils.readCompressedJsonUtf8(cacheFile, InspectionCache.class);
-            String installedKeikoVersion = Keiko.INSTANCE.getBuildProperties().getVersion();
+            try {
+                InspectionCache cache = JsonFileUtils.readCompressedJsonUtf8(cacheFile, InspectionCache.class);
+                Version cacheKeikoVersion = Version.valueOf(cache.getKeikoVersion());
+                Version installedKeikoVersion = Keiko.INSTANCE.getBuildProperties().getVersion();
 
-            if (installedKeikoVersion.equals(cache.getKeikoVersion()))
-                result = cache;
-            else
+                if (installedKeikoVersion.equals(cacheKeikoVersion))
+                    result = cache;
+                else
+                    //noinspection ResultOfMethodCallIgnored
+                    cacheFile.delete();
+            } catch (Exception ex) {
+                // Skip and delete invalid cache file.
                 //noinspection ResultOfMethodCallIgnored
                 cacheFile.delete();
+            }
         }
 
         return result;
