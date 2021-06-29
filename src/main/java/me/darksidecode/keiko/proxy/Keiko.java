@@ -383,7 +383,7 @@ public final class Keiko {
 
         try {
             KeikoClassLoader loader = new KeikoClassLoader(proxiedExecutable);
-            Thread.currentThread().setContextClassLoader(loader);
+            Thread.currentThread().setContextClassLoader(loader); // otherwise resources (non-class files) won't load
             logger.debugLocalized("startup.classLoaderStats",
                     loader.getLoadResult().successes, loader.getLoadResult().failures);
 
