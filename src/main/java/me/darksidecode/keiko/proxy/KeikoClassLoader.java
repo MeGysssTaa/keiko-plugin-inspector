@@ -22,14 +22,15 @@ package me.darksidecode.keiko.proxy;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
 import me.darksidecode.jminima.phase.basic.EmitArbitraryValuePhase;
 import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
-import org.apache.commons.io.IOUtils;
+import me.darksidecode.keiko.proxy.injector.InjectionException;
+import me.darksidecode.keiko.proxy.injector.Injector;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSigner;
@@ -57,6 +58,8 @@ class KeikoClassLoader extends URLClassLoader {
 
     private final Manifest manifest;
 
+    private final Injector injector;
+
     @Getter (AccessLevel.PACKAGE)
     private LoadClassesPhase.Result loadResult;
 
@@ -68,6 +71,8 @@ class KeikoClassLoader extends URLClassLoader {
         this.manifest = jar.getManifest();
         this.bootstrapClassName = manifest == null ? null
                 : manifest.getMainAttributes().getValue("Main-Class");
+
+        injector = new Injector(jar, new SimpleJavaDisassembler(jar));
 
         Workflow workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
@@ -98,9 +103,9 @@ class KeikoClassLoader extends URLClassLoader {
         if (entry != null) {
             byte[] classBytes;
 
-            try (InputStream stream = jar.getInputStream(entry)) {
-                classBytes = IOUtils.toByteArray(stream);
-            } catch (IOException ex) {
+            try {
+                classBytes = injector.inject(entry);
+            } catch (InjectionException ex) {
                 throw new ClassNotFoundException(name, ex);
             }
 

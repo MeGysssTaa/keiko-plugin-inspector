@@ -17,14 +17,16 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.installation;
+package me.darksidecode.keiko.proxy.injector;
 
-public final class MalformedVersionException extends Exception {
+import lombok.NonNull;
 
-    private static final long serialVersionUID = -5576071307355230849L;
+public final class InjectionException extends Exception {
 
-    MalformedVersionException(String message) {
-        super(message);
+    private static final long serialVersionUID = -4951783526063936901L;
+
+    InjectionException(@NonNull String message, @NonNull Throwable cause) {
+        super(message, cause);
     }
 
 }

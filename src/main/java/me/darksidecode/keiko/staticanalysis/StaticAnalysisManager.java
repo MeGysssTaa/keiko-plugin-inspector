@@ -75,6 +75,8 @@ public class StaticAnalysisManager {
             Keiko.INSTANCE.getLogger().error("Unhandled exception in: setup", ex);
         }
 
+        // TODO: 29.06.2021 run in parallel
+
         for (IndexedPlugin plugin : pluginContext.getPlugins()) {
             boolean failed = inspectPlugin(plugin);
 

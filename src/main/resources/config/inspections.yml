@@ -24,6 +24,11 @@
 # from checksum checking. It is strongly not recommended to list many plugins here.
 integrity_exclusions: []
 
+# Should Keiko run static plugins inspections in parallel (multi-threaded)?
+# Enabling this generally results in faster static inspections, and hence, startup.
+# Disabling this will cause all static inspections to run sequently in one thread.
+parallel: true
+
 
 
 

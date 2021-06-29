@@ -28,7 +28,7 @@ public final class InspectionsConfig {
     @Getter
     private static YamlHandle handle;
 
-    @Getter @Config ("plugins_integrity.abort_server_startup")
-    private static Boolean abortServerStartupOnIntegrityViolation = true;
+    @Getter @Config
+    private static Boolean parallel = true;
 
 }

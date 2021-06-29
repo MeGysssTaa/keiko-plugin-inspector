@@ -17,14 +17,26 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.installation;
+package me.darksidecode.keiko.proxy.injector;
 
-public final class MalformedVersionException extends Exception {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    private static final long serialVersionUID = -5576071307355230849L;
+@Target (ElementType.METHOD)
+@Retention (RetentionPolicy.RUNTIME)
+public @interface Inject {
 
-    MalformedVersionException(String message) {
-        super(message);
+    String inClass();
+
+    String inMethod();
+
+    Position at();
+
+    enum Position {
+        BEGINNING,
+        END
     }
 
 }
