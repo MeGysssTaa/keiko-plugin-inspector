@@ -23,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.disassembling.JavaDisassembler;
 import me.darksidecode.jminima.phase.EmittedValue;
+import me.darksidecode.keiko.proxy.injector.injection.Injection;
 import org.apache.commons.io.IOUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -35,7 +36,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 @RequiredArgsConstructor
-public class Injector {
+public final class Injector {
 
     @NonNull
     private final JarFile jar;
@@ -59,12 +60,9 @@ public class Injector {
                 .replace(".class/", "")
                 .replace(".class", "");
 
-        if (!className.startsWith("net/md_5/bungee/") && collector
-                .collectInjections(className, null, null).isEmpty()) {
+        if (collector.collectInjections(className, null, null).isEmpty()) {
             // We have nothing to inject in this class. Read its bytes as is from the JAR.
             // This is faster than blindly disassembling and reassembling all classes with ASM.
-            // Note that this does not apply to BungeeCord classes, since we do some extra
-            // modifications to them // this is so awful......
             try (InputStream inputStream = jar.getInputStream(entry)) {
                 return IOUtils.toByteArray(inputStream);
             } catch (IOException ex) {
@@ -86,10 +84,9 @@ public class Injector {
 
             if (cls.methods != null) {
                 for (MethodNode mtd : cls.methods) {
-                    checkBungeeTransform(cls, mtd); // TODO: 29.06.2021 awful; replace with sth proper & scalable
                     Collection<Injection> injections = collector
                             .collectInjections(cls.name, mtd.name, mtd.desc);
-                    injections.forEach(injection -> injection.apply(cls, mtd));
+                    injections.forEach(injection -> injection.applyAndRecord(cls, mtd));
                 }
             }
 
@@ -101,14 +98,6 @@ public class Injector {
         } catch (Exception ex) {
             throw new InjectionException("unhandled exception during injection", ex);
         }
-    }
-    
-    private void checkBungeeTransform(ClassNode cls, MethodNode mtd) {
-        if (cls.name.equals("net/md_5/bungee/BungeeCord") && mtd.name.equals("<init>"))
-            BungeeCompatibility.removeBungeeSecurityManager(cls, mtd);
-        else if ((cls.name.equals("net/md_5/bungee/api/plugin/PluginClassloader") && mtd.name.equals("<init>"))
-                || (cls.name.equals("net/md_5/bungee/api/plugin/LibraryLoader") && mtd.name.equals("createLoader")))
-            BungeeCompatibility.respectKeikoClassLoader(cls, mtd);
     }
 
 }

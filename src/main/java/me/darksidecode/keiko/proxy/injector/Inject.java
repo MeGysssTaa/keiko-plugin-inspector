@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target (ElementType.METHOD)
+@Target ({ ElementType.TYPE, ElementType.METHOD })
 @Retention (RetentionPolicy.RUNTIME)
 public @interface Inject {
 
@@ -32,9 +32,14 @@ public @interface Inject {
 
     String inMethod();
 
-    Position at();
+    Position at() default Position.UNUSED;
 
+    /**
+     * Only used for MethodCallInjection.
+     * Probably should be refactored.
+     */
     enum Position {
+        UNUSED, // for everything other than MethodCallInjection
         BEGINNING,
         END
     }

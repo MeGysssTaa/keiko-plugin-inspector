@@ -20,9 +20,14 @@
 package me.darksidecode.keiko.proxy.injector;
 
 import lombok.NonNull;
+import me.darksidecode.keiko.proxy.injector.injection.Injection;
+import me.darksidecode.keiko.proxy.injector.injection.MethodCallInjection;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -33,7 +38,7 @@ import java.util.stream.Collectors;
 class InjectionsCollector {
 
     private static final String INVALID_IN_METHOD
-            = "invalid inMethod value: expected methodName(DescriptorPart1)DescriptorPart2; / string: ";
+            = "invalid inMethod value: expected methodName(DescriptorPart1)DescriptorPart2; -- string: ";
 
     private final Collection<Injection> injections = collectInjections();
 
@@ -66,16 +71,57 @@ class InjectionsCollector {
     private static Collection<Injection> collectInjections() {
         Collection<Injection> injections = new ArrayList<>();
         Reflections reflections = new Reflections(
-                "me.darksidecode.keiko.proxy.injector.injections",
+                "me.darksidecode.keiko.proxy.injector.injection",
+                new TypeAnnotationsScanner(),
+                new SubTypesScanner(),
                 new MethodAnnotationsScanner());
 
+        collectGenericInjections(reflections, injections);
+        collectMethodCallInjections(reflections, injections);
+
+        return injections;
+    }
+
+    private static void collectGenericInjections(Reflections reflections, Collection<Injection> injections) {
+        for (Class<?> clazz : reflections.getTypesAnnotatedWith(Inject.class)) {
+            validateInjection(clazz);
+
+            Inject anno = clazz.getAnnotation(Inject.class);
+            String[] inMethod = tokenizeAndValidateInMethod(Objects.requireNonNull(anno.inMethod()));
+            Injection injection;
+
+            try {
+                Class<? extends Injection> injectionClass = (Class<? extends Injection>) clazz;
+                Constructor<? extends Injection> ctor = injectionClass.getConstructor(
+                        String.class, // inClass
+                        String.class, // inMethodName
+                        String.class  // inMethodDesc
+                );
+
+                injection = ctor.newInstance(
+                        Objects.requireNonNull(anno.inClass().replace('.', '/')),
+                        inMethod[0], // method name
+                        inMethod[1] // method descriptor
+                );
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalArgumentException(
+                        "failed to instantiate an Injection (annotated with @Inject): "
+                                + clazz.getName() + " - make sure the annotated type " +
+                                "provides a constructor identical to the parent constructor", ex);
+            }
+
+            injections.add(injection);
+        }
+    }
+
+    private static void collectMethodCallInjections(Reflections reflections, Collection<Injection> injections) {
         for (Method method : reflections.getMethodsAnnotatedWith(Inject.class)) {
             validateInjection(method);
 
             Inject anno = method.getAnnotation(Inject.class);
             String[] inMethod = tokenizeAndValidateInMethod(Objects.requireNonNull(anno.inMethod()));
 
-            injections.add(new Injection(
+            injections.add(new MethodCallInjection(
                     Objects.requireNonNull(anno.inClass().replace('.', '/')),
                     inMethod[0], // method name
                     inMethod[1], // method descriptor
@@ -84,8 +130,13 @@ class InjectionsCollector {
                     Objects.requireNonNull(anno.at())
             ));
         }
+    }
 
-        return injections;
+    private static void validateInjection(Class<?> clazz) {
+        if (!Injection.class.isAssignableFrom(clazz))
+            throw new IllegalArgumentException(
+                    "class " + clazz.getName() + " is annotated with @Inject, " +
+                            "but does not inherit from " + Injection.class.getName());
     }
 
     private static void validateInjection(Method method) {
