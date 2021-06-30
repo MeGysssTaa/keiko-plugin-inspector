@@ -349,8 +349,8 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
 
             // Self-defense
             if (RuntimeProtectConfig.getSelfDefense()
-                    && (op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE)
-                    && details.contains(Keiko.INSTANCE.getEnv().getWorkDir().getAbsolutePath())) { // "File: {file_name}"
+                    && (op == Operation.FILE_READ || op == Operation.FILE_WRITE || op == Operation.FILE_DELETE)
+                    && details.contains(Keiko.INSTANCE.getEnv().getWorkDir().getAbsolutePath())) { // "File: {AbsPath}"
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");
