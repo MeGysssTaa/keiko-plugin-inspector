@@ -38,7 +38,7 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
 
-    private static final String[] allowedKeikoPackages = {
+    private static final String[] allowedKeikoPackagePrefixes = {
             // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
             // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
             KeikoSecurityManager.class.getPackage().getName(),
@@ -308,8 +308,8 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         if (Rule.isLoaded()) {
             boolean allowedKeikoPackage = false;
 
-            for (String p : allowedKeikoPackages) {
-                if (pkg.equals(p)) {
+            for (String allowedPrefix : allowedKeikoPackagePrefixes) {
+                if (pkg.startsWith(allowedPrefix)) {
                     allowedKeikoPackage = true;
                     break;
                 }
