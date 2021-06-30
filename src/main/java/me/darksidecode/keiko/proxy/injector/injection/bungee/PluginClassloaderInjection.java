@@ -86,6 +86,8 @@ public class PluginClassloaderInjection extends Injection {
                     mtd.instructions.insertBefore(insn, new MethodInsnNode(
                             INVOKESPECIAL, "java/net/URLClassLoader",
                             "<init>", "([Ljava/net/URL;Ljava/lang/ClassLoader;)V"));
+
+                    break; // we don't need to check any more instructions
                 }
             }
         }
