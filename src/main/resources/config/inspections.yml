@@ -59,6 +59,8 @@ static:
 
   # ForceOP is usually referred to as code that gives specific player or a group of
   # players server operator (OP) permissions using Player#setOp or Bukkit commands ("/op").
+  #
+  # (-*-) Keiko is capable of blocking ForceOP at runtime using Domain Access Control.
   force_op:
     enabled: true
     countermeasures:
