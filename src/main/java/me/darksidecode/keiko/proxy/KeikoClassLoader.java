@@ -59,6 +59,8 @@ class KeikoClassLoader extends URLClassLoader {
 
     private final Manifest manifest;
 
+    private final Workflow workflow;
+
     private Injector injector;
 
     @Getter (AccessLevel.PACKAGE)
@@ -74,7 +76,9 @@ class KeikoClassLoader extends URLClassLoader {
                 : manifest.getMainAttributes().getValue("Main-Class");
 
         // Load classes and inject our code.
-        Workflow workflow = new Workflow()
+        // Don't close this Workflow (nor use it in a try-with-resources) because it will close the
+        // JarFile as well. We don't want this - the JarFile is still used later (in loadClassFromJar).
+        workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
                 .phase(new DetectMinecraftVersionPhase()
                         .afterExecution((val, err) -> {
@@ -164,6 +168,8 @@ class KeikoClassLoader extends URLClassLoader {
 
     @Override
     public void close() throws IOException {
+        workflow.close();
+
         try {
             super.close();
         } finally {
