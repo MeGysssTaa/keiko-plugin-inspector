@@ -40,6 +40,8 @@ class InjectionsCollector {
     private static final String INVALID_IN_METHOD
             = "invalid inMethod value: expected methodName(DescriptorPart1)DescriptorPart2; -- string: ";
 
+    private final PlaceholderApplicator placeholderApplicator = new PlaceholderApplicator();
+
     private final Collection<Injection> injections = collectInjections();
 
     Collection<Injection> collectInjections(@NonNull String cls, String mtdName, String mtdDesc) {
@@ -68,7 +70,7 @@ class InjectionsCollector {
                 .count();
     }
 
-    private static Collection<Injection> collectInjections() {
+    private Collection<Injection> collectInjections() {
         Collection<Injection> injections = new ArrayList<>();
         Reflections reflections = new Reflections(
                 "me.darksidecode.keiko.proxy.injector.injection",
@@ -82,12 +84,17 @@ class InjectionsCollector {
         return injections;
     }
 
-    private static void collectGenericInjections(Reflections reflections, Collection<Injection> injections) {
+    private void collectGenericInjections(Reflections reflections, Collection<Injection> injections) {
         for (Class<?> clazz : reflections.getTypesAnnotatedWith(Inject.class)) {
             validateInjection(clazz);
 
             Inject anno = clazz.getAnnotation(Inject.class);
-            String[] inMethod = tokenizeAndValidateInMethod(Objects.requireNonNull(anno.inMethod()));
+
+            String inClass = placeholderApplicator.apply(
+                    Objects.requireNonNull(anno.inClass()).replace('.', '/'));
+            String[] inMethod = tokenizeAndValidateInMethod(
+                    Objects.requireNonNull(anno.inMethod()));
+
             Injection injection;
 
             try {
@@ -99,7 +106,7 @@ class InjectionsCollector {
                 );
 
                 injection = ctor.newInstance(
-                        Objects.requireNonNull(anno.inClass().replace('.', '/')),
+                        inClass,
                         inMethod[0], // method name
                         inMethod[1] // method descriptor
                 );
@@ -114,19 +121,23 @@ class InjectionsCollector {
         }
     }
 
-    private static void collectMethodCallInjections(Reflections reflections, Collection<Injection> injections) {
+    private void collectMethodCallInjections(Reflections reflections, Collection<Injection> injections) {
         for (Method method : reflections.getMethodsAnnotatedWith(Inject.class)) {
             validateInjection(method);
 
             Inject anno = method.getAnnotation(Inject.class);
-            String[] inMethod = tokenizeAndValidateInMethod(Objects.requireNonNull(anno.inMethod()));
+
+            String inClass = placeholderApplicator.apply(
+                    Objects.requireNonNull(anno.inClass()).replace('.', '/'));
+            String[] inMethod = tokenizeAndValidateInMethod(
+                    Objects.requireNonNull(anno.inMethod()));
 
             injections.add(new MethodCallInjection(
-                    Objects.requireNonNull(anno.inClass().replace('.', '/')),
+                    inClass,
                     inMethod[0], // method name
                     inMethod[1], // method descriptor
-                    Objects.requireNonNull(method.getDeclaringClass().getName().replace('.', '/')),
-                    Objects.requireNonNull(method.getName()),
+                    method.getDeclaringClass().getName().replace('.', '/'),
+                    method.getName(),
                     Objects.requireNonNull(anno.at())
             ));
         }
