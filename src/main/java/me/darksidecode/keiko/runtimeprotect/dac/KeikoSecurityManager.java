@@ -36,7 +36,7 @@ import java.security.Permission;
 import java.util.*;
 import java.util.function.Function;
 
-public class KeikoSecurityManager extends DomainAccessController {
+public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
 
     private static final String[] allowedKeikoPackages = {
             // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
@@ -322,6 +322,16 @@ public class KeikoSecurityManager extends DomainAccessController {
         }
     }
 
+    @Override
+    public void checkOpAdd() {
+        checkNoArgs(Operation.MINECRAFT_OP_ADD);
+    }
+
+    @Override
+    public void checkOpRemove() {
+        checkNoArgs(Operation.MINECRAFT_OP_REMOVE);
+    }
+
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
         checkAccess(arg -> true, op, "-");
@@ -395,6 +405,8 @@ public class KeikoSecurityManager extends DomainAccessController {
         PROPERTY_WRITE,
         PROPERTY_READ,
         PACKAGE_ACCESS,
+        MINECRAFT_OP_ADD,
+        MINECRAFT_OP_REMOVE,
         MISCELLANEOUS;
 
         private String localizedName;

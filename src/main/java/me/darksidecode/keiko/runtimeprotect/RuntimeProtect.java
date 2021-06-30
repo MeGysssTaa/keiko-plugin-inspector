@@ -29,12 +29,15 @@ public class RuntimeProtect {
     @Getter
     private boolean enabled;
 
+    @Getter
+    private KeikoSecurityManager dac;
+
     public void setupDomainAccessControl() {
         if (!RuntimeProtectConfig.getDomainAccessControlEnabled())
             return;
 
-        SecurityManager mgr = new KeikoSecurityManager();
-        System.setSecurityManager(mgr);
+        dac = new KeikoSecurityManager();
+        System.setSecurityManager(dac);
         enabled = true; // indicate that Keiko DAC was successfully enabled
         Keiko.INSTANCE.getLogger().debugLocalized("runtimeProtect.dac.enabled");
     }

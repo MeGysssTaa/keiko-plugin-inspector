@@ -20,7 +20,9 @@
 package me.darksidecode.keiko.proxy.injector.injection.minecraft;
 
 import lombok.experimental.UtilityClass;
+import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
+import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 
 @UtilityClass
 public class DedicatedPlayerListInjection {
@@ -30,8 +32,19 @@ public class DedicatedPlayerListInjection {
             inMethod = "addOp(Lcom/mojang/authlib/GameProfile;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void checkAddOp() {
+    public static void checkOpAdd() {
+        RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
+        if (runtimeProtect.isEnabled()) runtimeProtect.getDac().checkOpAdd();
+    }
 
+    @Inject (
+            inClass = "net.minecraft.server.{nms_version}.DedicatedPlayerList",
+            inMethod = "removeOp(Lcom/mojang/authlib/GameProfile;)V",
+            at = Inject.Position.BEGINNING
+    )
+    public static void checkOpRemove() {
+        RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
+        if (runtimeProtect.isEnabled()) runtimeProtect.getDac().checkOpRemove();
     }
 
 }

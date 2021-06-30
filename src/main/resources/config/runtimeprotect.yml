@@ -344,6 +344,41 @@ domain_access_control:
       - DENY ALL me.darksidecode.keiko.*
       - DENY ALL keiko_internals.*
 
+  # Minecraft op control.
+  #
+  # Controls plugins' ability to give certain players the server operator (OP) status.
+  # Can be used as an "anti force op" at runtime.
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> *
+  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #
+  # Examples:
+  #
+  #     # Allow plugin "LuckPerms" to give the server operator (OP) status to any player:
+  #     - ALLOW PLUGIN=LuckPerms *
+  #
+  #     # Deny all plugins to op any player:
+  #     - DENY ALL *
+  minecraft_op_add:
+    notify: false
+    default: DENY
+    rules: []
+
+  # Minecraft de-op control.
+  #
+  # Controls plugins' ability to remove the server operator (OP) status from certain players.
+  # Can be used as an "anti force op" or as some "admin protection" at runtime.
+  #
+  # Rules syntax:
+  #
+  #     same as in minecraft_op_add, examples can also be found there
+  minecraft_op_remove:
+    notify: false
+    default: DENY
+    rules: []
+
   # Miscellaneous JVM actions (permissions) control.
   #
   # Allows to control plugins' access to specific JVM permissions.
