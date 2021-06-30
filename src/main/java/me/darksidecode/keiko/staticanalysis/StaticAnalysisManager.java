@@ -273,7 +273,7 @@ public class StaticAnalysisManager {
                 try {
                     String inputJarPath = plugin.getJar().getAbsolutePath()
                             .replace("\\", "/"); // better Windows compatibility
-                    String pluginsFolderPath = Keiko.INSTANCE.getPluginsDir().getAbsolutePath();
+                    String pluginsFolderPath = Keiko.INSTANCE.getEnv().getPluginsDir().getAbsolutePath();
                     List<String> exclusions = InspectionsConfig.getHandle()
                             .get(configName + ".exclusions", Collections.emptyList());
 

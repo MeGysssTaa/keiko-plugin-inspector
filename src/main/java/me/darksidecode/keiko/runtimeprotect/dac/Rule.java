@@ -100,7 +100,7 @@ class Rule {
 
             if (identityFilter == IdentityFilter.PLUGIN) {
                 String pluginName = identityArgs[1].trim();
-                filteredPlugin = Keiko.INSTANCE.getPluginContext().getPlugin(pluginName);
+                filteredPlugin = Keiko.INSTANCE.getEnv().getPluginContext().getPlugin(pluginName);
 
                 if (filteredPlugin == null)
                     throw new NoSuchElementException("no such plugin installed: \"" + pluginName + "\"");

@@ -54,7 +54,7 @@ public class StaticAnalysisResult implements Serializable {
     }
     
     public IndexedPlugin getAnalyzedPlugin() {
-        return Keiko.INSTANCE.getPluginContext().getClassOwner(analyzedClassName);
+        return Keiko.INSTANCE.getEnv().getPluginContext().getClassOwner(analyzedClassName);
     }
 
     public enum Type {

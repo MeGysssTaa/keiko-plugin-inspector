@@ -65,22 +65,7 @@ public final class Keiko {
     private volatile LaunchState launchState = LaunchState.NOT_LAUNCHED;
 
     @Getter
-    private BuildProperties buildProperties;
-
-    @Getter
-    private File keikoExecutable;
-
-    @Getter
-    private File serverDir;
-
-    @Getter
-    private File workDir;
-
-    @Getter
-    private File pluginsDir;
-
-    @Getter
-    private PluginContext pluginContext;
+    private final Environment env = new Environment();
 
     @Getter
     private final KeikoLogger logger;
@@ -99,14 +84,14 @@ public final class Keiko {
         fetchBuildProperties();
 
         System.out.println(LOGO);
-        System.out.println("      --  " + buildProperties.getVersion());
-        System.out.println("      --  " + buildProperties.getTimestamp());
+        System.out.println("      --  " + env.getBuildProperties().getVersion());
+        System.out.println("      --  " + env.getBuildProperties().getTimestamp());
         System.out.println("\n\n");
 
         installEverything();
 
-        logger = new KeikoLogger(new File(workDir, "logs"));
-        logger.debugLocalized("startup.workDir", workDir.getAbsolutePath());
+        logger = new KeikoLogger(new File(env.getWorkDir(), "logs"));
+        logger.debugLocalized("startup.workDir", env.getWorkDir().getAbsolutePath());
     }
 
     public static void main(String[] args) {
@@ -220,7 +205,7 @@ public final class Keiko {
                 .getContextClassLoader().getResourceAsStream("build.properties")) {
             Properties properties = new Properties();
             properties.load(stream);
-            buildProperties = new BuildProperties(properties);
+            env.setBuildProperties(new BuildProperties(properties));
         } catch (IOException | MalformedVersionException | NullPointerException ex) {
             throw new RuntimeException("failed to load build.properties", ex);
         }
@@ -228,14 +213,18 @@ public final class Keiko {
 
     private void installEverything() {
         // Initialize Keiko working directory.
-        workDir = new File(KeikoProperties.workDir);
+        File workDir = new File(KeikoProperties.workDir);
         //noinspection ResultOfMethodCallIgnored
         workDir.mkdirs();
-        serverDir = workDir.getAbsoluteFile().getParentFile();
+        env.setWorkDir(workDir);
+
+        File serverDir = workDir.getAbsoluteFile().getParentFile();
 
         if (!serverDir.isDirectory())
             throw new RuntimeException(
                     "Keiko JAR must be placed near the original server executable");
+
+        env.setServerDir(serverDir);
 
         KeikoInstaller installer = new KeikoInstaller(workDir);
 
@@ -266,19 +255,19 @@ public final class Keiko {
         // Simple search for other Keiko JARs installed in the same directory.
         // Such installations might be confusing, especially when the user is
         // constantly switching between release and development builds.
-        File[] files = keikoExecutable.getParentFile().listFiles();
+        File[] files = env.getKeikoExecutable().getParentFile().listFiles();
 
         if (files == null)
             throw new IllegalStateException("keikoExecutable#parent has no files (null)");
 
         for (File file : files) {
-            if (!file.equals(keikoExecutable)
+            if (!file.equals(env.getKeikoExecutable())
                     && file.getName().toLowerCase().contains("keiko")
                     && file.getName().endsWith(".jar")) {
                 // Two or more Keiko executables found on the same path.
                 // This might be confusing for the user. Warn and exit.
                 logger.warningLocalized("startup.ambiguousInstallation",
-                        keikoExecutable.getName(), file.getName());
+                        env.getKeikoExecutable().getName(), file.getName());
                 System.exit(1);
             }
         }
@@ -318,12 +307,16 @@ public final class Keiko {
     }
 
     private void findKeikoExecutable() {
+        File keikoExecutable;
+
         try {
             keikoExecutable = new File(getClass()
                     .getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (URISyntaxException ex) {
             throw new RuntimeException("failed to find the Keiko executable", ex);
         }
+
+        env.setKeikoExecutable(keikoExecutable);
 
         if (!keikoExecutable.isFile())
             throw new RuntimeException("the Keiko executable is not a file");
@@ -338,7 +331,7 @@ public final class Keiko {
     private void checkForUpdates() {
         int intervalMinutes = GlobalConfig.getUpdaterIntervalMinutes();
         KeikoUpdater updater = new KeikoUpdater(
-                buildProperties.getVersion(), GlobalConfig.getUpdaterDownload());
+                env.getBuildProperties().getVersion(), GlobalConfig.getUpdaterDownload());
 
         if (intervalMinutes != -1 /* disable */) {
             updater.run(); // run in this thread immediately
@@ -350,8 +343,11 @@ public final class Keiko {
     }
 
     private void indexPlugins() {
-        pluginsDir = new File("plugins");
-        pluginContext = PluginContext.currentContext(pluginsDir);
+        File pluginsDir = new File("plugins");
+        env.setPluginsDir(pluginsDir);
+
+        PluginContext pluginContext = PluginContext.currentContext(pluginsDir);
+        env.setPluginContext(pluginContext);
 
         if (pluginContext == null) {
             logger.warningLocalized("pluginsIndex.abortingLine1");
@@ -362,7 +358,7 @@ public final class Keiko {
 
     private void ensurePluginsIntegrity() {
         IntegrityChecker checker = new IntegrityChecker();
-        boolean abortStartup = checker.run(pluginContext);
+        boolean abortStartup = checker.run(env.getPluginContext());
 
         if (abortStartup) {
             // Some plugins' integrity has been violated.
@@ -375,7 +371,7 @@ public final class Keiko {
     private void runStaticAnalyses() {
         // TODO: 22.06.2021 support for other CacheManager implementations (e.g. cloud-based)
         staticAnalysisManager = new StaticAnalysisManager(
-                pluginContext, new LocalFileStorageCacheManager());
+                env.getPluginContext(), new LocalFileStorageCacheManager());
 
         double beginTime = System.nanoTime();
         boolean abortStartup;

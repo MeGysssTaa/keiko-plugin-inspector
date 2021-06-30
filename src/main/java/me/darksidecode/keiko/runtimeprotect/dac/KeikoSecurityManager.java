@@ -38,13 +38,13 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController {
 
-    private static final List<String> allowedKeikoPackages = Arrays.asList(
+    private static final String[] allowedKeikoPackages = {
             // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
             // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
             KeikoSecurityManager.class.getPackage().getName(),
-            // Also exclude the "injections" package so that the code we @Inject actually works.
-            Inject.class.getPackage().getName() + ".injections"
-    );
+            // Also exclude the "injection" package so that the code we @Inject actually works.
+            Inject.class.getPackage().getName() + ".injection"
+    };
 
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
@@ -306,8 +306,18 @@ public class KeikoSecurityManager extends DomainAccessController {
     @Override
     public void checkPackageAccess(String pkg) {
         if (Rule.isLoaded()) {
-            boolean allowedKeikoPackage = allowedKeikoPackages.stream().anyMatch(pkg::equals);
-            checkAccess(arg -> !allowedKeikoPackage && StringUtils.matchWildcards(
+            boolean allowedKeikoPackage = false;
+
+            for (String p : allowedKeikoPackages) {
+                if (pkg.equals(p)) {
+                    allowedKeikoPackage = true;
+                    break;
+                }
+            }
+
+            boolean exclude = allowedKeikoPackage;
+
+            checkAccess(arg -> !exclude && StringUtils.matchWildcards(
                     pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
         }
     }
@@ -330,7 +340,7 @@ public class KeikoSecurityManager extends DomainAccessController {
             // Self-defense
             if (RuntimeProtectConfig.getSelfDefense()
                     && (op == Operation.FILE_WRITE) || (op == Operation.FILE_DELETE)
-                    && details.contains(Keiko.INSTANCE.getWorkDir().getAbsolutePath())) { // "File: {file_name}"
+                    && details.contains(Keiko.INSTANCE.getEnv().getWorkDir().getAbsolutePath())) { // "File: {file_name}"
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");

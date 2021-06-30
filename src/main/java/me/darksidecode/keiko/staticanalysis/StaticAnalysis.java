@@ -64,7 +64,7 @@ public abstract class StaticAnalysis implements ClassWalker {
 
     private static Identity identity(@NonNull ClassNode cls, MethodNode mtd) {
         String className = cls.name.replace('/', '.');
-        IndexedPlugin plugin = Keiko.INSTANCE.getPluginContext().getClassOwner(className);
+        IndexedPlugin plugin = Keiko.INSTANCE.getEnv().getPluginContext().getClassOwner(className);
 
         return new Identity(
                 plugin.getJar().getAbsolutePath(),

@@ -49,7 +49,7 @@ class ChecksumsCacheFile {
     }
 
     private File getFile() {
-        File artifactsFolder = new File(Keiko.INSTANCE.getWorkDir(), ".artifacts/");
+        File artifactsFolder = new File(Keiko.INSTANCE.getEnv().getWorkDir(), ".artifacts/");
         //noinspection ResultOfMethodCallIgnored
         artifactsFolder.mkdirs();
 

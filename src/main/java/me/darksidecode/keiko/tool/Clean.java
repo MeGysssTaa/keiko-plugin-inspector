@@ -30,7 +30,7 @@ class Clean extends KeikoTool {
 
     @Override
     protected int execute(String[] args) throws Exception {
-        File artifactsDir = new File(Keiko.INSTANCE.getWorkDir(), ".artifacts/");
+        File artifactsDir = new File(Keiko.INSTANCE.getEnv().getWorkDir(), ".artifacts/");
         Result result = new Result();
 
         if (artifactsDir.isDirectory())

@@ -105,7 +105,7 @@ public class KeikoUpdater extends TimerTask {
     }
 
     private void downloadAndInstall(String jarUrl) {
-        File keikoExecutable = Keiko.INSTANCE.getKeikoExecutable();
+        File keikoExecutable = Keiko.INSTANCE.getEnv().getKeikoExecutable();
 
         if (!keikoExecutable.delete()) {
             Keiko.INSTANCE.getLogger().warningLocalized("updater.errDownload");

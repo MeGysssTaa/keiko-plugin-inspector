@@ -40,7 +40,7 @@ public class LocalFileStorageCacheManager implements CacheManager {
             try {
                 InspectionCache cache = JsonFileUtils.readCompressedJsonUtf8(cacheFile, InspectionCache.class);
                 Version cacheKeikoVersion = Version.valueOf(cache.getKeikoVersion());
-                Version installedKeikoVersion = Keiko.INSTANCE.getBuildProperties().getVersion();
+                Version installedKeikoVersion = Keiko.INSTANCE.getEnv().getBuildProperties().getVersion();
 
                 if (installedKeikoVersion.equals(cacheKeikoVersion))
                     result = cache;
@@ -74,7 +74,7 @@ public class LocalFileStorageCacheManager implements CacheManager {
     }
 
     private File getCachesFolder() {
-        File cachesFolder = new File(Keiko.INSTANCE.getWorkDir(), ".artifacts/static-inspections-caches/");
+        File cachesFolder = new File(Keiko.INSTANCE.getEnv().getWorkDir(), ".artifacts/static-inspections-caches/");
         //noinspection ResultOfMethodCallIgnored
         cachesFolder.mkdirs();
 
