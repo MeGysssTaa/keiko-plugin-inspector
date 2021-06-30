@@ -332,6 +332,12 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         checkNoArgs(Operation.MINECRAFT_OP_REMOVE);
     }
 
+    @Override
+    public void checkCommandDispatch() {
+        // TODO: 30.06.2021 filter command (requires comparably much work in the injection system to use parameters)
+        checkNoArgs(Operation.MINECRAFT_COMMAND_DISPATCH);
+    }
+
     private void checkNoArgs(Operation op) {
         // No required arg(s) for this operation (always "*")
         checkAccess(arg -> true, op, "-");
@@ -407,6 +413,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         PACKAGE_ACCESS,
         MINECRAFT_OP_ADD,
         MINECRAFT_OP_REMOVE,
+        MINECRAFT_COMMAND_DISPATCH,
         MISCELLANEOUS;
 
         private String localizedName;

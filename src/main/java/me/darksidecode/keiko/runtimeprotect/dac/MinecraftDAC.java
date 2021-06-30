@@ -25,4 +25,6 @@ public interface MinecraftDAC {
 
     void checkOpRemove();
 
+    void checkCommandDispatch();
+
 }

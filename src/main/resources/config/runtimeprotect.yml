@@ -369,6 +369,28 @@ domain_access_control:
     default: DENY
     rules: []
 
+  # Minecraft server command execution control.
+  #
+  # Controls plugins' ability to dispatch Minecraft server
+  # or plugins commands (including "/op", "/deop", ...).
+  #
+  # Rules syntax:
+  #
+  #     <"ALLOW"/"DENY"> <identity> *
+  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #
+  # Examples:
+  #
+  #     # Allow plugin "LuckPerms" to execute any Minecraft command:
+  #     - ALLOW PLUGIN=LuckPerms *
+  #
+  #     # Deny all plugins to execute any Minecraft commands:
+  #     - DENY ALL *
+  minecraft_command_dispatch:
+    notify: false
+    default: DENY
+    rules: []
+
   # Miscellaneous JVM actions (permissions) control.
   #
   # Allows to control plugins' access to specific JVM permissions.
