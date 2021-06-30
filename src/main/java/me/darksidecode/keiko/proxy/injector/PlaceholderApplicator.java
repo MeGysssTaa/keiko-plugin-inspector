@@ -27,6 +27,7 @@ final class PlaceholderApplicator {
     private final String nmsVersion;
 
     PlaceholderApplicator() {
+        // Cache because getters in Environment use 'synchronized' which is pretty slow.
         String nmsVersion = Keiko.INSTANCE.getEnv().getNmsVersion();
         this.nmsVersion = nmsVersion != null ? nmsVersion : "" /* Bungee (will not be used) */;
     }

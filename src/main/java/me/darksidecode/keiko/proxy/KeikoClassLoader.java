@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
+import me.darksidecode.jminima.phase.PhaseExecutionException;
 import me.darksidecode.jminima.phase.basic.EmitArbitraryValuePhase;
 import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
@@ -58,7 +59,7 @@ class KeikoClassLoader extends URLClassLoader {
 
     private final Manifest manifest;
 
-    private final Injector injector;
+    private Injector injector;
 
     @Getter (AccessLevel.PACKAGE)
     private LoadClassesPhase.Result loadResult;
@@ -72,18 +73,31 @@ class KeikoClassLoader extends URLClassLoader {
         this.bootstrapClassName = manifest == null ? null
                 : manifest.getMainAttributes().getValue("Main-Class");
 
-        injector = new Injector(jar, new SimpleJavaDisassembler(jar));
-
         // Load classes and inject our code.
         Workflow workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
+                .phase(new DetectMinecraftVersionPhase()
+                        .afterExecution((val, err) -> {
+                            // It is important that we only create Injector afted detecting the proxied Minecraft
+                            // server version so that this version is already known in the LoadClassesPhase. If we
+                            // created Injector earlier, then the PlaceholderApplication (in InjectionsCollector)
+                            // would be unable to replace placeholders like "{nms_version}" properly.
+                            Keiko.INSTANCE.getEnv().setNmsVersion(val);
+                            injector = new Injector(jar, new SimpleJavaDisassembler(jar));
+                        }))
                 .phase(new LoadClassesPhase(this)
                         .afterExecution((val, err) -> loadResult = val));
 
         WorkflowExecutionResult result = workflow.executeAll();
 
-        if (result == WorkflowExecutionResult.FATAL_FAILURE)
+        if (result == WorkflowExecutionResult.FATAL_FAILURE) {
+            int errNum = 0;
+
+            for (PhaseExecutionException ex : workflow.getAllErrorsChronological())
+                Keiko.INSTANCE.getLogger().error("JMinima error #%d", ++errNum, ex);
+
             throw new IllegalStateException("fatal class loader failure");
+        }
 
         // Print some stats regarding injection. (Non-localized: this is a very low-level debug.)
         long appliedInjections = injector.getAppliedInjections();

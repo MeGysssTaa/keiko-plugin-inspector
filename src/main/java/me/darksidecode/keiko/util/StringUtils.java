@@ -33,6 +33,10 @@ public final class StringUtils {
     private static final String NO_WILDCARDS_PREFIX = "NO_WILDCARDS :: ";
     private static final String ESCAPED_DOT         = Pattern.quote(".");
 
+    public static String orEmpty(String s) {
+        return s == null ? "" : s;
+    }
+
     public static String basicReplacements(@NonNull String s) {
         if (Keiko.INSTANCE.getLaunchState() != Keiko.LaunchState.NOT_LAUNCHED) // might be called, e.g., from tests
             s = s.replace("{keiko_folder}",   Keiko.INSTANCE.getEnv().getWorkDir   ().getAbsolutePath())
