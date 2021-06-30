@@ -160,17 +160,7 @@ domain_access_control:
     notify: false
     default: DENY
     rules:
-      - ALLOW ALL {plugins_folder}/{plugin_name}
-      - ALLOW ALL {plugins_folder}/{plugin_name}/*
-      - ALLOW ALL {plugin_jar_path}
-      - ALLOW ALL {plugins_folder}/bStats/config.yml
-      - ALLOW ALL {plugins_folder}/PluginMetrics/config.yml
-      - ALLOW ALL {java_folder}/*
-      - ALLOW ALL /tmp
-      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}
-      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#checkConflictingVersions {plugins_folder}/*
-      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#onLoad {plugins_folder}
-      - ALLOW SOURCE=com.comphenix.protocol.ProtocolLib#onLoad {plugins_folder}/*
+      - ALLOW ALL *
 
   # File deletion control.
   #
