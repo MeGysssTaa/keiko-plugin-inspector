@@ -72,12 +72,20 @@ class LoadClassesPhase extends Phase<JarFile, LoadClassesPhase.Result> {
 
             if (entry.getName().endsWith(".class")) {
                 try {
-                    classLoader.findClass(entry.getName()
+                    String className = entry.getName()
                             .replace('/', '.')
-                            .replace(".class", "")
-                    );
+                            .replace(".class", "");
 
+                    classLoader.findClass(className);
                     result.successes++;
+
+                    // Detect Minecraft server version from package name.
+                    if (Keiko.INSTANCE.getEnv().getNmsVersion() == null
+                            && className.startsWith("net.minecraft.server.")) {
+                        String nmsVersion = className.split("\\.")[3]; // infer from package name
+                        Keiko.INSTANCE.getLogger().debug("Minecraft server: %s", nmsVersion);
+                        Keiko.INSTANCE.getEnv().setNmsVersion(nmsVersion);
+                    }
                 } catch (Throwable t) {
                     if (JMinima.debug) t.printStackTrace();
                     errMsgBuilder.append("\n    - ").append(t);
