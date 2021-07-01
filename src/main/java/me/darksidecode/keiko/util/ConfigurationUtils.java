@@ -35,10 +35,7 @@ public class ConfigurationUtils {
         List<IdentityFilter> filters = new ArrayList<>();
 
         try {
-            List<String> matchers = conf.get(path);
-
-            if (matchers == null)
-                return filters;
+            List<String> matchers = conf.get(path, new ArrayList<>());
 
             for (String matcher : matchers) {
                 IdentityFilter filter = new IdentityFilter(matcher);

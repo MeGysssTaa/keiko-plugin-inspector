@@ -17,10 +17,17 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.heur;
+package me.darksidecode.keiko.runtimeprotect.megane.event.bukkit;
 
-public enum ReportSeverity {
+import lombok.NonNull;
+import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
+import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
-    MEDIUM
+public class BukkitPlayerChatEvent implements Event {
+
+    @Override
+    public void dispatch(@NonNull Listener listener) {
+        listener.onBukkitPlayerChat(this);
+    }
 
 }

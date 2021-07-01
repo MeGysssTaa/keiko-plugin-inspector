@@ -23,6 +23,8 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpRemoveEvent;
 
 @UtilityClass
 public class DedicatedPlayerListInjection {
@@ -35,6 +37,10 @@ public class DedicatedPlayerListInjection {
     public static void checkOpAdd() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
         if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpAdd();
+
+        if (runtimeProtect.isMeganeEnabled())
+            runtimeProtect.getMegane().getEventBus()
+                    .dispatchEvent(new MinecraftOpAddEvent());
     }
 
     @Inject (
@@ -45,6 +51,10 @@ public class DedicatedPlayerListInjection {
     public static void checkOpRemove() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
         if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpRemove();
+
+        if (runtimeProtect.isMeganeEnabled())
+            runtimeProtect.getMegane().getEventBus()
+                    .dispatchEvent(new MinecraftOpRemoveEvent());
     }
 
 }

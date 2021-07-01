@@ -47,4 +47,16 @@ public final class RuntimeUtils {
         return null;
     }
 
+    public static boolean isInjectedKeikoCall() {
+        StackTraceElement[] stacktrace = new Exception().getStackTrace();
+
+        for (StackTraceElement e : stacktrace)
+            if (e.getClassName().startsWith("me.darksidecode.keiko.proxy.injector.injection."))
+                // This call to an internal (normally restricted) Keiko package has been injected by
+                // Keiko (before loading the class). For example, this might be an injected DAC call.
+                return true;
+
+        return false;
+    }
+
 }

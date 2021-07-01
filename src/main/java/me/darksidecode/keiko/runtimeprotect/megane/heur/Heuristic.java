@@ -33,16 +33,16 @@ import java.util.List;
 public class Heuristic implements Listener {
 
     @Getter
-    protected final boolean enabled;
+    private final boolean enabled;
 
     private final List<IdentityFilter> exclusions;
 
     @Getter
-    private final String displayName, configSection;
+    protected final String displayName, configSection, i18nPrefix;
 
     public Heuristic() {
         // Infer displayName and configSection from class name.
-        String name = getClass().getName().replace("Heuristic", "");
+        String name = getClass().getSimpleName().replace("Heuristic", "");
         displayName = "Heur." + name;
 
         char[] nameChars = name.toCharArray();
@@ -58,12 +58,15 @@ public class Heuristic implements Listener {
             configNameBuilder.append(Character.toLowerCase(c));
         }
 
-        configSection = "megane.heur." + configNameBuilder;
+        String snakeCaseName = configNameBuilder.toString();
+
+        configSection = "megane.heur." + snakeCaseName;
+        i18nPrefix = "runtimeProtect.megane.heur." + snakeCaseName + ".";
 
         // Load configuration.
         YamlHandle conf = RuntimeProtectConfig.getHandle();
 
-        enabled = conf.get(configSection + ".enabled");
+        enabled = conf.get(configSection + ".enabled", false);
         exclusions = ConfigurationUtils.getExclusionsList(conf, configSection + ".exclusions");
     }
 
@@ -72,8 +75,9 @@ public class Heuristic implements Listener {
                 .anyMatch(exclusion -> exclusion.matches(identity));
     }
 
-    protected final void report(@NonNull ReportSeverity severity, @NonNull String textI18nKey, String... args) {
-        // TODO: 01.07.2021 implement
+    protected final void makeReport(@NonNull Report report) {
+        report.print();
+        // TODO: 01.07.2021 some countermeasures? server shutdown? ...?
     }
 
 }

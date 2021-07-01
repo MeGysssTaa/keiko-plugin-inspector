@@ -22,6 +22,10 @@
 
 megane:
   enabled: true
+  heur:
+    force_op:
+      enabled: true
+      exclusions: []
 
 
 

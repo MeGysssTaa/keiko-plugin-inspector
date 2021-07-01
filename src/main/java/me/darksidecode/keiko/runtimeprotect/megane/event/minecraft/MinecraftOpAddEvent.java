@@ -20,10 +20,10 @@
 package me.darksidecode.keiko.runtimeprotect.megane.event.minecraft;
 
 import lombok.NonNull;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
+import me.darksidecode.keiko.runtimeprotect.megane.event.PluginIssuedEvent;
 
-public class MinecraftOpAddEvent implements Event {
+public class MinecraftOpAddEvent extends PluginIssuedEvent {
 
     @Override
     public void dispatch(@NonNull Listener listener) {

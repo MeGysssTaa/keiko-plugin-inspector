@@ -17,48 +17,28 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.proxy.injector.injection.craftbukkit;
+package me.darksidecode.keiko.proxy.injector.injection.bukkit;
 
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
-import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 
 @UtilityClass
-public class CraftServerInjection {
+public class AsyncPlayerChatEventInjection {
 
     @Inject (
-            inClass = "org.bukkit.craftbukkit.{nms_version}.CraftServer",
-            inMethod = "dispatchCommand(" +
-                    "Lorg/bukkit/command/CommandSender;" +
-                    "Ljava/lang/String;" +
-                    ")Z",
+            inClass = "org.bukkit.event.player.AsyncPlayerChatEvent",
+            inMethod = "<init>(ZLorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Set;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void checkCommandDispatch() {
-        onCommand();
-    }
-
-    @Inject (
-            inClass = "org.bukkit.craftbukkit.{nms_version}.CraftServer",
-            inMethod = "dispatchServerCommand(" +
-                    "Lorg/bukkit/command/CommandSender;" +
-                    "Lnet/minecraft/server/v1_8_R3/ServerCommand;" +
-                    ")Z",
-            at = Inject.Position.BEGINNING
-    )
-    public static void checkCommandDispatchServer() {
-        onCommand();
-    }
-
-    private static void onCommand() {
+    public static void onBukkitPlayerJoin() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch();
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new CraftBukkitCommandEvent());
+                    .dispatchEvent(new BukkitPlayerChatEvent());
     }
 
 }

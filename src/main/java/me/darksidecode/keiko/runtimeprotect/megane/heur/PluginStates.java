@@ -17,30 +17,30 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event;
+package me.darksidecode.keiko.runtimeprotect.megane.heur;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.registry.Identity;
-import me.darksidecode.keiko.runtimeprotect.megane.heur.PluginStates;
-import me.darksidecode.keiko.util.RuntimeUtils;
 
-/**
- * Indicates an even that COULD have theoretically been triggered by a plugin.
- * Does NOT guarantee that the event was not triggered by the Minecraft server
- * (or Bukkit). Keep this in mind!
- */
-public abstract class PluginIssuedEvent implements Event {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    @Getter
-    protected final PluginStates pluginStates; // MAY be null! This class does NOT guarantee the event is plugin-issued!
+@Getter
+@RequiredArgsConstructor (access = AccessLevel.PRIVATE)
+public final class PluginStates {
 
-    protected PluginIssuedEvent() {
-        Identity plugin = RuntimeUtils.resolveCallerPlugin();
-        pluginStates = plugin == null ? null : PluginStates.of(plugin);
+    @Getter (AccessLevel.PRIVATE) // hide getter
+    private static final Map<Identity, PluginStates> map = new ConcurrentHashMap<>();
+
+    public static PluginStates of(@NonNull Identity plugin) {
+        return map.computeIfAbsent(plugin, PluginStates::new);
     }
 
-    public final boolean isIssuedByPlugin() {
-        return pluginStates != null;
-    }
+    private final Identity plugin;
+
+    private final Object lock = new Object();
 
 }

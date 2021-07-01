@@ -17,17 +17,17 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event.minecraft;
+package me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 import me.darksidecode.keiko.runtimeprotect.megane.event.PluginIssuedEvent;
 
-public class MinecraftOpRemoveEvent extends PluginIssuedEvent {
+public class CraftBukkitCommandEvent extends PluginIssuedEvent {
 
     @Override
     public void dispatch(@NonNull Listener listener) {
-        listener.onMinecraftOpRemove(this);
+        listener.onCraftBukkitCommand(this);
     }
 
 }

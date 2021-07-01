@@ -58,11 +58,14 @@ public class Megane {
                                 + ", has it got a public default (no-parameters) constructor?", ex);
             }
 
-            RegisterHeuristic anno = clazz.getAnnotation(RegisterHeuristic.class);
-            Class<? extends Event>[] eventTypes = anno.value();
+            if (heur.isEnabled()) {
+                // Only subscribe to events if this heuristic is enabled in config.
+                RegisterHeuristic anno = clazz.getAnnotation(RegisterHeuristic.class);
+                Class<? extends Event>[] eventTypes = anno.value();
 
-            for (Class<? extends Event> eventType : eventTypes)
-                eventBus.getListenersOf(eventType).add(heur);
+                for (Class<? extends Event> eventType : eventTypes)
+                    eventBus.getListenersOf(eventType).add(heur);
+            }
         }
     }
 

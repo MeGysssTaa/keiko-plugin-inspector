@@ -25,7 +25,6 @@ import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.util.RuntimeUtils;
 import me.darksidecode.keiko.util.StringUtils;
@@ -37,14 +36,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
-
-    private static final String[] allowedKeikoPackagePrefixes = {
-            // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
-            // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
-            KeikoSecurityManager.class.getPackage().getName(),
-            // Also exclude the "injection" package so that the code we @Inject actually works.
-            Inject.class.getPackage().getName() + ".injection"
-    };
 
     private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
@@ -306,16 +297,11 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     @Override
     public void checkPackageAccess(String pkg) {
         if (Rule.isLoaded()) {
-            boolean allowedKeikoPackage = false;
-
-            for (String allowedPrefix : allowedKeikoPackagePrefixes) {
-                if (pkg.startsWith(allowedPrefix)) {
-                    allowedKeikoPackage = true;
-                    break;
-                }
-            }
-
-            boolean exclude = allowedKeikoPackage;
+            // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
+            // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
+            // Also exclude injected calls so that Keiko Megane event injections and other injections work.
+            boolean exclude = pkg.startsWith("me.darksidecode.keiko.runtimeprotect.dac")
+                    || RuntimeUtils.isInjectedKeikoCall();
 
             checkAccess(arg -> !exclude && StringUtils.matchWildcards(
                     pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
