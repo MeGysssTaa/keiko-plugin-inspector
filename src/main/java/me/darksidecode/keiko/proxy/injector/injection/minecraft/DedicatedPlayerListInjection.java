@@ -34,7 +34,7 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpAdd() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isEnabled()) runtimeProtect.getDac().checkOpAdd();
+        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpAdd();
     }
 
     @Inject (
@@ -44,7 +44,7 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpRemove() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isEnabled()) runtimeProtect.getDac().checkOpRemove();
+        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpRemove();
     }
 
 }

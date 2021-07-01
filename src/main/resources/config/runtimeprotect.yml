@@ -20,6 +20,12 @@
 
 
 
+megane:
+  enabled: true
+
+
+
+
 # Keiko Domain Access Control (custom Java SecurityManager) settings.
 #
 # This feature provides you nearly a full control of what specific plugins,

@@ -403,7 +403,7 @@ public final class Keiko {
 
     private void setupRuntimeProtect() {
         runtimeProtect = new RuntimeProtect();
-        runtimeProtect.setupDomainAccessControl();
+        runtimeProtect.setup();
     }
 
     private void launchProxy() {

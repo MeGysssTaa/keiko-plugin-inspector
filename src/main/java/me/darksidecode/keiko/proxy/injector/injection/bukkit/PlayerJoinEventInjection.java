@@ -17,40 +17,28 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.proxy.injector.injection.craftbukkit;
+package me.darksidecode.keiko.proxy.injector.injection.bukkit;
 
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 
 @UtilityClass
-public class CraftServerInjection {
+public class PlayerJoinEventInjection {
 
     @Inject (
-            inClass = "org.bukkit.craftbukkit.{nms_version}.CraftServer",
-            inMethod = "dispatchCommand(" +
-                    "Lorg/bukkit/command/CommandSender;" +
-                    "Ljava/lang/String;" +
-                    ")Z",
+            inClass = "org.bukkit.event.player.PlayerJoinEvent",
+            inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public void checkCommandDispatch() {
+    public static void onBukkitPlayerJoin() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch();
-    }
 
-    @Inject (
-            inClass = "org.bukkit.craftbukkit.{nms_version}.CraftServer",
-            inMethod = "dispatchServerCommand(" +
-                    "Lorg/bukkit/command/CommandSender;" +
-                    "Lnet/minecraft/server/v1_8_R3/ServerCommand;" +
-                    ")Z",
-            at = Inject.Position.BEGINNING
-    )
-    public void checkCommandDispatchServer() {
-        RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch();
+        if (runtimeProtect.isMeganeEnabled())
+            runtimeProtect.getMegane().getEventBus()
+                    .dispatchEvent(new BukkitPlayerJoinEvent());
     }
 
 }

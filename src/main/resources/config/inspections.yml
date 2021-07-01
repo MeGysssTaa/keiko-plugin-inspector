@@ -60,7 +60,7 @@ static:
   # ForceOP is usually referred to as code that gives specific player or a group of
   # players server operator (OP) permissions using Player#setOp or Bukkit commands ("/op").
   #
-  # (-*-) Keiko is capable of blocking ForceOP at runtime using Domain Access Control.
+  # (-*-) Keiko is capable of blocking ForceOP at runtime using RuntimeProtect.
   force_op:
     enabled: true
     countermeasures:
@@ -71,7 +71,7 @@ static:
   # that allow Java software to perform something out of JVM. This is very rarely used by
   # plugins, but may be abused by hackers to bypass Keiko Domain Access Control restrictions.
   #
-  # (-*-) Keiko is capable of blocking NativesLoader at runtime using Domain Access Control.
+  # (-*-) Keiko is capable of blocking NativesLoader at runtime using RuntimeProtect.
   natives_loader:
     enabled: true
     countermeasures:
@@ -83,7 +83,7 @@ static:
   # to finish its workflow properly, thus leading to unexpected issues/bugs such as server not responding
   # to commands (including Ctrl+C) and not performing world save.
   #
-  # (-*-) Keiko is capable of blocking SystemExit at runtime using Domain Access Control.
+  # (-*-) Keiko is capable of blocking SystemExit at runtime using RuntimeProtect.
   system_exit:
     enabled: true
     exclusions: []
@@ -92,8 +92,8 @@ static:
   # certain system (Linux/Windows) commands like in SSH (e.g. 'rm -rf /' that deletes
   # everything on your machine). Ordinary plugins should never use such Java capabilities.
   #
-  # (-*-) Keiko is PARTIALLY(!) capable of blocking SystemProcess at runtime using Domain Access Control.
-  #       There are still cases when DAC is unable of preventing ProcessBuilder usage, so it is strongly
+  # (-*-) Keiko is PARTIALLY(!) capable of blocking SystemProcess at runtime using RuntimeProtect.
+  #       There are still cases when RuntimeProtect is unable to prevent ProcessBuilder usage, so it is strongly
   #       recommended that you let Keiko shut your server down forcefully if it detects a suspicious plugin
   #       that can harm your server using "SSH-like" system commands.
   system_process:

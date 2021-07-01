@@ -23,22 +23,43 @@ import lombok.Getter;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.runtimeprotect.dac.KeikoSecurityManager;
+import me.darksidecode.keiko.runtimeprotect.megane.Megane;
 
 public class RuntimeProtect {
 
     @Getter
-    private boolean enabled;
+    private boolean meganeEnabled;
+
+    @Getter
+    private Megane megane;
+
+    @Getter
+    private boolean dacEnabled;
 
     @Getter
     private KeikoSecurityManager dac;
 
-    public void setupDomainAccessControl() {
+    public void setup() {
+        setupMegane();
+        setupDomainAccessControl();
+    }
+
+    private void setupMegane() {
+        if (!RuntimeProtectConfig.getMeganeEnabled())
+            return;
+
+        megane = new Megane();
+        meganeEnabled = true; // indicate that Keiko Megane was successfully enabled
+        Keiko.INSTANCE.getLogger().debugLocalized("runtimeProtect.megane.enabled");
+    }
+
+    private void setupDomainAccessControl() {
         if (!RuntimeProtectConfig.getDomainAccessControlEnabled())
             return;
 
         dac = new KeikoSecurityManager();
         System.setSecurityManager(dac);
-        enabled = true; // indicate that Keiko DAC was successfully enabled
+        dacEnabled = true; // indicate that Keiko DAC was successfully enabled
         Keiko.INSTANCE.getLogger().debugLocalized("runtimeProtect.dac.enabled");
     }
 

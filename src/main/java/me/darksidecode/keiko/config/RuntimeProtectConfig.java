@@ -26,6 +26,9 @@ public class RuntimeProtectConfig {
     @Getter
     private static YamlHandle handle;
 
+    @Getter @Config ("megane.enabled")
+    public static Boolean meganeEnabled = true;
+
     @Getter @Config ("domain_access_control.enabled")
     private static Boolean domainAccessControlEnabled = true;
 
