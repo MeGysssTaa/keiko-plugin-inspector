@@ -43,6 +43,7 @@ import me.darksidecode.keiko.registry.IndexedPlugin;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
 import me.darksidecode.keiko.staticanalysis.cache.InspectionCache;
+import me.darksidecode.keiko.util.ConfigurationUtils;
 import org.reflections.Reflections;
 
 import java.util.*;
@@ -166,34 +167,9 @@ public class StaticAnalysisManager {
     private Collection<IdentityFilter> getExclusions(StaticAnalysis inspection) {
         String scannerName = inspection.getScannerName();
 
-        return exclusions.computeIfAbsent(scannerName, k -> { // lazy get
-            Collection<IdentityFilter> filters = new ArrayList<>();
-
-            try {
-                String configName = StaticAnalysis.inspectionNameToConfigName(scannerName);
-                List<String> matchers = InspectionsConfig.getHandle().get(configName + ".exclusions");
-
-                for (String matcher : matchers) {
-                    IdentityFilter filter = new IdentityFilter(matcher);
-
-                    if (filter.getErrorI18nKey() == null)
-                        filters.add(filter); // valid exclusion
-                    else {
-                        Keiko.INSTANCE.getLogger().warningLocalized(
-                                IdentityFilter.ERR_PREFIX + "skippingInvalidExclusion");
-                        Keiko.INSTANCE.getLogger().warningLocalized(filter.getErrorI18nKey());
-                        Keiko.INSTANCE.getLogger().warning("    - \"%s\"", matcher);
-                    }
-                }
-            } catch (Exception ex) {
-                Keiko.INSTANCE.getLogger().warningLocalized(
-                        IdentityFilter.ERR_PREFIX + "skippingInvalidExclusion");
-                Keiko.INSTANCE.getLogger().error(
-                        "Unhandled exception (totally invalid configuration?)", ex);
-            }
-
-            return filters;
-        });
+        return exclusions.computeIfAbsent(scannerName, k -> // lazy get
+                ConfigurationUtils.getExclusionsList(InspectionsConfig.getHandle(),
+                        StaticAnalysis.inspectionNameToConfigName(scannerName) + ".exclusions"));
     }
 
     private int printResultsAndCountWarnings() {

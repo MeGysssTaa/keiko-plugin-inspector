@@ -21,9 +21,7 @@ package me.darksidecode.keiko.runtimeprotect.megane.event;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
-import org.reflections.Reflections;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,45 +31,12 @@ public class EventBus {
 
     private final Map<Class<? extends Event>, Collection<Listener>> listeners = new HashMap<>();
 
-    public EventBus() {
-        wireEvents();
-    }
-
-    private void wireEvents() {
-        Reflections reflections = new Reflections("me.darksidecode.keiko.runtimeprotect.megane");
-
-        for (Class<?> clazz : reflections.getTypesAnnotatedWith(WireEvents.class)) {
-            if (!Listener.class.isAssignableFrom(clazz))
-                throw new IllegalArgumentException(
-                        "class " + clazz.getName() + " is annotated with @WireEvents, " +
-                                "but does not inherit from " + Listener.class.getName());
-
-            Class<? extends Listener> listenerClass = (Class<? extends Listener>) clazz;
-            Listener listener;
-
-            try {
-                Constructor<? extends Listener> ctor = listenerClass.getConstructor();
-                listener = ctor.newInstance();
-            } catch (ReflectiveOperationException ex) {
-                throw new IllegalArgumentException(
-                        "failed to instantiate listener " + clazz.getName()
-                                + ", does it have a public default (no-parameters) constructor?");
-            }
-
-            WireEvents anno = clazz.getAnnotation(WireEvents.class);
-            Class<? extends Event>[] eventTypes = anno.value();
-
-            for (Class<? extends Event> eventType : eventTypes)
-                listenersOf(eventType).add(listener);
-        }
-    }
-
-    private Collection<Listener> listenersOf(Class<? extends Event> eventType) {
+    public Collection<Listener> getListenersOf(Class<? extends Event> eventType) {
         return listeners.computeIfAbsent(eventType, k -> new ArrayList<>());
     }
 
     public void dispatchEvent(@NonNull Event event) {
-        Collection<Listener> listeners = listenersOf(event.getClass());
+        Collection<Listener> listeners = getListenersOf(event.getClass());
 
         for (Listener listener : listeners) {
             try {

@@ -20,11 +20,50 @@
 package me.darksidecode.keiko.runtimeprotect.megane;
 
 import lombok.Getter;
+import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
 import me.darksidecode.keiko.runtimeprotect.megane.event.EventBus;
+import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
+import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
+import org.reflections.Reflections;
+
+import java.lang.reflect.Constructor;
 
 public class Megane {
 
     @Getter
     private final EventBus eventBus = new EventBus();
+
+    public Megane() {
+        loadHeuristics();
+    }
+
+    private void loadHeuristics() {
+        Reflections reflections = new Reflections("me.darksidecode.keiko.runtimeprotect.megane.heur.impl");
+
+        for (Class<?> clazz : reflections.getTypesAnnotatedWith(RegisterHeuristic.class)) {
+            if (!Heuristic.class.isAssignableFrom(clazz))
+                throw new IllegalArgumentException(
+                        "class " + clazz.getName() + " is annotated with @RegisterHeuristic, " +
+                                "but does not inherit from " + Heuristic.class.getName());
+
+            Class<? extends Heuristic> listenerClass = (Class<? extends Heuristic>) clazz;
+            Heuristic heur;
+
+            try {
+                Constructor<? extends Heuristic> ctor = listenerClass.getConstructor();
+                heur = ctor.newInstance();
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalArgumentException(
+                        "failed to instantiate Heuristic " + clazz.getName()
+                                + ", has it got a public default (no-parameters) constructor?", ex);
+            }
+
+            RegisterHeuristic anno = clazz.getAnnotation(RegisterHeuristic.class);
+            Class<? extends Event>[] eventTypes = anno.value();
+
+            for (Class<? extends Event> eventType : eventTypes)
+                eventBus.getListenersOf(eventType).add(heur);
+        }
+    }
 
 }

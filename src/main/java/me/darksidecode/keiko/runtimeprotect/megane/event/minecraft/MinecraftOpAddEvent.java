@@ -17,19 +17,17 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event;
+package me.darksidecode.keiko.runtimeprotect.megane.event.minecraft;
 
 import lombok.NonNull;
-import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpRemoveEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
+import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
-public interface Listener {
+public class MinecraftOpAddEvent implements Event {
 
-    default void onBukkitPlayerJoin(@NonNull BukkitPlayerJoinEvent e) {}
-
-    default void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {}
-
-    default void onMinecraftOpRemove(@NonNull MinecraftOpRemoveEvent e) {}
+    @Override
+    public void dispatch(@NonNull Listener listener) {
+        listener.onMinecraftOpAdd(this);
+    }
 
 }

@@ -24,7 +24,9 @@ import lombok.NonNull;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
 import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.registry.Identity;
+import me.darksidecode.keiko.registry.IdentityFilter;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
+import me.darksidecode.keiko.util.ConfigurationUtils;
 
 import java.util.List;
 
@@ -33,17 +35,17 @@ public class Heuristic implements Listener {
     @Getter
     protected final boolean enabled;
 
-    private final List<Identity> exclusions;
+    private final List<IdentityFilter> exclusions;
 
     @Getter
     private final String displayName, configSection;
 
-    Heuristic() {
+    public Heuristic() {
         // Infer displayName and configSection from class name.
-        String className = getClass().getName();
-        displayName = "Heur." + className;
+        String name = getClass().getName().replace("Heuristic", "");
+        displayName = "Heur." + name;
 
-        char[] nameChars = className.toCharArray();
+        char[] nameChars = name.toCharArray();
         StringBuilder configNameBuilder = new StringBuilder();
         boolean firstChar = true;
 
@@ -62,10 +64,15 @@ public class Heuristic implements Listener {
         YamlHandle conf = RuntimeProtectConfig.getHandle();
 
         enabled = conf.get(configSection + ".enabled");
-        // TODO: 01.07.2021 load exclusions
+        exclusions = ConfigurationUtils.getExclusionsList(conf, configSection + ".exclusions");
     }
 
-    protected final void report(@NonNull String textI18nKey) {
+    protected final boolean isExcluded(@NonNull Identity identity) {
+        return exclusions.stream()
+                .anyMatch(exclusion -> exclusion.matches(identity));
+    }
+
+    protected final void report(@NonNull ReportSeverity severity, @NonNull String textI18nKey, String... args) {
         // TODO: 01.07.2021 implement
     }
 

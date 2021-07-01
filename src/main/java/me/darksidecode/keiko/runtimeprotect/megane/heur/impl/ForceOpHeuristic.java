@@ -17,17 +17,17 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event;
+package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
+import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
 
-@Target (ElementType.TYPE)
-@Retention (RetentionPolicy.RUNTIME)
-public @interface WireEvents {
-
-    Class<? extends Event>[] value();
+@RegisterHeuristic ({
+        BukkitPlayerJoinEvent.class,
+        MinecraftOpAddEvent.class
+})
+public class ForceOpHeuristic extends Heuristic {
 
 }
