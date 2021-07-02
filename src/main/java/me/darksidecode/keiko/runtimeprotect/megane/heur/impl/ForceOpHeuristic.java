@@ -33,7 +33,8 @@ import me.darksidecode.keiko.util.time.Clock;
 
 @RegisterHeuristic ({
         BukkitPlayerJoinEvent.class,
-        MinecraftOpAddEvent.class
+        MinecraftOpAddEvent.class,
+        CraftBukkitCommandEvent.class
 })
 public class ForceOpHeuristic extends Heuristic {
 
