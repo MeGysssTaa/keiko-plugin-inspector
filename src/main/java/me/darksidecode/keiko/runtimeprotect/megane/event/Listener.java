@@ -21,6 +21,7 @@ package me.darksidecode.keiko.runtimeprotect.megane.event;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
@@ -31,6 +32,8 @@ public interface Listener {
     default void onBukkitPlayerJoin(@NonNull BukkitPlayerJoinEvent e) {}
 
     default void onBukkitPlayerChat(@NonNull BukkitPlayerChatEvent e) {}
+
+    default void onBukkitPlayerCommandPreprocess(@NonNull BukkitPlayerCommandPreprocessEvent e) {}
 
     default void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {}
 

@@ -33,7 +33,7 @@ public class AsyncPlayerChatEventInjection {
             inMethod = "<init>(ZLorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Set;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onBukkitPlayerJoin() {
+    public static void onChat() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isMeganeEnabled())

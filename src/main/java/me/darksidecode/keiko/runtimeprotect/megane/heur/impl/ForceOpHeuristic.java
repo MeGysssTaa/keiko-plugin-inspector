@@ -22,6 +22,7 @@ package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 import lombok.NonNull;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
@@ -34,14 +35,16 @@ import me.darksidecode.keiko.util.time.Clock;
 @RegisterHeuristic ({
         BukkitPlayerJoinEvent.class,
         MinecraftOpAddEvent.class,
-        CraftBukkitCommandEvent.class
+        CraftBukkitCommandEvent.class,
+        BukkitPlayerCommandPreprocessEvent.class
 })
 public class ForceOpHeuristic extends Heuristic {
 
     private static final long THRESHOLD_MILLIS = 500;
 
-    private final Clock playerJoinClock = new AtomicClock();
-    private final Clock playerChatClock = new AtomicClock();
+    private final Clock playerJoinClock    = new AtomicClock();
+    private final Clock playerChatClock    = new AtomicClock();
+    private final Clock playerCmdPrepClock = new AtomicClock();
 
     @Override
     public void onBukkitPlayerJoin(@NonNull BukkitPlayerJoinEvent e) {
@@ -54,6 +57,11 @@ public class ForceOpHeuristic extends Heuristic {
     }
 
     @Override
+    public void onBukkitPlayerCommandPreprocess(@NonNull BukkitPlayerCommandPreprocessEvent e) {
+        playerCmdPrepClock.reset();
+    }
+
+    @Override
     public void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {
         if (e.isIssuedByPlugin()) {
             Identity plugin = e.getPluginStates().getPlugin();
@@ -62,6 +70,8 @@ public class ForceOpHeuristic extends Heuristic {
                 report(plugin, "setOpOnJoin");
             else if (!playerChatClock.hasElapsed(THRESHOLD_MILLIS))
                 report(plugin, "setOpOnChat");
+            else if (!playerCmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
+                report(plugin, "setOpOnCmdPrep");
         }
     }
 
@@ -74,6 +84,8 @@ public class ForceOpHeuristic extends Heuristic {
                 report(plugin, "cmdOnJoin");
             else if (!playerChatClock.hasElapsed(THRESHOLD_MILLIS))
                 report(plugin, "cmdOnChat");
+            else if (!playerCmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
+                report(plugin, "cmdOnCmdPrep");
         }
     }
 

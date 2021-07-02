@@ -23,22 +23,35 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
-import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 
 @UtilityClass
-public class PlayerJoinEventInjection {
+public class PlayerCommandPreprocessEventInjection {
 
     @Inject (
-            inClass = "org.bukkit.event.player.PlayerJoinEvent",
+            inClass = "org.bukkit.event.player.PlayerCommandPreprocessEvent",
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onJoin() {
+    public static void onCmdPreprocess1() {
+        onCmdPreprocess();
+    }
+
+    @Inject (
+            inClass = "org.bukkit.event.player.PlayerCommandPreprocessEvent",
+            inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Set;)V",
+            at = Inject.Position.BEGINNING
+    )
+    public static void onCmdPreprocess2() {
+        onCmdPreprocess();
+    }
+
+    private static void onCmdPreprocess() {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new BukkitPlayerJoinEvent());
+                    .dispatchEvent(new BukkitPlayerCommandPreprocessEvent());
     }
 
 }
