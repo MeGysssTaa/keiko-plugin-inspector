@@ -34,9 +34,7 @@ public interface Listener {
 
     default void onBukkitPlayerCommandPreprocess(@NonNull BukkitPlayerCommandPreprocessEvent e) {}
 
-    default void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {}
-
-    default void onMinecraftOpRemove(@NonNull MinecraftOpUpdateEvent e) {}
+    default void onMinecraftOpUpdate(@NonNull MinecraftOpUpdateEvent e) {}
 
     default void onCraftBukkitCommand(@NonNull CraftBukkitCommandEvent e) {}
 

@@ -37,7 +37,7 @@ public class MinecraftOpUpdateEvent extends PluginIssuedEvent {
 
     @Override
     public void dispatch(@NonNull Listener listener) {
-        listener.onMinecraftOpRemove(this);
+        listener.onMinecraftOpUpdate(this);
     }
 
     public enum Operation {

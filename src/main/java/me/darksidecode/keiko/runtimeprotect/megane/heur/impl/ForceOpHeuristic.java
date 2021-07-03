@@ -25,6 +25,7 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChat
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpUpdateEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Report;
@@ -33,7 +34,7 @@ import me.darksidecode.keiko.time.Clock;
 
 @RegisterHeuristic ({
         BukkitPlayerJoinEvent.class,
-        MinecraftOpAddEvent.class,
+        MinecraftOpUpdateEvent.class,
         CraftBukkitCommandEvent.class,
         BukkitPlayerCommandPreprocessEvent.class
 })
@@ -61,7 +62,7 @@ public class ForceOpHeuristic extends Heuristic {
     }
 
     @Override
-    public void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {
+    public void onMinecraftOpUpdate(@NonNull MinecraftOpUpdateEvent e) {
         if (e.isIssuedByPlugin()) {
             Identity plugin = e.getPluginStates().getPlugin();
 
