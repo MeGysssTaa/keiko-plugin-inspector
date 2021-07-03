@@ -48,7 +48,7 @@ class LoadClassesPhase extends Phase<JarFile, LoadClassesPhase.Result> {
     @Override
     protected EmittedValue<? extends LoadClassesPhase.Result> execute(JarFile target,
                                                                       PhaseExecutionException error)
-                                                                      throws Exception {
+                                                                      throws Throwable {
         if (target == null)
             return new EmittedValue<>(new PhaseExecutionException(
                     true, "failed to define classes from the given target data", error));

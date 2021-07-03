@@ -36,7 +36,7 @@ public class DetectMinecraftVersionPhase extends Phase<JarFile, String> {
 
     @Override
     protected EmittedValue<? extends String> execute(JarFile target,
-                                                     PhaseExecutionException error) throws Exception {
+                                                     PhaseExecutionException error) throws Throwable {
         if (target == null)
             return new EmittedValue<>(new PhaseExecutionException(
                     true, "failed to detect Minecraft server version from the given target data", error));

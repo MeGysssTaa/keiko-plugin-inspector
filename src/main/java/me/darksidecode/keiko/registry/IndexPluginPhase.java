@@ -48,7 +48,7 @@ public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
 
     @Override
     protected EmittedValue<? extends IndexedPlugin> execute(JarFile target,
-                                                            PhaseExecutionException error) throws Exception {
+                                                            PhaseExecutionException error) throws Throwable {
         if (target == null)
             return new EmittedValue<>(new PhaseExecutionException(
                     true, "failed to index a plugin", error));
