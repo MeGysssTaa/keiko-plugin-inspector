@@ -21,9 +21,6 @@ package me.darksidecode.keiko.reflect;
 
 import lombok.RequiredArgsConstructor;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
-
 /**
  * Used to cache reflection calls to methods whose return value never changes,
  * and that do not accept any input arguments (have no method parameters).
@@ -31,16 +28,14 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ReflectCached<T> {
 
-    private final Method method;
-
-    private final Object handle;
+    private final ReflectValueExtractor<T> valueExtractor;
 
     private T value;
 
     public T get() {
         if (value == null) {
             try {
-                value = (T) Objects.requireNonNull(method.invoke(handle));
+                value = valueExtractor.extract();
             } catch (ReflectiveOperationException ex) {
                 throw new RuntimeException("fatal reflection failure", ex);
             }

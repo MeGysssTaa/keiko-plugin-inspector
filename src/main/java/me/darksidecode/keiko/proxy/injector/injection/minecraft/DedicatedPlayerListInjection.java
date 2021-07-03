@@ -23,9 +23,9 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
+import me.darksidecode.keiko.reflect.mojang.WrappedGameProfile;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpRemoveEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpUpdateEvent;
 
 @UtilityClass
 public class DedicatedPlayerListInjection {
@@ -42,7 +42,9 @@ public class DedicatedPlayerListInjection {
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new MinecraftOpAddEvent());
+                    .dispatchEvent(new MinecraftOpUpdateEvent(
+                            MinecraftOpUpdateEvent.Operation.OP_ADD,
+                            new WrappedGameProfile(gameProfile)));
     }
 
     @Inject (
@@ -57,7 +59,9 @@ public class DedicatedPlayerListInjection {
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new MinecraftOpRemoveEvent());
+                    .dispatchEvent(new MinecraftOpUpdateEvent(
+                            MinecraftOpUpdateEvent.Operation.OP_REMOVE,
+                            new WrappedGameProfile(gameProfile)));
     }
 
 }

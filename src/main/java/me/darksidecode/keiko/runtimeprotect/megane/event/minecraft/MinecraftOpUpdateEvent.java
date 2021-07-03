@@ -19,15 +19,30 @@
 
 package me.darksidecode.keiko.runtimeprotect.megane.event.minecraft;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import me.darksidecode.keiko.reflect.mojang.WrappedGameProfile;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 import me.darksidecode.keiko.runtimeprotect.megane.event.PluginIssuedEvent;
 
-public class MinecraftOpAddEvent extends PluginIssuedEvent {
+@RequiredArgsConstructor
+public class MinecraftOpUpdateEvent extends PluginIssuedEvent {
+
+    @Getter @NonNull
+    private final Operation operation;
+
+    @Getter @NonNull
+    private final WrappedGameProfile gameProfile;
 
     @Override
     public void dispatch(@NonNull Listener listener) {
-        listener.onMinecraftOpAdd(this);
+        listener.onMinecraftOpRemove(this);
+    }
+
+    public enum Operation {
+        OP_ADD,
+        OP_REMOVE
     }
 
 }

@@ -62,6 +62,7 @@ public class KeikoClassLoader extends URLClassLoader {
 
     private final Workflow workflow;
 
+    @Getter
     private Injector injector;
 
     @Getter (AccessLevel.PACKAGE)

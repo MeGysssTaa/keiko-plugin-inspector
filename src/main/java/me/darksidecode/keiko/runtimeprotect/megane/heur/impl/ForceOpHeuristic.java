@@ -25,7 +25,6 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChat
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Report;

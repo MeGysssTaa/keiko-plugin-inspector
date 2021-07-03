@@ -22,7 +22,7 @@ package me.darksidecode.keiko.proxy.injector;
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
 
-final class PlaceholderApplicator {
+public final class PlaceholderApplicator {
 
     private final String nmsVersion;
 
@@ -32,7 +32,7 @@ final class PlaceholderApplicator {
         this.nmsVersion = nmsVersion != null ? nmsVersion : "" /* Bungee (will not be used) */;
     }
 
-    String apply(@NonNull String s) {
+    public String apply(@NonNull String s) {
         return s.replace("{nms_version}", nmsVersion);
     }
 

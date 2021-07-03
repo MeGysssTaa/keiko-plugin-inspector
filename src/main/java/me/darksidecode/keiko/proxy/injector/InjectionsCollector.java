@@ -19,6 +19,9 @@
 
 package me.darksidecode.keiko.proxy.injector;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.injector.injection.Injection;
 import me.darksidecode.keiko.proxy.injector.injection.MethodCallInjection;
@@ -35,11 +38,13 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-class InjectionsCollector {
+@NoArgsConstructor (access = AccessLevel.PACKAGE)
+public class InjectionsCollector {
 
     private static final String INVALID_IN_METHOD
             = "invalid inMethod value: expected methodName(DescriptorPart1)DescriptorPart2; -- string: ";
 
+    @Getter
     private final PlaceholderApplicator placeholderApplicator = new PlaceholderApplicator();
 
     private final Collection<Injection> injections = collectInjections();

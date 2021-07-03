@@ -17,17 +17,32 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event.minecraft;
+package me.darksidecode.keiko.reflect;
 
+import lombok.Getter;
 import lombok.NonNull;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
-import me.darksidecode.keiko.runtimeprotect.megane.event.PluginIssuedEvent;
 
-public class MinecraftOpRemoveEvent extends PluginIssuedEvent {
+/**
+ * Used to provide easier access to classes that we don't have at compile time
+ * or at run time with normal access (through non-Keiko class loader(s)).
+ */
+public abstract class WrappedObject {
 
-    @Override
-    public void dispatch(@NonNull Listener listener) {
-        listener.onMinecraftOpRemove(this);
+    @Getter
+    protected final Class<?> type;
+
+    @Getter
+    protected final Object handle;
+
+    protected WrappedObject(@NonNull Class<?> type, @NonNull Object handle) {
+        Class<?> handleClass = handle.getClass();
+
+        if (!type.isAssignableFrom(handleClass))
+            throw new IllegalArgumentException(
+                    "invalid handle: expected " + type.getName() + ", but got " + handleClass);
+
+        this.type = type;
+        this.handle = handle;
     }
 
 }

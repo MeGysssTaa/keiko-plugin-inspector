@@ -19,6 +19,7 @@
 
 package me.darksidecode.keiko.proxy.injector;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.disassembling.JavaDisassembler;
@@ -44,6 +45,7 @@ public final class Injector {
     @NonNull
     private final JavaDisassembler disassembler;
 
+    @Getter
     private final InjectionsCollector collector = new InjectionsCollector();
 
     public long getAppliedInjections() {

@@ -17,44 +17,38 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.reflect;
+package me.darksidecode.keiko.reflect.mojang;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.reflect.MethodCallExtractor;
+import me.darksidecode.keiko.reflect.ReflectCached;
+import me.darksidecode.keiko.reflect.WrappedObject;
 
 import java.lang.reflect.Method;
 
-public class WrappedBukkitPlayer {
+public class WrappedGameProfile extends WrappedObject {
 
-    private static final Class<?> bukkitPlayerClass;
+    private static final Class<?> gameProfileClass;
 
-    private static final Method getName;
+    private static final Method getNameMethod;
 
     static {
         try {
-            bukkitPlayerClass = Keiko.INSTANCE.getLoader()
-                    .getLoadedClass("org.bukkit.entity.Player");
+            gameProfileClass = Keiko.INSTANCE.getLoader()
+                    .getLoadedClass("com.mojang.authlib.GameProfile");
 
-            getName = bukkitPlayerClass.getMethod("getName");
+            getNameMethod = gameProfileClass.getMethod("getName");
         } catch (ReflectiveOperationException ex) {
             throw new ExceptionInInitializerError(ex);
         }
     }
 
-    private final Object handle;
-
     private final ReflectCached<String> name;
 
-    public WrappedBukkitPlayer(@NonNull Object handle) {
-        Class<?> handleClass = handle.getClass();
-
-        if (!bukkitPlayerClass.isAssignableFrom(handleClass))
-            throw new IllegalArgumentException(
-                    "invalid handle: expected " + bukkitPlayerClass.getName()
-                            + ", but got " + handleClass);
-
-        this.handle = handle;
-        this.name = new ReflectCached<>(getName, handle);
+    public WrappedGameProfile(@NonNull Object handle) {
+        super(gameProfileClass, handle);
+        name = new ReflectCached<>(new MethodCallExtractor<>(getNameMethod, handle));
     }
 
     public String getName() {

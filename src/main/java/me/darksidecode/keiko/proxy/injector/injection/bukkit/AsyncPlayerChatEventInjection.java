@@ -23,7 +23,7 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
-import me.darksidecode.keiko.reflect.WrappedBukkitPlayer;
+import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 

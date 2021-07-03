@@ -17,27 +17,22 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event.bukkit;
+package me.darksidecode.keiko.reflect;
 
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
+
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 @RequiredArgsConstructor
-public class BukkitPlayerCommandPreprocessEvent implements Event {
+public class PublicFieldExtractor<T> implements ReflectValueExtractor<T> {
 
-    @Getter @NonNull
-    private final WrappedBukkitPlayer player;
-
-    @Getter @NonNull
-    private final String message;
+    private final Field field;
+    private final Object handle;
 
     @Override
-    public void dispatch(@NonNull Listener listener) {
-        listener.onBukkitPlayerCommandPreprocess(this);
+    public T extract() throws ReflectiveOperationException {
+        return (T) Objects.requireNonNull(field.get(handle));
     }
 
 }

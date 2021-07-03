@@ -24,8 +24,7 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChat
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpRemoveEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpUpdateEvent;
 
 public interface Listener {
 
@@ -37,7 +36,7 @@ public interface Listener {
 
     default void onMinecraftOpAdd(@NonNull MinecraftOpAddEvent e) {}
 
-    default void onMinecraftOpRemove(@NonNull MinecraftOpRemoveEvent e) {}
+    default void onMinecraftOpRemove(@NonNull MinecraftOpUpdateEvent e) {}
 
     default void onCraftBukkitCommand(@NonNull CraftBukkitCommandEvent e) {}
 

@@ -19,11 +19,17 @@
 
 package me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 import me.darksidecode.keiko.runtimeprotect.megane.event.PluginIssuedEvent;
 
+@RequiredArgsConstructor
 public class CraftBukkitCommandEvent extends PluginIssuedEvent {
+
+    @Getter @NonNull
+    private final String command;
 
     @Override
     public void dispatch(@NonNull Listener listener) {

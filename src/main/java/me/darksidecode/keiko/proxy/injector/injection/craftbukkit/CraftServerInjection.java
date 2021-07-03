@@ -23,6 +23,7 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
+import me.darksidecode.keiko.reflect.minecraft.WrappedServerCommand;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 
@@ -39,7 +40,7 @@ public class CraftServerInjection {
     )
     public static void checkCommandDispatch(MethodParam<?> sender, MethodParam<String> command) {
         // param 'sender' type 'org.bukkit.command.CommandSender'
-        onCommand();
+        onCommand(command.getValue());
     }
 
     @Inject (
@@ -53,16 +54,16 @@ public class CraftServerInjection {
     public static void checkCommandDispatchServer(MethodParam<?> sender, MethodParam<?> serverCommand) {
         // param 'sender' type 'org.bukkit.command.CommandSender'
         // param 'serverCommand' type 'net.minecraft.server.{nms_version}.ServerCommand'
-        onCommand();
+        onCommand(new WrappedServerCommand(serverCommand.getValue()).getCommand());
     }
 
-    private static void onCommand() {
+    private static void onCommand(String command) {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
         if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch();
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new CraftBukkitCommandEvent());
+                    .dispatchEvent(new CraftBukkitCommandEvent(command));
     }
 
 }
