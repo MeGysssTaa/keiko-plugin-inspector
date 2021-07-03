@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.phase.PhaseExecutionException;
+import me.darksidecode.jminima.phase.PhaseExecutionWatcher;
 import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
 import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
 import me.darksidecode.jminima.workflow.Workflow;
@@ -72,7 +73,9 @@ public class PluginContext {
                     try (Workflow workflow = new Workflow()
                             .phase(new OpenJarFilePhase(file))
                             .phase(new IndexPluginPhase()
-                                    .afterExecution((val, err) -> indexedPluginHolder.setValue(val)))
+                                    .watcher(new PhaseExecutionWatcher<IndexedPlugin>()
+                                            .doAfterExecution((val, err) -> indexedPluginHolder.setValue(val))
+                                    ))
                             .phase(new CloseJarFilePhase())) {
                         WorkflowExecutionResult result = workflow.executeAll();
 

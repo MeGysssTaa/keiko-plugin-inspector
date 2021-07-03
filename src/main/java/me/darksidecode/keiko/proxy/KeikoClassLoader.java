@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
 import me.darksidecode.jminima.phase.PhaseExecutionException;
+import me.darksidecode.jminima.phase.PhaseExecutionWatcher;
 import me.darksidecode.jminima.phase.basic.EmitArbitraryValuePhase;
 import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
@@ -81,22 +82,26 @@ class KeikoClassLoader extends URLClassLoader {
         workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
                 .phase(new DetectMinecraftVersionPhase()
-                        .afterExecution((val, err) -> {
-                            // It is important that we only create Injector afted detecting the proxied Minecraft
-                            // server version so that this version is already known in the LoadClassesPhase. If we
-                            // created Injector earlier, then the PlaceholderApplication (in InjectionsCollector)
-                            // would be unable to replace placeholders like "{nms_version}" properly.
-                            try {
-                                Keiko.INSTANCE.getEnv().setNmsVersion(val);
-                                injector = new Injector(jar, new SimpleJavaDisassembler(jar));
-                            } catch (Exception ex) {
-                                // Fatal error in code (for example, an invalid @Inject annotation).
-                                Keiko.INSTANCE.getLogger().error("Failed to create injector", ex);
-                                System.exit(1);
-                            }
-                        }))
+                        .watcher(new PhaseExecutionWatcher<String>()
+                                .doAfterExecution((val, err) -> {
+                                    // It is important that we only create Injector afted detecting the proxied
+                                    // Minecraft server version so that this version is already known in the
+                                    // LoadClassesPhase. If we created Injector earlier, then the PlaceholderApplicator
+                                    // (in InjectionsCollector) would be unable to replace placeholders like
+                                    // "{nms_version}" properly (because the value has not been set yet).
+                                    Keiko.INSTANCE.getEnv().setNmsVersion(val);
+                                    injector = new Injector(jar, new SimpleJavaDisassembler(jar));
+                                })
+                                .doOnWatcherError(t -> {
+                                    // Fatal error in code (for example, an invalid @Inject annotation).
+                                    Keiko.INSTANCE.getLogger().error("Failed to create injector", t);
+                                    System.exit(1);
+                                })
+                        ))
                 .phase(new LoadClassesPhase(this)
-                        .afterExecution((val, err) -> loadResult = val));
+                        .watcher(new PhaseExecutionWatcher<LoadClassesPhase.Result>()
+                                .doAfterExecution((val, err) -> loadResult = val)
+                        ));
 
         WorkflowExecutionResult result = workflow.executeAll();
 
