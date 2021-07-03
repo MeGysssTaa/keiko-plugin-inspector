@@ -163,11 +163,6 @@ class InjectionsCollector {
                     "method is annotated with @Inject but is not static - a call to it cannot be injected: "
                             + method.getDeclaringClass().getName() + "#" + method.getName());
 
-        if (method.getParameterCount() > 0)
-            throw new IllegalArgumentException(
-                    "method is annotated with @Inject but has parameters - a call to it cannot be injected: "
-                            + method.getDeclaringClass().getName() + "#" + method.getName());
-
         if (method.getReturnType() != void.class) // IMPORTANT: void.class, NOT Void.class
             throw new IllegalArgumentException(
                     "method is annotated with @Inject but has non-void return type - a call to it cannot be injected: "

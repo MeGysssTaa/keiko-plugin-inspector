@@ -47,12 +47,14 @@ public abstract class Injection implements Opcodes {
     protected boolean applied;
 
     public final void applyAndRecord(@NonNull ClassNode cls, @NonNull MethodNode mtd) {
-        apply(cls, mtd);
+        if (!applied) { // avoid duplicate application
+            apply(cls, mtd);
 
-        Keiko.INSTANCE.getLogger().debug("Applied injection %s to %s#%s%s",
-                getClass().getName(), inClass, inMethodName, inMethodDesc);
+            Keiko.INSTANCE.getLogger().debug("Applied injection %s to %s#%s%s",
+                    getClass().getName(), inClass, inMethodName, inMethodDesc);
 
-        applied = true;
+            applied = true;
+        }
     }
 
     protected abstract void apply(@NonNull ClassNode cls, @NonNull MethodNode mtd);

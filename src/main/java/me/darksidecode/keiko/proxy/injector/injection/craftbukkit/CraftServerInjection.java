@@ -22,6 +22,7 @@ package me.darksidecode.keiko.proxy.injector.injection.craftbukkit;
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
+import me.darksidecode.keiko.proxy.injector.MethodParam;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 
@@ -36,7 +37,8 @@ public class CraftServerInjection {
                     ")Z",
             at = Inject.Position.BEGINNING
     )
-    public static void checkCommandDispatch() {
+    public static void checkCommandDispatch(MethodParam<?> sender, MethodParam<String> command) {
+        // param 'sender' type 'org.bukkit.command.CommandSender'
         onCommand();
     }
 
@@ -48,7 +50,9 @@ public class CraftServerInjection {
                     ")Z",
             at = Inject.Position.BEGINNING
     )
-    public static void checkCommandDispatchServer() {
+    public static void checkCommandDispatchServer(MethodParam<?> sender, MethodParam<?> serverCommand) {
+        // param 'sender' type 'org.bukkit.command.CommandSender'
+        // param 'serverCommand' type 'net.minecraft.server.{nms_version}.ServerCommand'
         onCommand();
     }
 

@@ -22,6 +22,7 @@ package me.darksidecode.keiko.proxy.injector.injection.bukkit;
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
+import me.darksidecode.keiko.proxy.injector.MethodParam;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
 
@@ -33,7 +34,8 @@ public class PlayerJoinEventInjection {
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onJoin() {
+    public static void onJoin(MethodParam<?> player, MethodParam<String> joinMsg) {
+        // param 'player' type 'org.bukkit.entity.Player'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isMeganeEnabled())

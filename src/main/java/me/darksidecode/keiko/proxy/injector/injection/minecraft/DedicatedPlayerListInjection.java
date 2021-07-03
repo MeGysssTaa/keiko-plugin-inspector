@@ -22,6 +22,7 @@ package me.darksidecode.keiko.proxy.injector.injection.minecraft;
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
+import me.darksidecode.keiko.proxy.injector.MethodParam;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAddEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpRemoveEvent;
@@ -34,7 +35,8 @@ public class DedicatedPlayerListInjection {
             inMethod = "addOp(Lcom/mojang/authlib/GameProfile;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void checkOpAdd() {
+    public static void checkOpAdd(MethodParam<?> gameProfile) {
+        // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
         if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpAdd();
 
@@ -48,7 +50,8 @@ public class DedicatedPlayerListInjection {
             inMethod = "removeOp(Lcom/mojang/authlib/GameProfile;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void checkOpRemove() {
+    public static void checkOpRemove(MethodParam<?> gameProfile) {
+        // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
         if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpRemove();
 

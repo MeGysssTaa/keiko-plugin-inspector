@@ -86,8 +86,14 @@ class KeikoClassLoader extends URLClassLoader {
                             // server version so that this version is already known in the LoadClassesPhase. If we
                             // created Injector earlier, then the PlaceholderApplication (in InjectionsCollector)
                             // would be unable to replace placeholders like "{nms_version}" properly.
-                            Keiko.INSTANCE.getEnv().setNmsVersion(val);
-                            injector = new Injector(jar, new SimpleJavaDisassembler(jar));
+                            try {
+                                Keiko.INSTANCE.getEnv().setNmsVersion(val);
+                                injector = new Injector(jar, new SimpleJavaDisassembler(jar));
+                            } catch (Exception ex) {
+                                // Fatal error in code (for example, an invalid @Inject annotation).
+                                Keiko.INSTANCE.getLogger().error("Failed to create injector", ex);
+                                System.exit(1);
+                            }
                         }))
                 .phase(new LoadClassesPhase(this)
                         .afterExecution((val, err) -> loadResult = val));

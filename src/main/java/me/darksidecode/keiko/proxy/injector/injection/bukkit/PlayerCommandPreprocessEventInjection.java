@@ -22,8 +22,12 @@ package me.darksidecode.keiko.proxy.injector.injection.bukkit;
 import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
+import me.darksidecode.keiko.proxy.injector.MethodParam;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
+import org.bukkit.entity.Player;
+
+import java.util.Set;
 
 @UtilityClass
 public class PlayerCommandPreprocessEventInjection {
@@ -33,7 +37,8 @@ public class PlayerCommandPreprocessEventInjection {
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onCmdPreprocess1() {
+    public static void onCmdPreprocess1(MethodParam<?> player, MethodParam<String> msg) {
+        // param 'player' type 'org.bukkit.entity.Player'
         onCmdPreprocess();
     }
 
@@ -42,7 +47,10 @@ public class PlayerCommandPreprocessEventInjection {
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Set;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onCmdPreprocess2() {
+    public static void onCmdPreprocess2(MethodParam<Player> player, MethodParam<String> msg,
+                                        MethodParam<Set<?>> recipients) {
+        // param 'player' type 'org.bukkit.entity.Player'
+        // param 'recipients' type 'java.util.Set<org.bukkit.entity.Player>'
         onCmdPreprocess();
     }
 
