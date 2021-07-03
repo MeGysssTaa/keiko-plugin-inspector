@@ -37,14 +37,16 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpAdd(MethodParam<?> gameProfile) {
         // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
+        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile);
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpAdd();
+
+        if (runtimeProtect.isDacEnabled())
+            runtimeProtect.getDac().checkOpAdd(wGameProfile.getName());
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
                     .dispatchEvent(new MinecraftOpUpdateEvent(
-                            MinecraftOpUpdateEvent.Operation.OP_ADD,
-                            new WrappedGameProfile(gameProfile)));
+                            MinecraftOpUpdateEvent.Operation.OP_ADD, wGameProfile));
     }
 
     @Inject (
@@ -54,14 +56,16 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpRemove(MethodParam<?> gameProfile) {
         // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
+        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile);
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkOpRemove();
+
+        if (runtimeProtect.isDacEnabled())
+            runtimeProtect.getDac().checkOpRemove(wGameProfile.getName());
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
                     .dispatchEvent(new MinecraftOpUpdateEvent(
-                            MinecraftOpUpdateEvent.Operation.OP_REMOVE,
-                            new WrappedGameProfile(gameProfile)));
+                            MinecraftOpUpdateEvent.Operation.OP_REMOVE, wGameProfile));
     }
 
 }

@@ -59,7 +59,7 @@ public class CraftServerInjection {
 
     private static void onCommand(String command) {
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
-        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch();
+        if (runtimeProtect.isDacEnabled()) runtimeProtect.getDac().checkCommandDispatch(command);
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()

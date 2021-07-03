@@ -20,6 +20,10 @@
 
 
 
+# Keiko Megane is a heuristic-based runtime protection mechanism that detects suspicious
+# behavior of plugins while your server is running. It is able to recognize a variety of
+# threats, and sometimes even remediate the damage they have done. For details visit:
+# https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Keiko-Megane
 megane:
   enabled: true
   heur:
@@ -351,16 +355,15 @@ domain_access_control:
   #
   # Rules syntax:
   #
-  #     <"ALLOW"/"DENY"> <identity> *
-  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #     <"ALLOW"/"DENY"> <identity> <player name>
   #
   # Examples:
   #
   #     # Allow plugin "LuckPerms" to give the server operator (OP) status to any player:
   #     - ALLOW PLUGIN=LuckPerms *
   #
-  #     # Deny all plugins to op any player:
-  #     - DENY ALL *
+  #     # Deny all plugins to op player with name SomeFishyDev:
+  #     - DENY ALL SomeFishyDev
   minecraft_op_add:
     notify: false
     default: DENY
@@ -386,20 +389,24 @@ domain_access_control:
   #
   # Rules syntax:
   #
-  #     <"ALLOW"/"DENY"> <identity> *
-  #     (the asterisk * does not mean anything here but is required - it just has to be there, keep that in mind)
+  #     <"ALLOW"/"DENY"> <identity> <command>
   #
   # Examples:
   #
-  #     # Allow plugin "LuckPerms" to execute any Minecraft command:
-  #     - ALLOW PLUGIN=LuckPerms *
+  #     # Allow plugin "LuckPerms" to execute Minecraft command "/op" to op any player:
+  #     - ALLOW PLUGIN=LuckPerms op *
   #
-  #     # Deny all plugins to execute any Minecraft commands:
-  #     - DENY ALL *
+  #     # Deny plugin "SomeFishyPlugin" to execute command "/give SomeFishyDev minecraft:diamond 64":
+  #     - DENY PLUGIN=SomeFishyPlugin give SomeFishyDev minecraft:diamond 64
   minecraft_command_dispatch:
     notify: false
-    default: DENY
-    rules: []
+    default: ALLOW
+    rules:
+      - DENY ALL op *
+      - DENY ALL pex *
+      - DENY ALL lp *
+      - DENY ALL permission*
+      - DENY ALL luckperms*
 
   # Miscellaneous JVM actions (permissions) control.
   #

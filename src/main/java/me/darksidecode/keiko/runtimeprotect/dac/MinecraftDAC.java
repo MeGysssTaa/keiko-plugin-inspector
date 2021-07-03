@@ -21,10 +21,10 @@ package me.darksidecode.keiko.runtimeprotect.dac;
 
 public interface MinecraftDAC {
 
-    void checkOpAdd();
+    void checkOpAdd(String player);
 
-    void checkOpRemove();
+    void checkOpRemove(String player);
 
-    void checkCommandDispatch();
+    void checkCommandDispatch(String command);
 
 }

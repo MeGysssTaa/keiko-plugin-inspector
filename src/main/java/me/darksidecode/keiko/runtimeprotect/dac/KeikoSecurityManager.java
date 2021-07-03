@@ -218,7 +218,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     @Override
     public void checkExec(String cmd) {
         checkAccess(arg -> StringUtils.matchWildcards(cmd, arg),
-                Operation.COMMAND_EXECUTION, I18n.get("runtimeProtect.dac.sysCmd", cmd));
+                Operation.COMMAND_EXECUTION, I18n.get("runtimeProtect.dac.cmd", cmd));
     }
 
     @Override
@@ -309,19 +309,24 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     }
 
     @Override
-    public void checkOpAdd() {
-        checkNoArgs(Operation.MINECRAFT_OP_ADD);
+    public void checkOpAdd(String player) {
+        checkAccess(arg -> StringUtils.matchWildcards(
+                player, arg), Operation.MINECRAFT_OP_ADD,
+                I18n.get("runtimeProtect.dac.player", player));
     }
 
     @Override
-    public void checkOpRemove() {
-        checkNoArgs(Operation.MINECRAFT_OP_REMOVE);
+    public void checkOpRemove(String player) {
+        checkAccess(arg -> StringUtils.matchWildcards(
+                player, arg), Operation.MINECRAFT_OP_REMOVE,
+                I18n.get("runtimeProtect.dac.player", player));
     }
 
     @Override
-    public void checkCommandDispatch() {
-        // TODO: 30.06.2021 filter command (requires comparably much work in the injection system to use parameters)
-        checkNoArgs(Operation.MINECRAFT_COMMAND_DISPATCH);
+    public void checkCommandDispatch(String command) {
+        checkAccess(arg -> StringUtils.matchWildcards(
+                command, arg), Operation.MINECRAFT_COMMAND_DISPATCH,
+                I18n.get("runtimeProtect.dac.cmd", command));
     }
 
     private void checkNoArgs(Operation op) {
