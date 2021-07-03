@@ -29,8 +29,8 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpAd
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Report;
-import me.darksidecode.keiko.util.time.AtomicClock;
-import me.darksidecode.keiko.util.time.Clock;
+import me.darksidecode.keiko.time.AtomicClock;
+import me.darksidecode.keiko.time.Clock;
 
 @RegisterHeuristic ({
         BukkitPlayerJoinEvent.class,

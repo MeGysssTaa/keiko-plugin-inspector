@@ -17,7 +17,7 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.util.time;
+package me.darksidecode.keiko.time;
 
 import lombok.NonNull;
 

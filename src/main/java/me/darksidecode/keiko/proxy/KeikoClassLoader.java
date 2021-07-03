@@ -43,7 +43,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-class KeikoClassLoader extends URLClassLoader {
+public class KeikoClassLoader extends URLClassLoader {
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -120,6 +120,16 @@ class KeikoClassLoader extends URLClassLoader {
 
         Keiko.INSTANCE.getLogger().debug("Injections applied: %d/%d (%d skipped)",
                 appliedInjections, appliedInjections + skippedInjections, skippedInjections);
+    }
+
+    public Class<?> getLoadedClass(@NonNull String name) throws ClassNotFoundException {
+        Class<?> result = classes.get(name);
+
+        if (result == null)
+            throw new ClassNotFoundException(
+                    name + " (Is the name correct? Has this class been loaded before?)");
+
+        return result;
     }
 
     @Override

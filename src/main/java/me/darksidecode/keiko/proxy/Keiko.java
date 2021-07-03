@@ -76,6 +76,9 @@ public final class Keiko {
     @Getter
     private RuntimeProtect runtimeProtect;
 
+    @Getter
+    private KeikoClassLoader loader;
+
     private File proxiedExecutable;
 
     @SuppressWarnings ("UseOfSystemOutOrSystemErr")
@@ -410,7 +413,7 @@ public final class Keiko {
         logger.infoLocalized("startup.launchingProxy");
 
         try {
-            KeikoClassLoader loader = new KeikoClassLoader(proxiedExecutable);
+            loader = new KeikoClassLoader(proxiedExecutable);
             Thread.currentThread().setContextClassLoader(loader); // otherwise resources (non-class files) won't load
             logger.debugLocalized("startup.classLoaderStats",
                     loader.getLoadResult().successes, loader.getLoadResult().failures);

@@ -17,24 +17,36 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.runtimeprotect.megane.event.bukkit;
+package me.darksidecode.keiko.reflect;
 
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.reflect.WrappedBukkitPlayer;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
-import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
+import java.lang.reflect.Method;
+import java.util.Objects;
+
+/**
+ * Used to cache reflection calls to methods whose return value never changes,
+ * and that do not accept any input arguments (have no method parameters).
+ */
 @RequiredArgsConstructor
-public class BukkitPlayerJoinEvent implements Event {
+public class ReflectCached<T> {
 
-    @Getter @NonNull
-    private final WrappedBukkitPlayer player;
+    private final Method method;
 
-    @Override
-    public void dispatch(@NonNull Listener listener) {
-        listener.onBukkitPlayerJoin(this);
+    private final Object handle;
+
+    private T value;
+
+    public T get() {
+        if (value == null) {
+            try {
+                value = (T) Objects.requireNonNull(method.invoke(handle));
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException("fatal reflection failure", ex);
+            }
+        }
+
+        return value;
     }
 
 }
