@@ -74,7 +74,7 @@ public class KeikoUpdater extends TimerTask {
 
                 if (download) {
                     Keiko.INSTANCE.getLogger().warningLocalized("updater.downloading", latestVersion);
-                    downloadAndInstall(downloadUrl);
+                    downloadAndInstall(downloadUrl, latestVersion);
                 }
             }
         } catch (Exception ex) {
@@ -104,10 +104,19 @@ public class KeikoUpdater extends TimerTask {
         }
     }
 
-    private void downloadAndInstall(String jarUrl) {
-        File keikoExecutable = Keiko.INSTANCE.getEnv().getKeikoExecutable();
+    private void downloadAndInstall(String jarUrl, Version version) {
+        // TODO: 04.07.2021 make naming not so hardcoded
+        String saveToName = "keiko-plugin-inspector-" + version + "-all.jar";
+        File saveTo = new File(saveToName);
 
-        if (!keikoExecutable.delete()) {
+        if (saveTo.exists() && !saveTo.delete()) {
+            Keiko.INSTANCE.getLogger().warningLocalized("updater.errDownload");
+            Keiko.INSTANCE.getLogger().error("The saveTo executable already exists, but cannot be deleted");
+
+            return;
+        }
+
+        if (!Keiko.INSTANCE.getEnv().getKeikoExecutable().delete()) {
             Keiko.INSTANCE.getLogger().warningLocalized("updater.errDownload");
             Keiko.INSTANCE.getLogger().error("Failed to delete the old Keiko executable");
 
@@ -116,12 +125,15 @@ public class KeikoUpdater extends TimerTask {
 
         try {
             URL url = new URL(jarUrl);
-            FileUtils.copyURLToFile(url, keikoExecutable, 5000, 60000);
+            FileUtils.copyURLToFile(url, saveTo, 5000, 60000);
 
             Keiko.INSTANCE.getLogger().warning(" ");
             Keiko.INSTANCE.getLogger().warning(LINE);
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine1");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine2");
+            Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine3");
+            Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine4");
+            Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine5");
             Keiko.INSTANCE.getLogger().warning(LINE);
             Keiko.INSTANCE.getLogger().warning(" ");
 
