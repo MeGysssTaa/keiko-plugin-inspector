@@ -99,31 +99,6 @@ public final class Keiko {
 
         logger = new KeikoLogger(new File(env.getWorkDir(), "logs"));
         logger.debugLocalized("startup.workDir", env.getWorkDir().getAbsolutePath());
-
-        Version.Type verType = env.getBuildProperties().getVersion().getType();
-
-        if (verType != Version.Type.RELEASE) {
-            // Message like "Continue anyway? [yes/no]"
-            String prompt = I18n.get("startup.notRelease")
-                    + " [" + I18n.get("prompts.yes") + "/" + I18n.get("prompts.no") + "]";
-
-            // Prompt user to enter "yes" or "no" explicitly.
-            boolean proceed;
-
-            if (KeikoProperties.notReleaseWarnYes != null)
-                proceed = KeikoProperties.notReleaseWarnYes;
-            else
-                proceed = UserInputRequest.newBuilder(System.in, YesNo.class)
-                        .prompt(logger, prompt)
-                        .lineTransformer(String::trim)
-                        .build()
-                        .block()
-                        .toBoolean(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
-
-            if (!proceed)
-                // The warning scared the user enough :) They don't want to run a non-release build of Keiko.
-                System.exit(0);
-        }
     }
 
     public static void main(String[] args) {
@@ -310,6 +285,32 @@ public final class Keiko {
             throw new IllegalStateException(launchState.name());
 
         launchState = LaunchState.LAUNCHING;
+
+        // Warn the user if they're running a non-release build of Keiko.
+        Version.Type verType = env.getBuildProperties().getVersion().getType();
+
+        if (verType != Version.Type.RELEASE) {
+            // Message like "Continue anyway? [yes/no]"
+            String prompt = I18n.get("startup.notRelease", verType.name().toLowerCase())
+                    + " [" + I18n.get("prompts.yes") + "/" + I18n.get("prompts.no") + "]";
+
+            // Prompt user to enter "yes" or "no" explicitly.
+            boolean proceed;
+
+            if (KeikoProperties.notReleaseWarnYes != null)
+                proceed = KeikoProperties.notReleaseWarnYes;
+            else
+                proceed = UserInputRequest.newBuilder(System.in, YesNo.class)
+                        .prompt(logger, prompt)
+                        .lineTransformer(String::trim)
+                        .build()
+                        .block()
+                        .toBoolean(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
+
+            if (!proceed)
+                // The warning scared the user enough :) They don't want to run a non-release build of Keiko.
+                System.exit(0);
+        }
 
         findKeikoExecutable();
         ensureUnambiguous();
