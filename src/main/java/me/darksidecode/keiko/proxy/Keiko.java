@@ -294,12 +294,12 @@ public final class Keiko {
             String prompt = I18n.get("startup.notRelease", verType.name().toLowerCase())
                     + " [" + I18n.get("prompts.yes") + "/" + I18n.get("prompts.no") + "]";
 
-            // Prompt user to enter "yes" or "no" explicitly.
             boolean proceed;
 
             if (KeikoProperties.notReleaseWarnYes != null)
                 proceed = KeikoProperties.notReleaseWarnYes;
             else
+                // Prompt user to enter "yes" or "no" explicitly.
                 proceed = UserInputRequest.newBuilder(System.in, YesNo.class)
                         .prompt(logger, prompt)
                         .lineTransformer(String::trim)
