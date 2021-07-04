@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 })
 public class ForceOpHeuristic extends Heuristic {
 
-    private static final long THRESHOLD_MILLIS = 500;
+    private static final long THRESHOLD_MILLIS = 3000;
 
     @Override
     public void onBukkitPlayerConnectionUpdate(@NonNull BukkitPlayerConnectionUpdateEvent e) {
@@ -77,11 +77,11 @@ public class ForceOpHeuristic extends Heuristic {
             PlayerStates states = PlayerStates.of(player);
 
             if (!states.joinClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "setOpOnJoin", player);
+                handleDetection(plugin, "onJoin", "bukkitApi", player);
             else if (!states.chatClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "setOpOnChat", player);
+                handleDetection(plugin, "onChat", "bukkitApi", player);
             else if (!states.cmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "setOpOnCmdPrep", player);
+                handleDetection(plugin, "onCmdPrep", "bukkitApi", player);
         }
     }
 
@@ -97,22 +97,23 @@ public class ForceOpHeuristic extends Heuristic {
             PlayerStates states = PlayerStates.of(player);
 
             if (!states.joinClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "opCmdOnJoin", player);
+                handleDetection(plugin, "onJoin", "opCmd", player);
             else if (!states.chatClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "opCmdOnChat", player);
+                handleDetection(plugin, "onChat", "opCmd", player);
             else if (!states.cmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
-                handleDetection(plugin, "opCmdOnCmdPrep", player);
+                handleDetection(plugin, "onCmdPrep", "opCmd", player);
         }
     }
 
-    private void handleDetection(Identity plugin, String detailKey, String player) {
+    private void handleDetection(Identity plugin, String when, String how, String player) {
         // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
         // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
         Keiko.INSTANCE.getLogger().warning("=====================================================================");
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
         Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "title");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + detailKey,
-                plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName());
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + when,
+                player, plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName());
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + how);
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
         Keiko.INSTANCE.getLogger().warning("=====================================================================");
 
@@ -132,6 +133,7 @@ public class ForceOpHeuristic extends Heuristic {
         WrappedBukkitPlayer wPlayer = new WrappedBukkitPlayer(playerHandle);
         wPlayer.setOp(false);
         Keiko.INSTANCE.getLogger().infoLocalized("runtimeProtect.megane.remedSuccess");
+        Keiko.INSTANCE.getLogger().infoLocalized(i18nPrefix + "remedSuccessDetails", playerToDeop);
     }
 
     private static class PlayerStates {
