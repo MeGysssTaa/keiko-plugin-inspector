@@ -108,14 +108,14 @@ public class ForceOpHeuristic extends Heuristic {
     private void handleDetection(Identity plugin, String when, String how, String player) {
         // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
         // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
+        Keiko.INSTANCE.getLogger().warning("\n\n");
         Keiko.INSTANCE.getLogger().warning("=====================================================================");
-        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "title");
+        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.threatDetected", displayName);
+        Keiko.INSTANCE.getLogger().warning(" ");
         Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + when,
                 player, plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName());
         Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + how);
-        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warning("=====================================================================");
 
         if (remediate) {
             try {
@@ -125,6 +125,10 @@ public class ForceOpHeuristic extends Heuristic {
                 Keiko.INSTANCE.getLogger().error("Unhandled error during remediation", t);
             }
         }
+
+        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning("\n\n");
     }
 
     private void remediate(String playerToDeop) {
@@ -132,8 +136,8 @@ public class ForceOpHeuristic extends Heuristic {
         Object playerHandle = WrappedBukkit.getPlayerExact(playerToDeop);
         WrappedBukkitPlayer wPlayer = new WrappedBukkitPlayer(playerHandle);
         wPlayer.setOp(false);
-        Keiko.INSTANCE.getLogger().infoLocalized("runtimeProtect.megane.remedSuccess");
-        Keiko.INSTANCE.getLogger().infoLocalized(i18nPrefix + "remedSuccessDetails", playerToDeop);
+        Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.remedSuccess");
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "remedSuccessDetails", playerToDeop);
     }
 
     private static class PlayerStates {
