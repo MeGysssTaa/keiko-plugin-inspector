@@ -300,8 +300,14 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
             // Essentially, every plugin will end up calling KeikoSecurityManager methods (checkRead, etc.),
             // though not explicitly (but internally by Java APIs). So we exclude this package automatically.
             // Also exclude injected calls so that Keiko Megane event injections and other injections work.
-            boolean exclude = pkg.startsWith("me.darksidecode.keiko.runtimeprotect.dac")
-                    || RuntimeUtils.isInjectedKeikoCall();
+            // The "injection" package is excluded exlicitly as well because the first injected call causes
+            // the *Injection class to be loaded, which causes another checkPackageAccess where the utility
+            // method RuntimeUtils#isInjectedKeikoCall still returns false. Another way to circumvent this
+            // issue could be to load all the *Injection classes eagerly, but I think that's not so necessary.
+            boolean exclude = 
+                    pkg.startsWith("me.darksidecode.keiko.runtimeprotect.dac")
+                 || pkg.startsWith("me.darksidecode.keiko.proxy.injector.injection")
+                 || RuntimeUtils.isInjectedKeikoCall();
 
             checkAccess(arg -> !exclude && StringUtils.matchWildcards(
                     pkg, arg), Operation.PACKAGE_ACCESS, I18n.get("runtimeProtect.dac.pkg", pkg));
