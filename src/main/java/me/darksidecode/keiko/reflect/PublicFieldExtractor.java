@@ -32,7 +32,7 @@ public class PublicFieldExtractor<T> implements ReflectValueExtractor<T> {
 
     @Override
     public T extract() throws ReflectiveOperationException {
-        return (T) Objects.requireNonNull(field.get(handle));
+        return (T) field.get(handle);
     }
 
 }

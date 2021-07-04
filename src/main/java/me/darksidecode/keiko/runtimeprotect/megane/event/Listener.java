@@ -23,18 +23,30 @@ import lombok.NonNull;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerConnectionUpdateEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerEditBookEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpUpdateEvent;
 
 public interface Listener {
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //   Bukkit
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     default void onBukkitPlayerConnectionUpdate(@NonNull BukkitPlayerConnectionUpdateEvent e) {}
-
     default void onBukkitPlayerChat(@NonNull BukkitPlayerChatEvent e) {}
-
     default void onBukkitPlayerCommandPreprocess(@NonNull BukkitPlayerCommandPreprocessEvent e) {}
+    default void onBukkitPlayerEditBookEvent(@NonNull BukkitPlayerEditBookEvent e) {}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //   Minecraft
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     default void onMinecraftOpUpdate(@NonNull MinecraftOpUpdateEvent e) {}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //   CraftBukkit
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     default void onCraftBukkitCommand(@NonNull CraftBukkitCommandEvent e) {}
 

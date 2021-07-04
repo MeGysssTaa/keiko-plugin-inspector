@@ -32,7 +32,7 @@ public class MethodCallExtractor<T> implements ReflectValueExtractor<T> {
 
     @Override
     public T extract() throws ReflectiveOperationException {
-        return (T) Objects.requireNonNull(method.invoke(handle));
+        return (T) method.invoke(handle);
     }
 
 }

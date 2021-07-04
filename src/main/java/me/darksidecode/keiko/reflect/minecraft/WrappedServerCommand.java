@@ -29,9 +29,11 @@ import java.lang.reflect.Field;
 
 public class WrappedServerCommand extends WrappedObject {
 
-    private static final Class<?> serverCommandClass;
+    private static final Class<?>
+            serverCommandClass;
 
-    private static final Field commandField;
+    private static final Field
+            commandField;
 
     static {
         try {

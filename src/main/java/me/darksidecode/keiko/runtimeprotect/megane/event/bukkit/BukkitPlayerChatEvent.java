@@ -22,7 +22,7 @@ package me.darksidecode.keiko.runtimeprotect.megane.event.bukkit;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
+import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
@@ -30,7 +30,7 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 public class BukkitPlayerChatEvent implements Event {
 
     @Getter @NonNull
-    private final WrappedBukkitPlayer player;
+    private final WrappedPlayer player;
 
     @Getter @NonNull
     private final String message;

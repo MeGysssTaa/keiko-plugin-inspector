@@ -26,12 +26,14 @@ import me.darksidecode.keiko.reflect.WrappedObject;
 
 import java.lang.reflect.Method;
 
-public class WrappedBukkitPlayer extends WrappedObject {
+public class WrappedPlayer extends WrappedObject {
 
-    private static final Class<?> playerClass;
+    private static final Class<?>
+            playerClass;
 
-    private static final Method getNameMethod;
-    private static final Method setOpMethod;
+    private static final Method
+            getNameMethod,
+            setOpMethod;
 
     static {
         try {
@@ -47,7 +49,7 @@ public class WrappedBukkitPlayer extends WrappedObject {
 
     private final ReflectCached<String> name;
 
-    public WrappedBukkitPlayer(Object handle) {
+    public WrappedPlayer(Object handle) {
         super(playerClass, handle);
         name = new ReflectCached<>(new MethodCallExtractor<>(getNameMethod, handle));
     }

@@ -23,7 +23,7 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
-import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
+import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerConnectionUpdateEvent;
 
@@ -35,7 +35,7 @@ public class PlayerQuitEventInjection {
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onJoin(MethodParam<?> player, MethodParam<String> quitMsg) {
+    public static void onQuit(MethodParam<?> player, MethodParam<String> quitMsg) {
         // param 'player' type 'org.bukkit.entity.Player'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
@@ -43,7 +43,7 @@ public class PlayerQuitEventInjection {
             runtimeProtect.getMegane().getEventBus()
                     .dispatchEvent(new BukkitPlayerConnectionUpdateEvent(
                             BukkitPlayerConnectionUpdateEvent.Operation.QUIT,
-                            new WrappedBukkitPlayer(player.getValue())));
+                            new WrappedPlayer(player.getValue())));
     }
 
 }

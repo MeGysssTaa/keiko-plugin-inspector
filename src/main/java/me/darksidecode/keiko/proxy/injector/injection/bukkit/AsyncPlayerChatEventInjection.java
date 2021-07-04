@@ -23,7 +23,7 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
-import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
+import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 
@@ -46,7 +46,7 @@ public class AsyncPlayerChatEventInjection {
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
                     .dispatchEvent(new BukkitPlayerChatEvent(
-                            new WrappedBukkitPlayer(player.getValue()), message.getValue()));
+                            new WrappedPlayer(player.getValue()), message.getValue()));
     }
 
 }

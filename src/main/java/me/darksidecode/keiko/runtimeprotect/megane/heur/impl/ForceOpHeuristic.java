@@ -22,7 +22,7 @@ package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.reflect.bukkit.WrappedBukkit;
-import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
+import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
@@ -134,10 +134,10 @@ public class ForceOpHeuristic extends Heuristic {
     private void remediate(String playerToDeop) {
         // Deop the player that was just Force-OP'ped.
         Object playerHandle = WrappedBukkit.getPlayerExact(playerToDeop);
-        WrappedBukkitPlayer wPlayer = new WrappedBukkitPlayer(playerHandle);
-        wPlayer.setOp(false);
+        WrappedPlayer player = new WrappedPlayer(playerHandle);
+        player.setOp(false);
         Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.remedSuccess");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "remedSuccessDetails", playerToDeop);
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "remedSuccessDetails", player.getName());
     }
 
     private static class PlayerStates {

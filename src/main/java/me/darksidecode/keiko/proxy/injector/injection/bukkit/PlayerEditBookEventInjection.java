@@ -23,27 +23,34 @@ import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.proxy.injector.Inject;
 import me.darksidecode.keiko.proxy.injector.MethodParam;
+import me.darksidecode.keiko.reflect.bukkit.WrappedBookMeta;
 import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
-import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerConnectionUpdateEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerEditBookEvent;
 
 @UtilityClass
-public class PlayerJoinEventInjection {
+public class PlayerEditBookEventInjection {
 
     @Inject (
-            inClass = "org.bukkit.event.player.PlayerJoinEvent",
+            inClass = "org.bukkit.event.player.PlayerEditBookEvent",
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onJoin(MethodParam<?> player, MethodParam<String> joinMsg) {
+    public static void onEditBook(MethodParam<?> player, MethodParam<Integer> slot,
+                                  MethodParam<?> oldBookMeta, MethodParam<?> newBookMeta,
+                                  MethodParam<Boolean> signing) {
         // param 'player' type 'org.bukkit.entity.Player'
+        // param 'oldBookMeta' type 'org.bukkit.inventory.meta.BookMeta'
+        // param 'newBookMeta' type 'org.bukkit.inventory.meta.BookMeta'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
-                    .dispatchEvent(new BukkitPlayerConnectionUpdateEvent(
-                            BukkitPlayerConnectionUpdateEvent.Operation.JOIN,
-                            new WrappedPlayer(player.getValue())));
+                    .dispatchEvent(new BukkitPlayerEditBookEvent(
+                            new WrappedPlayer(player.getValue()),
+                            new WrappedBookMeta(oldBookMeta.getValue()),
+                            new WrappedBookMeta(newBookMeta.getValue()),
+                            signing.getValue()));
     }
 
 }

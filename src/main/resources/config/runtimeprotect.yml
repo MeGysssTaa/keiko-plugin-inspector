@@ -31,6 +31,8 @@ megane:
       enabled: true
       remediate: true
       exclusions: []
+    book_backdoor:
+      enabled: true
 
 
 

@@ -27,9 +27,11 @@ import java.lang.reflect.Method;
 @UtilityClass
 public class WrappedBukkit {
 
-    private static final Class<?> bukkitClass;
+    private static final Class<?>
+            bukkitClass;
 
-    private static final Method getPlayerExactMethod;
+    private static final Method
+            getPlayerExactMethod;
 
     static {
         try {

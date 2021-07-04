@@ -22,27 +22,26 @@ package me.darksidecode.keiko.runtimeprotect.megane.event.bukkit;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.darksidecode.keiko.reflect.bukkit.WrappedBookMeta;
 import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
 @RequiredArgsConstructor
-public class BukkitPlayerConnectionUpdateEvent implements Event {
-
-    @Getter @NonNull
-    private final Operation operation;
+public class BukkitPlayerEditBookEvent implements Event {
 
     @Getter @NonNull
     private final WrappedPlayer player;
 
+    @Getter @NonNull
+    private final WrappedBookMeta oldBookMeta, newBookMeta;
+
+    @Getter
+    private final boolean signing;
+
     @Override
     public void dispatch(@NonNull Listener listener) {
-        listener.onBukkitPlayerConnectionUpdate(this);
-    }
-
-    public enum Operation {
-        JOIN,
-        QUIT
+        listener.onBukkitPlayerEditBookEvent(this);
     }
 
 }

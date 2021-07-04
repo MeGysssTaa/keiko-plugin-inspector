@@ -17,9 +17,8 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko.reflect.mojang;
+package me.darksidecode.keiko.reflect.bukkit;
 
-import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.reflect.MethodCallExtractor;
 import me.darksidecode.keiko.reflect.ReflectCached;
@@ -27,34 +26,43 @@ import me.darksidecode.keiko.reflect.WrappedObject;
 
 import java.lang.reflect.Method;
 
-public class WrappedGameProfile extends WrappedObject {
+public class WrappedBookMeta extends WrappedObject {
 
     private static final Class<?>
-            gameProfileClass;
+            bookMetaClass;
 
     private static final Method
-            getNameMethod;
+            hasTitleMethod,
+            getTitleMethod;
 
     static {
         try {
-            gameProfileClass = Keiko.INSTANCE.getLoader()
-                    .getLoadedClass("com.mojang.authlib.GameProfile");
+            bookMetaClass = Keiko.INSTANCE.getLoader()
+                    .getLoadedClass("org.bukkit.inventory.meta.BookMeta");
 
-            getNameMethod = gameProfileClass.getMethod("getName");
+            hasTitleMethod = bookMetaClass.getDeclaredMethod("hasTitle");
+            getTitleMethod = bookMetaClass.getDeclaredMethod("getTitle");
         } catch (ReflectiveOperationException ex) {
             throw new ExceptionInInitializerError(ex);
         }
     }
 
-    private final ReflectCached<String> name;
+    private final ReflectCached<Boolean> hasTitle;
+    private final ReflectCached<String>  title;
 
-    public WrappedGameProfile(@NonNull Object handle) {
-        super(gameProfileClass, handle);
-        name = new ReflectCached<>(new MethodCallExtractor<>(getNameMethod, handle));
+    public WrappedBookMeta(Object handle) {
+        super(bookMetaClass, handle);
+
+        hasTitle = new ReflectCached<>(new MethodCallExtractor<>(hasTitleMethod, handle));
+        title    = new ReflectCached<>(new MethodCallExtractor<>(getTitleMethod, handle));
     }
 
-    public String getName() {
-        return name.get();
+    public boolean hasTitle() {
+        return hasTitle.get();
+    }
+
+    public String getTitle() {
+        return title.get();
     }
 
 }
