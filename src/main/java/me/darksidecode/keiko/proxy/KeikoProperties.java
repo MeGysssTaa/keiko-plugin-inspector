@@ -34,4 +34,11 @@ public class KeikoProperties {
         staticInspWarnsYes = prop == null ? null : Boolean.parseBoolean(prop);
     }
 
+    public static final Boolean notReleaseWarnYes; // IMPORTANT: no default value!
+
+    static {
+        String prop = System.getProperty("keiko.notReleaseWarnYes");
+        notReleaseWarnYes = prop == null ? null : Boolean.parseBoolean(prop);
+    }
+
 }

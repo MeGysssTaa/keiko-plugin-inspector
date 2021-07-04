@@ -24,11 +24,15 @@ import me.darksidecode.keiko.config.ConfigurationLoader;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.config.RuntimeProtectConfig;
+import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.installation.KeikoInstaller;
 import me.darksidecode.keiko.installation.KeikoUpdater;
 import me.darksidecode.keiko.installation.MalformedVersionException;
+import me.darksidecode.keiko.installation.Version;
 import me.darksidecode.keiko.integrity.IntegrityChecker;
 import me.darksidecode.keiko.io.KeikoLogger;
+import me.darksidecode.keiko.io.UserInputRequest;
+import me.darksidecode.keiko.io.YesNo;
 import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.staticanalysis.StaticAnalysisManager;
@@ -95,6 +99,31 @@ public final class Keiko {
 
         logger = new KeikoLogger(new File(env.getWorkDir(), "logs"));
         logger.debugLocalized("startup.workDir", env.getWorkDir().getAbsolutePath());
+
+        Version.Type verType = env.getBuildProperties().getVersion().getType();
+
+        if (verType != Version.Type.RELEASE) {
+            // Message like "Continue anyway? [yes/no]"
+            String prompt = I18n.get("startup.notRelease")
+                    + " [" + I18n.get("prompts.yes") + "/" + I18n.get("prompts.no") + "]";
+
+            // Prompt user to enter "yes" or "no" explicitly.
+            boolean proceed;
+
+            if (KeikoProperties.notReleaseWarnYes != null)
+                proceed = KeikoProperties.notReleaseWarnYes;
+            else
+                proceed = UserInputRequest.newBuilder(System.in, YesNo.class)
+                        .prompt(logger, prompt)
+                        .lineTransformer(String::trim)
+                        .build()
+                        .block()
+                        .toBoolean(); // TRUE = user wants the server to start, FALSE = user wants the startup to abort
+
+            if (!proceed)
+                // The warning scared the user enough :) They don't want to run a non-release build of Keiko.
+                System.exit(0);
+        }
     }
 
     public static void main(String[] args) {
