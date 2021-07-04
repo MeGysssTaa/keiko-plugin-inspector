@@ -35,6 +35,8 @@ public class Heuristic implements Listener {
     @Getter
     private final boolean enabled;
 
+    protected final boolean remediate;
+
     private final List<IdentityFilter> exclusions;
 
     @Getter
@@ -67,6 +69,7 @@ public class Heuristic implements Listener {
         YamlHandle conf = RuntimeProtectConfig.getHandle();
 
         enabled = conf.get(configSection + ".enabled", false);
+        remediate = conf.get(configSection + ".remediate", false);
         exclusions = ConfigurationUtils.getExclusionsList(conf, configSection + ".exclusions");
     }
 
@@ -75,9 +78,8 @@ public class Heuristic implements Listener {
                 .anyMatch(exclusion -> exclusion.matches(identity));
     }
 
-    protected final void makeReport(@NonNull Report report) {
-        report.print();
-        // TODO: 01.07.2021 some countermeasures? server shutdown? ...?
+    protected final <T> T getLocalSetting(@NonNull String key, T def) {
+        return RuntimeProtectConfig.getHandle().get(configSection + "." + key, def);
     }
 
 }

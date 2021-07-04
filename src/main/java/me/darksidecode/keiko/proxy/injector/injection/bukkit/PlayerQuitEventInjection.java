@@ -28,21 +28,21 @@ import me.darksidecode.keiko.runtimeprotect.RuntimeProtect;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerConnectionUpdateEvent;
 
 @UtilityClass
-public class PlayerJoinEventInjection {
+public class PlayerQuitEventInjection {
 
     @Inject (
-            inClass = "org.bukkit.event.player.PlayerJoinEvent",
+            inClass = "org.bukkit.event.player.PlayerQuitEvent",
             inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
             at = Inject.Position.BEGINNING
     )
-    public static void onJoin(MethodParam<?> player, MethodParam<String> joinMsg) {
+    public static void onJoin(MethodParam<?> player, MethodParam<String> quitMsg) {
         // param 'player' type 'org.bukkit.entity.Player'
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isMeganeEnabled())
             runtimeProtect.getMegane().getEventBus()
                     .dispatchEvent(new BukkitPlayerConnectionUpdateEvent(
-                            BukkitPlayerConnectionUpdateEvent.Operation.JOIN,
+                            BukkitPlayerConnectionUpdateEvent.Operation.QUIT,
                             new WrappedBukkitPlayer(player.getValue())));
     }
 

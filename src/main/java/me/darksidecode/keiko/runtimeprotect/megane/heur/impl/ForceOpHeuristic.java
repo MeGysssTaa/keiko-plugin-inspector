@@ -20,83 +20,130 @@
 package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 
 import lombok.NonNull;
+import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.reflect.bukkit.WrappedBukkit;
+import me.darksidecode.keiko.reflect.bukkit.WrappedBukkitPlayer;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerChatEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerCommandPreprocessEvent;
-import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerJoinEvent;
+import me.darksidecode.keiko.runtimeprotect.megane.event.bukkit.BukkitPlayerConnectionUpdateEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.craftbukkit.CraftBukkitCommandEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.event.minecraft.MinecraftOpUpdateEvent;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.Heuristic;
 import me.darksidecode.keiko.runtimeprotect.megane.heur.RegisterHeuristic;
-import me.darksidecode.keiko.runtimeprotect.megane.heur.Report;
 import me.darksidecode.keiko.time.AtomicClock;
 import me.darksidecode.keiko.time.Clock;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @RegisterHeuristic ({
-        BukkitPlayerJoinEvent.class,
+        BukkitPlayerConnectionUpdateEvent.class,
+        BukkitPlayerCommandPreprocessEvent.class,
         MinecraftOpUpdateEvent.class,
         CraftBukkitCommandEvent.class,
-        BukkitPlayerCommandPreprocessEvent.class
 })
 public class ForceOpHeuristic extends Heuristic {
 
     private static final long THRESHOLD_MILLIS = 500;
 
-    private final Clock playerJoinClock    = new AtomicClock();
-    private final Clock playerChatClock    = new AtomicClock();
-    private final Clock playerCmdPrepClock = new AtomicClock();
-
     @Override
-    public void onBukkitPlayerJoin(@NonNull BukkitPlayerJoinEvent e) {
-        playerJoinClock.reset();
+    public void onBukkitPlayerConnectionUpdate(@NonNull BukkitPlayerConnectionUpdateEvent e) {
+        if (e.getOperation() == BukkitPlayerConnectionUpdateEvent.Operation.JOIN)
+            PlayerStates.of(e.getPlayer().getName()).joinClock.reset();
+        else if (e.getOperation() == BukkitPlayerConnectionUpdateEvent.Operation.QUIT)
+            PlayerStates.map.remove(e.getPlayer().getName());
     }
 
     @Override
     public void onBukkitPlayerChat(@NonNull BukkitPlayerChatEvent e) {
-        playerChatClock.reset();
+        PlayerStates.of(e.getPlayer().getName()).chatClock.reset();
     }
 
     @Override
     public void onBukkitPlayerCommandPreprocess(@NonNull BukkitPlayerCommandPreprocessEvent e) {
-        playerCmdPrepClock.reset();
+        PlayerStates.of(e.getPlayer().getName()).cmdPrepClock.reset();
     }
 
     @Override
     public void onMinecraftOpUpdate(@NonNull MinecraftOpUpdateEvent e) {
-        if (e.isIssuedByPlugin()) {
-            Identity plugin = e.getPluginStates().getPlugin();
+        Identity plugin;
 
-            if (!playerJoinClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "setOpOnJoin");
-            else if (!playerChatClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "setOpOnChat");
-            else if (!playerCmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "setOpOnCmdPrep");
+        if (!e.isIssuedByPlugin() || isExcluded(plugin = e.getPluginStates().getPlugin()))
+            return;
+
+        if (e.getOperation() == MinecraftOpUpdateEvent.Operation.OP_ADD) {
+            String player = e.getGameProfile().getName();
+            PlayerStates states = PlayerStates.of(player);
+
+            if (!states.joinClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "setOpOnJoin", player);
+            else if (!states.chatClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "setOpOnChat", player);
+            else if (!states.cmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "setOpOnCmdPrep", player);
         }
     }
 
     @Override
     public void onCraftBukkitCommand(@NonNull CraftBukkitCommandEvent e) {
-        if (e.isIssuedByPlugin()) {
-            Identity plugin = e.getPluginStates().getPlugin();
+        Identity plugin;
 
-            if (!playerJoinClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "cmdOnJoin");
-            else if (!playerChatClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "cmdOnChat");
-            else if (!playerCmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
-                report(plugin, "cmdOnCmdPrep");
+        if (!e.isIssuedByPlugin() || isExcluded(plugin = e.getPluginStates().getPlugin()))
+            return;
+
+        if (e.getCommand().startsWith("op ")) {
+            String player = e.getCommand().split(" ")[1];
+            PlayerStates states = PlayerStates.of(player);
+
+            if (!states.joinClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "opCmdOnJoin", player);
+            else if (!states.chatClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "opCmdOnChat", player);
+            else if (!states.cmdPrepClock.hasElapsed(THRESHOLD_MILLIS))
+                handleDetection(plugin, "opCmdOnCmdPrep", player);
         }
     }
 
-    private void report(Identity plugin, String detail) {
-        makeReport(Report.newBuilder(Report.Severity.HIGH)
-                .localizedLine(i18nPrefix + "title",
-                        plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName())
-                .line(" ")
-                .localizedLine(i18nPrefix + detail)
-                .build()
-        );
+    private void handleDetection(Identity plugin, String detailKey, String player) {
+        // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
+        // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
+        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "title");
+        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + detailKey,
+                plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName());
+        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+
+        if (remediate) {
+            try {
+                remediate(player);
+            } catch (Throwable t) {
+                Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.remedFailure");
+                Keiko.INSTANCE.getLogger().error("Unhandled error during remediation", t);
+            }
+        }
+    }
+
+    private void remediate(String playerToDeop) {
+        // Deop the player that was just Force-OP'ped.
+        Object playerHandle = WrappedBukkit.getPlayerExact(playerToDeop);
+        WrappedBukkitPlayer wPlayer = new WrappedBukkitPlayer(playerHandle);
+        wPlayer.setOp(false);
+        Keiko.INSTANCE.getLogger().infoLocalized("runtimeProtect.megane.remedSuccess");
+    }
+
+    private static class PlayerStates {
+        private static final Map<String, PlayerStates> map = new ConcurrentHashMap<>();
+
+        private final Clock joinClock    = new AtomicClock();
+        private final Clock chatClock    = new AtomicClock();
+        private final Clock cmdPrepClock = new AtomicClock();
+
+        private static PlayerStates of(String playerName) {
+            return map.computeIfAbsent(playerName, k -> new PlayerStates());
+        }
     }
 
 }

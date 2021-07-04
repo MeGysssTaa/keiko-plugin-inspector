@@ -19,48 +19,36 @@
 
 package me.darksidecode.keiko.reflect.bukkit;
 
+import lombok.experimental.UtilityClass;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.reflect.MethodCallExtractor;
-import me.darksidecode.keiko.reflect.ReflectCached;
-import me.darksidecode.keiko.reflect.WrappedObject;
 
 import java.lang.reflect.Method;
 
-public class WrappedBukkitPlayer extends WrappedObject {
+@UtilityClass
+public class WrappedBukkit {
 
-    private static final Class<?> playerClass;
+    private static final Class<?> bukkitClass;
 
-    private static final Method getNameMethod;
-    private static final Method setOpMethod;
+    private static final Method getPlayerExactMethod;
 
     static {
         try {
-            playerClass = Keiko.INSTANCE.getLoader()
-                    .getLoadedClass("org.bukkit.entity.Player");
+            bukkitClass = Keiko.INSTANCE.getLoader()
+                    .getLoadedClass("org.bukkit.Bukkit");
 
-            getNameMethod = playerClass.getMethod("getName");
-            setOpMethod = playerClass.getMethod("setOp", boolean.class);
+            getPlayerExactMethod = bukkitClass
+                    .getDeclaredMethod("getPlayerExact", String.class);
         } catch (ReflectiveOperationException ex) {
             throw new ExceptionInInitializerError(ex);
         }
     }
 
-    private final ReflectCached<String> name;
-
-    public WrappedBukkitPlayer(Object handle) {
-        super(playerClass, handle);
-        name = new ReflectCached<>(new MethodCallExtractor<>(getNameMethod, handle));
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public void setOp(boolean value) {
+    public static Object getPlayerExact(String name) {
         try {
-            setOpMethod.invoke(handle, value);
+            // returns handle: org.bukkit.entity.Player
+            return getPlayerExactMethod.invoke(null, name);
         } catch (ReflectiveOperationException ex) {
-            throw new RuntimeException("fatal reflection failure");
+            throw new RuntimeException("fatal reflection failure", ex);
         }
     }
 

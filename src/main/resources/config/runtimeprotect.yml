@@ -29,6 +29,7 @@ megane:
   heur:
     force_op:
       enabled: true
+      remediate: true
       exclusions: []
 
 

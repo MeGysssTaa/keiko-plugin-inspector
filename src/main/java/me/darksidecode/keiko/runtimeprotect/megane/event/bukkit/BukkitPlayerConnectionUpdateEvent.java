@@ -27,14 +27,22 @@ import me.darksidecode.keiko.runtimeprotect.megane.event.Event;
 import me.darksidecode.keiko.runtimeprotect.megane.event.Listener;
 
 @RequiredArgsConstructor
-public class BukkitPlayerJoinEvent implements Event {
+public class BukkitPlayerConnectionUpdateEvent implements Event {
+
+    @Getter @NonNull
+    private final Operation operation;
 
     @Getter @NonNull
     private final WrappedBukkitPlayer player;
 
     @Override
     public void dispatch(@NonNull Listener listener) {
-        listener.onBukkitPlayerJoin(this);
+        listener.onBukkitPlayerConnectionUpdate(this);
+    }
+
+    public enum Operation {
+        JOIN,
+        QUIT
     }
 
 }
