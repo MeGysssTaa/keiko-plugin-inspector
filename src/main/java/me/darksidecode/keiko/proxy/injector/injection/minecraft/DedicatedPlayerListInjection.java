@@ -37,7 +37,7 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpAdd(MethodParam<?> gameProfile) {
         // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
-        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile);
+        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile.getValue());
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isDacEnabled())
@@ -56,7 +56,7 @@ public class DedicatedPlayerListInjection {
     )
     public static void checkOpRemove(MethodParam<?> gameProfile) {
         // param 'gameProfile' type 'com.mojang.authlib.GameProfile'
-        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile);
+        WrappedGameProfile wGameProfile = new WrappedGameProfile(gameProfile.getValue());
         RuntimeProtect runtimeProtect = Keiko.INSTANCE.getRuntimeProtect();
 
         if (runtimeProtect.isDacEnabled())
