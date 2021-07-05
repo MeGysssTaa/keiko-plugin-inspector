@@ -93,7 +93,7 @@ class Code extends KeikoTool {
                 Keiko.INSTANCE.getLogger().warningLocalized(getI18nPrefix() + errType);
 
                 for (PhaseExecutionException err : workflow.getAllErrorsChronological())
-                    Keiko.INSTANCE.getLogger().error("State: disassemble", err);
+                    Keiko.INSTANCE.getLogger().error("JMinima error", err);
 
                 if (result == WorkflowExecutionResult.FATAL_FAILURE)
                     return 1;
@@ -106,10 +106,12 @@ class Code extends KeikoTool {
                 File outputFile = new File(outputDir, cls.name + ".txt");
                 File parent = outputFile.getParentFile();
 
-                if (!parent.exists() && !parent.mkdirs())
-                    // Just warn, don't exit at this point.
+                if (!parent.exists() && !parent.mkdirs()) {
+                    // Just warn and skip -- don't exit at this point.
                     Keiko.INSTANCE.getLogger().warningLocalized(
                             getI18nPrefix() + "outMkFail", parent.getAbsolutePath());
+                    continue;
+                }
 
                 try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                         new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
