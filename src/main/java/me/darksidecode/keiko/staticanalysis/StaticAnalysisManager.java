@@ -230,15 +230,15 @@ public class StaticAnalysisManager {
     }
 
     private boolean inspectPlugin(IndexedPlugin plugin) {
-        return runInspectionWorkflow(plugin, collectInspectors(plugin)); // true = failed, false = succeeded
+        return runInspectionWorkflow(plugin, collectInspections(plugin)); // true = failed, false = succeeded
     }
 
-    private Collection<Class<? extends StaticAnalysis>> collectInspectors(IndexedPlugin plugin) {
+    private Collection<Class<? extends StaticAnalysis>> collectInspections(IndexedPlugin plugin) {
         Collection<Class<? extends StaticAnalysis>> inspections = new ArrayList<>();
 
         for (Class<?> inspectionClass : reflections.getTypesAnnotatedWith(RegisterStaticAnalysis.class)) {
             if (!StaticAnalysis.class.isAssignableFrom(inspectionClass))
-                throw new RuntimeException("illegal managed inspection " +
+                throw new RuntimeException("illegal StaticAnalysis " +
                         "(annotated but invalid type): " + inspectionClass.getName());
 
             String inspectionName = StaticAnalysis
