@@ -32,11 +32,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1.18
-      if: always()
-      with:
-        files: test-results/**/*.xml
     - name: Build with Gradle (shadow jar)
       run: ./gradlew shadowJar
     - uses: actions/upload-artifact@v2
@@ -49,3 +44,8 @@ jobs:
       run: |
         rm -f ~/.gradle/caches/modules-2/modules-2.lock
         rm -f ~/.gradle/caches/modules-2/gc.properties
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.18
+      if: always()
+      with:
+        files: test-results/**/*.xml
