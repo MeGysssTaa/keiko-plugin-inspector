@@ -38,10 +38,15 @@ public class YesNo {
 
     @SuppressWarnings ("unused") // called reflectively from Converter
     public static YesNo valueOf(@NonNull String s) {
-        // Use localized words for "yes" and "no" for better user experience.
-        if (s.equalsIgnoreCase(I18n.get("prompts.yes")))
+        // Use localized words for "yes" and "no" for better user experience, but also
+        // allow to use "y[es]" and "[n]o" like in all traditional prompts of type "continue
+        // anyway?" so that more "advanced" users don't have to bother switching their keyboard
+        // locale all the time.
+        String lower = s.toLowerCase();
+
+        if (lower.startsWith("y") || lower.equalsIgnoreCase(I18n.get("prompts.yes")))
             return YES;
-        else if (s.equalsIgnoreCase(I18n.get("prompts.no")))
+        else if (lower.startsWith("n") || lower.equalsIgnoreCase(I18n.get("prompts.no")))
             return NO;
         else
             return null; // invalid user input
