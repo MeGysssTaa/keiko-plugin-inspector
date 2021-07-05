@@ -58,9 +58,6 @@ class Rule {
     private final String arg;
 
     Rule(String s) {
-
-        // TODO: 30.03.2019 complex checking for contradictory rules
-
         this.originStr = s; // must be done before any replacements!
         s = StringUtils.basicReplacements(s);
 

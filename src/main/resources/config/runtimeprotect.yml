@@ -84,8 +84,8 @@ domain_access_control:
   #     SSH            22
   connection_open:
     notify: false
-    default: ALLOW
-    rules: []
+    rules:
+      - ALLOW ALL * PORT *
 
   # Connection listen (the process of your server waiting for a connection from outside) control.
   #
@@ -98,8 +98,8 @@ domain_access_control:
   # TIP: see connection_open for port placeholders.
   connection_listen:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - ALLOW ALL localhost PORT *
 
   # Connection accept (the process of your server accepting a connection that it has been waiting for outside) control.
   #
@@ -110,8 +110,8 @@ domain_access_control:
   # TIP: see connection_open for port placeholders.
   connection_accept:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - ALLOW ALL * PORT *
 
   # Connection (join/leave/send/receive) IP multicast control.
   #
@@ -122,8 +122,8 @@ domain_access_control:
   #                turns into: <"ALLOW"/"DENY"> <identity> <host> PORT *
   connection_multicast:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - ALLOW ALL * PORT *
 
   # Java SocketFactory set control.
   #
@@ -144,8 +144,8 @@ domain_access_control:
   #     - DENY PLUGIN=not-malware-trust-me *
   socket_factory_set:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - DENY ALL *
 
   # File write control.
   #
@@ -162,11 +162,11 @@ domain_access_control:
   #     - DENY PLUGIN=NotMalware4sure {server_folder}/server.properties
   file_write:
     notify: false
-    default: DENY
     rules:
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
-      - ALLOW ALL {plugin_jar_path}
+      - ALLOW ALL /tmp
+      - ALLOW ALL /tmp/*
 
   # File read control.
   #
@@ -175,7 +175,6 @@ domain_access_control:
   #     same as in file_write, examples can also be found there
   file_read:
     notify: false
-    default: DENY
     rules:
       - ALLOW ALL *
 
@@ -186,10 +185,11 @@ domain_access_control:
   #     same as in file_write, examples can also be found there
   file_delete:
     notify: false
-    default: DENY
     rules:
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
+      - ALLOW ALL /tmp
+      - ALLOW ALL /tmp/*
 
   # Runtime natives load/linkage control.
   #
@@ -210,8 +210,8 @@ domain_access_control:
   #     - DENY SOURCE=xyz.some.cool.plugin.NativeRAT#prepareNatives *
   natives_linkage:
     notify: false
-    default: DENY
     rules:
+      - DENY ALL *
       - ALLOW ALL sunec
 
   # System command execution control.
@@ -233,8 +233,8 @@ domain_access_control:
   #     - DENY ALL wget http://some-fishy-host.io/rat.jar
   command_execution:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - DENY ALL *
 
   # Forceful inappropriate system exit control.
   #
@@ -258,8 +258,8 @@ domain_access_control:
   #     - DENY PLUGIN=UntrustedPlugin *
   system_exit:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - DENY ALL *
 
   # JVM system properties access (read/write) control.
   #
@@ -281,8 +281,8 @@ domain_access_control:
   #     - DENY ALL *
   properties_access:
     notify: false
-    default: ALLOW
-    rules: []
+    rules:
+      - ALLOW ALL *
 
   # Individual JVM system property write control.
   #
@@ -302,8 +302,8 @@ domain_access_control:
   #     - DENY PLUGIN=RandomDownloadedPlugin ftp.*
   property_write:
     notify: false
-    default: ALLOW
     rules:
+      - ALLOW ALL *
       - DENY ALL http.proxyHost
       - DENY ALL http.proxyPort
       - DENY ALL https.proxyHost
@@ -323,8 +323,8 @@ domain_access_control:
   #     same as in property_write, examples can also be found there
   property_read:
     notify: false
-    default: ALLOW
-    rules: []
+    rules:
+      - ALLOW ALL *
 
   # Package (code location) access control.
   #
@@ -346,8 +346,8 @@ domain_access_control:
   #     - DENY ALL me.darksidecode.keiko.*
   package_access:
     notify: false
-    default: ALLOW
     rules:
+      - ALLOW ALL *
       - DENY ALL me.darksidecode.keiko.*
       - DENY ALL keiko_internals.*
 
@@ -369,8 +369,8 @@ domain_access_control:
   #     - DENY ALL SomeFishyDev
   minecraft_op_add:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - DENY ALL *
 
   # Minecraft de-op control.
   #
@@ -382,8 +382,8 @@ domain_access_control:
   #     same as in minecraft_op_add, examples can also be found there
   minecraft_op_remove:
     notify: false
-    default: DENY
-    rules: []
+    rules:
+      - DENY ALL *
 
   # Minecraft server command execution control.
   #
@@ -403,13 +403,15 @@ domain_access_control:
   #     - DENY PLUGIN=SomeFishyPlugin give SomeFishyDev minecraft:diamond 64
   minecraft_command_dispatch:
     notify: false
-    default: ALLOW
     rules:
+      - ALLOW ALL *
       - DENY ALL op *
+      - DENY ALL deop *
       - DENY ALL pex *
       - DENY ALL lp *
       - DENY ALL permission*
       - DENY ALL luckperms*
+      - DENY ALL promote*
 
   # Miscellaneous JVM actions (permissions) control.
   #
@@ -431,8 +433,8 @@ domain_access_control:
   #     - DENY ALL doAs*
   miscellaneous:
     notify: false
-    default: ALLOW
     rules:
+      - ALLOW ALL *
       - DENY ALL createClassLoader
       - DENY ALL setContextClassLoader
       - DENY ALL enableContextClassLoaderOverride

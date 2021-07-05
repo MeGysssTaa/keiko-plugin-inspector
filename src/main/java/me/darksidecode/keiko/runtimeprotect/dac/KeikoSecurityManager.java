@@ -37,29 +37,15 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
 
-    private final Map<Operation, Rule.Type> defaultRules;
     private final Map<Operation, List<Rule>> rules;
 
     private final YamlHandle conf;
 
     public KeikoSecurityManager() {
         conf = RuntimeProtectConfig.getHandle();
-        defaultRules = new HashMap<>();
         rules = new HashMap<>();
 
         for (Operation op : Operation.values()) {
-            String defaultRuleStr = conf.get(
-                    "domain_access_control." + op.name().toLowerCase() + ".default",
-                    Rule.Type.ALLOW.name());
-
-            try {
-                defaultRules.put(op, Rule.Type.valueOf(defaultRuleStr.toUpperCase().trim()));
-            } catch (NullPointerException | IllegalArgumentException ex) {
-                defaultRules.put(op, Rule.Type.ALLOW);
-                Keiko.INSTANCE.getLogger().warningLocalized(
-                        "runtimeProtect.dac.invalidDefCfg", op.localizedName, defaultRuleStr);
-            }
-
             rules.put(op, new ArrayList<>());
             loadRules(rules, op);
         }
@@ -68,16 +54,10 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     private void loadRules(Map<Operation, List<Rule>> rules, Operation op) {
         for (String ruleStr : getRules(op)) {
             try {
-                Rule rule = new Rule(ruleStr);
-
-                if (rule.getFilterType() == defaultRules.get(op))
-                    Keiko.INSTANCE.getLogger().warningLocalized(
-                            "runtimeProtect.dac.ignoringContraRule", op.localizedName, ruleStr);
-                else
-                    rules.get(op).add(rule);
+                rules.get(op).add(new Rule(ruleStr));
             } catch (Exception ex) {
                 // Invalid rule. Skip it and warn.
-                String cause = (ex.getCause() == null) ? "?" : ex.getCause().getMessage();
+                String cause = (ex.getCause() == null) ? "-" : ex.getCause().getMessage();
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.ignoringInvalidRule",
                         op.localizedName, ruleStr, ex.getMessage(), cause);
@@ -346,37 +326,37 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         // If caller is null, then this means that the caller is either
         // the Minecraft server/Bukkit/Bungee, or some other dark magic.
         if (caller != null) {
-            Rule.Type defaultRule = defaultRules.get(op);
-            debugAccess(caller, op, details);
-            boolean deny = defaultRule == Rule.Type.DENY;
+            logAccess(caller, op, details);
 
-            // Self-defense
+            // Self-defense.
             if (RuntimeProtectConfig.getSelfDefense()
                     && (op == Operation.FILE_READ || op == Operation.FILE_WRITE || op == Operation.FILE_DELETE)
-                    && details.contains(Keiko.INSTANCE.getEnv().getWorkDir().getAbsolutePath())) { // "File: {AbsPath}"
+                    && (details.contains(Keiko.INSTANCE.getEnv().getWorkDir().getAbsolutePath())) // "File: {AbsPath}"
+                    ||  details.contains(Keiko.INSTANCE.getEnv().getKeikoExecutable().getAbsolutePath())) { // ^
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control (self-defense)");
             }
 
-            // Rules/filters
+            // User-defined rules/filters.
+            Rule.Type finalRule = Rule.Type.ALLOW;
+
             for (Rule rule : rules.get(op)) {
                 String arg = rule.getArg();
 
                 if (rule.getIdentityFilter() == Rule.IdentityFilter.ALL)
-                    arg = arg.
-                            replace("{plugin_name}", caller.getPluginName()).
-                            replace("{plugin_jar_path}", caller.getFilePath());
+                    arg = arg.replace("{plugin_name}",     caller.getPluginName())
+                             .replace("{plugin_jar_path}", caller.getFilePath  ());
 
-                boolean filtered = rule.filterCaller(caller);
-                boolean allowArg = ruleFunc.apply(arg);
-                boolean match = filtered && allowArg;
+                boolean callerMatch = rule.filterCaller(caller);
+                boolean argumentMatch = ruleFunc.apply(arg);
+                boolean fullMatch = callerMatch && argumentMatch;
 
-                if (match)
-                    deny = rule.getFilterType() == Rule.Type.DENY;
+                if (fullMatch) // both caller and call argument satisfy this rule's filter
+                    finalRule = rule.getFilterType(); // overwrite final rule (bottom-most rules have higher priority)
             }
 
-            if (deny) {
+            if (finalRule == Rule.Type.DENY) {
                 Keiko.INSTANCE.getLogger().warningLocalized(
                         "runtimeProtect.dac.vioDetected", caller, op.localizedName, details);
                 throw new SecurityException("access denied by Keiko Domain Access Control");
@@ -384,7 +364,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         }
     }
 
-    private void debugAccess(Identity caller, Operation op, String details) {
+    private void logAccess(Identity caller, Operation op, String details) {
         boolean notify = conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false);
         KeikoLogger.Level level = notify ? KeikoLogger.Level.INFO : KeikoLogger.Level.DEBUG;
         Keiko.INSTANCE.getLogger().logLocalized(
