@@ -34,6 +34,7 @@ public class KeikoTools {
 
     static {
         tools.add(new Clean());
+        tools.add(new Code());
     }
 
     public static int executeToolWithArgs(@NonNull String toolName, @NonNull String[] toolArgs) {
