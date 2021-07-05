@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 })
 public class ForceOpHeuristic extends Heuristic {
 
-    private static final long THRESHOLD_MILLIS = 3000;
+    private static final long THRESHOLD_MILLIS = 10000;
 
     @Override
     public void onBukkitPlayerConnectionUpdate(@NonNull BukkitPlayerConnectionUpdateEvent e) {
