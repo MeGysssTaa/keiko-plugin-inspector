@@ -131,6 +131,7 @@ public class KeikoUpdater extends TimerTask {
             Keiko.INSTANCE.getLogger().warning(LINE);
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine1");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine2");
+            Keiko.INSTANCE.getLogger().warning(" ");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine3");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine4");
             Keiko.INSTANCE.getLogger().warningLocalized("updater.installedLine5");
