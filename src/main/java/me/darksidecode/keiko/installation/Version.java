@@ -96,8 +96,9 @@ public class Version implements Comparable<Version> {
 
     public enum Type {
         // Ordered by readiness, ascending.
-        DEV,
-        RELEASE
+        DEV,    // absolutely untested development build, created automatically by the CI workflow on each git push
+        PRE,    // more or less tested version, but still not recommended for production use (release candidate)
+        RELEASE // well-tested version, usually almost 100% ready and safe for production use
     }
 
     private static class Parser {
