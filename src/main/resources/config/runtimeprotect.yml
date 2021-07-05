@@ -83,7 +83,7 @@ domain_access_control:
   #     SFTP           22
   #     SSH            22
   connection_open:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL * PORT *
 
@@ -97,7 +97,7 @@ domain_access_control:
   #
   # TIP: see connection_open for port placeholders.
   connection_listen:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL localhost PORT *
 
@@ -109,7 +109,7 @@ domain_access_control:
   #
   # TIP: see connection_open for port placeholders.
   connection_accept:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL * PORT *
 
@@ -121,7 +121,7 @@ domain_access_control:
   #     EXCEPTION: port must always be equal to "*", i.e. actual syntax
   #                turns into: <"ALLOW"/"DENY"> <identity> <host> PORT *
   connection_multicast:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL * PORT *
 
@@ -143,7 +143,7 @@ domain_access_control:
   #     # Forbid plugin "not-malware-trust-me' to modify system's SocketFactory:
   #     - DENY PLUGIN=not-malware-trust-me *
   socket_factory_set:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
 
@@ -161,7 +161,7 @@ domain_access_control:
   #     # Forbid plugin "NotMalware4sure" to write in server's "server.properties" file:
   #     - DENY PLUGIN=NotMalware4sure {server_folder}/server.properties
   file_write:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
@@ -174,7 +174,7 @@ domain_access_control:
   #
   #     same as in file_write, examples can also be found there
   file_read:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
 
@@ -184,7 +184,7 @@ domain_access_control:
   #
   #     same as in file_write, examples can also be found there
   file_delete:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
@@ -209,7 +209,7 @@ domain_access_control:
   #     # Forbid method "prepareNatives" of Java class "NativeRAT" in package "xyz.some.cool.plugin" to load any natives:
   #     - DENY SOURCE=xyz.some.cool.plugin.NativeRAT#prepareNatives *
   natives_linkage:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
       - ALLOW ALL sunec
@@ -232,7 +232,7 @@ domain_access_control:
   #     # Forbid all plugins to execute "wget http://some-fishy-host.io/rat.jar":
   #     - DENY ALL wget http://some-fishy-host.io/rat.jar
   command_execution:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
 
@@ -257,7 +257,7 @@ domain_access_control:
   #     # Forbid plugin "UntrustedPlugin" to perform system exit with any status code:
   #     - DENY PLUGIN=UntrustedPlugin *
   system_exit:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
 
@@ -280,7 +280,7 @@ domain_access_control:
   #     # Deny all plugins to get and set all system properties at once:
   #     - DENY ALL *
   properties_access:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
 
@@ -301,7 +301,7 @@ domain_access_control:
   #     # Forbid plugin "RandomDownloadedPlugin" to change any system properties that start with "ftp.":
   #     - DENY PLUGIN=RandomDownloadedPlugin ftp.*
   property_write:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
       - DENY ALL http.proxyHost
@@ -322,7 +322,7 @@ domain_access_control:
   #
   #     same as in property_write, examples can also be found there
   property_read:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
 
@@ -345,7 +345,7 @@ domain_access_control:
   #     # Forbid all plugins to access Keiko's package (so that they cannot hack Keiko programmatically):
   #     - DENY ALL me.darksidecode.keiko.*
   package_access:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
       - DENY ALL me.darksidecode.keiko.*
@@ -368,7 +368,7 @@ domain_access_control:
   #     # Deny all plugins to op player with name SomeFishyDev:
   #     - DENY ALL SomeFishyDev
   minecraft_op_add:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
 
@@ -381,7 +381,7 @@ domain_access_control:
   #
   #     same as in minecraft_op_add, examples can also be found there
   minecraft_op_remove:
-    notify: false
+    log: off
     rules:
       - DENY ALL *
 
@@ -402,7 +402,7 @@ domain_access_control:
   #     # Deny plugin "SomeFishyPlugin" to execute command "/give SomeFishyDev minecraft:diamond 64":
   #     - DENY PLUGIN=SomeFishyPlugin give SomeFishyDev minecraft:diamond 64
   minecraft_command_dispatch:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
       - DENY ALL op *
@@ -432,7 +432,7 @@ domain_access_control:
   #     # Forbid all plugins to execute any JVM actions whose name starts with "doAs":
   #     - DENY ALL doAs*
   miscellaneous:
-    notify: false
+    log: off
     rules:
       - ALLOW ALL *
       - DENY ALL createClassLoader

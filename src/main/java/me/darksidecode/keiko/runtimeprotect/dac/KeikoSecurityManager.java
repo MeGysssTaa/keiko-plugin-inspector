@@ -37,21 +37,44 @@ import java.util.function.Function;
 
 public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
 
+    private final Map<Operation, KeikoLogger.Level> logLevels;
+
     private final Map<Operation, List<Rule>> rules;
 
     private final YamlHandle conf;
 
     public KeikoSecurityManager() {
         conf = RuntimeProtectConfig.getHandle();
+        logLevels = new HashMap<>();
         rules = new HashMap<>();
 
         for (Operation op : Operation.values()) {
             rules.put(op, new ArrayList<>());
-            loadRules(rules, op);
+            loadLogLevel(op);
+            loadRules(op);
         }
     }
 
-    private void loadRules(Map<Operation, List<Rule>> rules, Operation op) {
+    private void loadLogLevel(Operation op) {
+        String levelStr = conf
+                .get("domain_access_control." + op.name().toLowerCase() + ".log", "off")
+                .replace(' ', '_').toUpperCase();
+
+        KeikoLogger.Level level = KeikoLogger.Level.OFF;
+
+        try {
+            level = KeikoLogger.Level.valueOf(levelStr);
+        } catch (IllegalArgumentException ex) {
+            // Invalid log level. Fall back to "disable logging".
+            Keiko.INSTANCE.getLogger().error(
+                    "Invalid log level \"%s\" for DAC operation %s. Falling back to \"OFF\".",
+                    op.name(), levelStr);
+        }
+
+        logLevels.put(op, level);
+    }
+
+    private void loadRules(Operation op) {
         for (String ruleStr : getRules(op)) {
             try {
                 rules.get(op).add(new Rule(ruleStr));
@@ -365,10 +388,8 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     }
 
     private void logAccess(Identity caller, Operation op, String details) {
-        boolean notify = conf.get("domain_access_control." + op.name().toLowerCase() + ".notify", false);
-        KeikoLogger.Level level = notify ? KeikoLogger.Level.INFO : KeikoLogger.Level.DEBUG;
-        Keiko.INSTANCE.getLogger().logLocalized(
-                level, "runtimeProtect.dac.actionDebug", caller, op.localizedName, details);
+        Keiko.INSTANCE.getLogger().logLocalized(logLevels.get(op),
+                "runtimeProtect.dac.actionDebug", caller, op.localizedName, details);
     }
 
     @RequiredArgsConstructor
