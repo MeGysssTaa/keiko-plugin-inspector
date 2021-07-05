@@ -44,3 +44,8 @@ jobs:
       run: |
         rm -f ~/.gradle/caches/modules-2/modules-2.lock
         rm -f ~/.gradle/caches/modules-2/gc.properties
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.18
+      if: always()
+      with:
+        files: "**/build/test-results/**/TEST-*.xml"
