@@ -50,22 +50,32 @@ task createProperties(dependsOn: processResources) {
 
 classes.dependsOn createProperties
 
-// Relocate all our internal libraries to avoid linkage errors when proxying other executables at runtime.
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+def libsPackage = 'keiko_internals'
 
-task relocateShadowJar(type: ConfigureShadowRelocation) {
-    target = tasks.shadowJar
-    prefix = 'keiko_internals'
-}
-
-// Include MANIFEST.MF
 shadowJar {
+    // Include MANIFEST.MF.
     manifest {
         attributes 'Main-Class': 'me.darksidecode.keiko.proxy.Keiko'
     }
+
+    // Relocate all our internal libraries to avoid linkage errors when proxying other executables at runtime.
+    // We can't rely on shadowjar's ConfigureShadowRelocation task for that, because it relocates all(!) the
+    // runtime-classpath libraries, however, we want to exclude some of them. I haven't found a way to add
+    // exclusions in the ConfigureShadowRelocation task, so got to do this ugly thing manually.
+    // TODO : IMPORTANT : Add any new runtime-classpath libraries here for relocation!
+    relocate('edu', "${libsPackage}.edu")
+    relocate('com', "${libsPackage}.com")
+    relocate('me', "${libsPackage}.me") {
+        exclude 'me.darksidecode.keiko.**.*' // don't relocate Keiko itself
+    }
+    relocate('net', "${libsPackage}.net")
+    relocate('javax', "${libsPackage}.javax")
+    relocate('org', "${libsPackage}.org") {
+        exclude 'org.fusesource.jansi.**.*' // don't relocate jansi, otherwise it just won't work (no colors)
+    }
+    relocate('javassist', "${libsPackage}.javassist")
 }
 
-tasks.shadowJar.dependsOn tasks.relocateShadowJar
 tasks.shadowJar.finalizedBy tasks.test
 
 // Dependencies
@@ -102,6 +112,8 @@ dependencies {
     implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.28'
+    implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.3'
+
 
     // Present at runtime (optional)
     compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.13.2-R0.1-SNAPSHOT'

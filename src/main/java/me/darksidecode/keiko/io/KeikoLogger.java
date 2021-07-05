@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.util.StringUtils;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -37,6 +39,10 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings ("UseOfSystemOutOrSystemErr")
 @RequiredArgsConstructor
 public class KeikoLogger implements Prompter, Closeable {
+
+    static {
+        AnsiConsole.systemInstall(); // for colorized logging
+    }
 
     private static final String PREFIX = "[Keiko] ";
 
@@ -54,15 +60,7 @@ public class KeikoLogger implements Prompter, Closeable {
 
     @Override
     public void prompt(@NonNull String message) {
-        info(message);
-    }
-
-    public void log(@NonNull Level level, @NonNull String s, Object... format) {
-        print(level, System.out, s, format);
-    }
-
-    public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
-        log(level, I18n.get(key, args));
+        log(Level.INFO, Ansi.Color.CYAN, message);
     }
 
     @Override
@@ -70,31 +68,87 @@ public class KeikoLogger implements Prompter, Closeable {
         logWriter.close();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void log(@NonNull Level level, @NonNull String s, Object... format) {
+        log(level, level.defaultColor, s, format);
+    }
+
+    public void log(@NonNull Level level, @NonNull Ansi.Color color,
+                    @NonNull String s, Object... format) {
+        print(level, System.out, color, s, format);
+    }
+
+    public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
+        log(level, I18n.get(key, args));
+    }
+
+    public void logLocalized(@NonNull Level level, @NonNull Ansi.Color color,
+                             @NonNull String key, Object... args) {
+        log(level, color, I18n.get(key, args));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     public void debug(@NonNull String s, Object... format) {
         log(Level.DEBUG, s, format);
+    }
+
+    public void debug(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
+        log(Level.DEBUG, color, s, format);
     }
 
     public void debugLocalized(@NonNull String key, Object... args) {
         debug(I18n.get(key, args));
     }
 
+    public void debugLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
+        debug(color, I18n.get(key, args));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void info(@NonNull String s, Object... format) {
         log(Level.INFO, s, format);
+    }
+
+    public void info(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
+        log(Level.INFO, color, s, format);
     }
 
     public void infoLocalized(@NonNull String key, Object... args) {
         info(I18n.get(key, args));
     }
 
+    public void infoLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
+        info(color, I18n.get(key, args));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void warning(@NonNull String s, Object... format) {
         log(Level.WARNING, s, format);
+    }
+
+    public void warning(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
+        log(Level.WARNING, color, s, format);
     }
 
     public void warningLocalized(@NonNull String key, Object... args) {
         warning(I18n.get(key, args));
     }
 
+    public void warningLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
+        warning(color, I18n.get(key, args));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void error(@NonNull String s, Object... format) {
+        error(Level.ERROR.defaultColor, s, format);
+    }
+
+    public void error(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
         Throwable t = null;
         Object lastFmt;
 
@@ -105,7 +159,7 @@ public class KeikoLogger implements Prompter, Closeable {
                     : Arrays.copyOf(format, format.length - 1);
         }
 
-        log(Level.ERROR, s, format);
+        log(Level.ERROR, color, s, format);
 
         if (t != null) {
             error("    " + t);
@@ -118,8 +172,10 @@ public class KeikoLogger implements Prompter, Closeable {
         }
     }
 
-    private void print(@NonNull Level level, @NonNull PrintStream printStream,
-                       @NonNull String message, Object... format) {
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void print(Level level, PrintStream printStream,
+                       Ansi.Color color, String message, Object... format) {
         if (level == Level.OFF)
             throw new IllegalArgumentException(
                     "Level.OFF must not be used for logging explicitly");
@@ -132,7 +188,12 @@ public class KeikoLogger implements Prompter, Closeable {
             String currentTime = LocalTime.now().format(timeFormatter);
 
             if (level.hasMinimum(GlobalConfig.getLogLevelConsole()))
-                printStream.println(PREFIX + level.localizedPrefix + message);
+                // Print colorized.
+                printStream.println(Ansi.ansi()
+                        .fg(color)
+                        .a(PREFIX + level.localizedPrefix + message)
+                        .reset()
+                );
 
             if (level.hasMinimum(GlobalConfig.getLogLevelFile()))
                 printToFile(PREFIX + "[" + currentDate + "] " +
@@ -222,12 +283,17 @@ public class KeikoLogger implements Prompter, Closeable {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @RequiredArgsConstructor
     public enum Level {
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR,
-        OFF;
+        DEBUG   (Ansi.Color.DEFAULT),
+        INFO    (Ansi.Color.WHITE  ),
+        WARNING (Ansi.Color.YELLOW ),
+        ERROR   (Ansi.Color.RED    ),
+        OFF     (Ansi.Color.DEFAULT /* unused but needed because of @NonNull's */);
+        
+        private final Ansi.Color defaultColor;
 
         private String localizedPrefix; // null for Level.OFF
 
