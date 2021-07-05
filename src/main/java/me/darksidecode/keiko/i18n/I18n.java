@@ -65,9 +65,10 @@ public class I18n {
             try {
                 map.put(key, new FormattedLocalizedMessageBuilder(lang.getString(key)));
             } catch (Exception ex) {
-                Keiko.INSTANCE.getLogger().error(
-                        "Skipped invalid message: bad localization format of %s in %s: %s",
-                        key, lang.getLocale(), ex.getMessage());
+                throw new RuntimeException("what", ex);
+//                Keiko.INSTANCE.getLogger().error(
+//                        "Skipped invalid message: bad localization format of %s in %s: %s",
+//                        key, lang.getLocale(), ex.getMessage());
             }
         }
     }
