@@ -96,9 +96,7 @@ public final class Keiko {
         System.out.println("\n\n");
 
         installEverything();
-
         logger = new KeikoLogger(new File(env.getWorkDir(), "logs"));
-        logger.debugLocalized("startup.workDir", env.getWorkDir().getAbsolutePath());
     }
 
     public static void main(String[] args) {
@@ -285,6 +283,7 @@ public final class Keiko {
             throw new IllegalStateException(launchState.name());
 
         launchState = LaunchState.LAUNCHING;
+        logger.debugLocalized("startup.workDir", env.getWorkDir().getAbsolutePath());
 
         // Warn the user if they're running a non-release build of Keiko.
         Version.Type verType = env.getBuildProperties().getVersion().getType();
