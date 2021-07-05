@@ -33,7 +33,13 @@ public class PlayerEditBookEventInjection {
 
     @Inject (
             inClass = "org.bukkit.event.player.PlayerEditBookEvent",
-            inMethod = "<init>(Lorg/bukkit/entity/Player;Ljava/lang/String;)V",
+            inMethod = "<init>(" +
+                    "Lorg/bukkit/entity/Player;" +
+                    "I" +
+                    "Lorg/bukkit/inventory/meta/BookMeta;" +
+                    "Lorg/bukkit/inventory/meta/BookMeta;" +
+                    "Z" +
+                    ")V",
             at = Inject.Position.BEGINNING
     )
     public static void onEditBook(MethodParam<?> player, MethodParam<Integer> slot,
