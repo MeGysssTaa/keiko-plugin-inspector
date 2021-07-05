@@ -84,6 +84,7 @@ abstract class KeikoTool {
     protected abstract int execute(String[] args) throws Exception;
 
     protected final void printUsage() {
+        Keiko.INSTANCE.getLogger().warningLocalized("tool.wrongUsage");
         Keiko.INSTANCE.getLogger().warningLocalized(getI18nPrefix() + "usage");
     }
 
