@@ -44,6 +44,17 @@ public class YamlHandle {
         return result;
     }
 
+    // A slightly safer variant of get<String>(key, def). If the config value for the specified key
+    // is, for example, "off", then YAML will treat it as a boolean ("off" = "false"), while we expect
+    // a String, thus throwing a ClassCastException. TODO/FIXME a better solution is 100% needed!
+    public String getString(@NonNull String key, String def) {
+        try {
+            return get(key, def);
+        } catch (ClassCastException ex) {
+            return def;
+        }
+    }
+
     public <T> T get(@NonNull String key, T def) {
         String[] fqKeyPath = key.split("\\.");
         Map<String, Object> lastInnerSection = resolveFinalInnerSection(fqKeyPath);

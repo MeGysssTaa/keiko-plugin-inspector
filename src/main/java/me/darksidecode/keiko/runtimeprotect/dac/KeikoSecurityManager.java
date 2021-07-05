@@ -57,7 +57,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
 
     private void loadLogLevel(Operation op) {
         String levelStr = conf
-                .get("domain_access_control." + op.name().toLowerCase() + ".log", "off")
+                .getString("domain_access_control." + op.name().toLowerCase() + ".log", "off")
                 .replace(' ', '_').toUpperCase();
 
         KeikoLogger.Level level = KeikoLogger.Level.OFF;
@@ -67,7 +67,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         } catch (IllegalArgumentException ex) {
             // Invalid log level. Fall back to "disable logging".
             Keiko.INSTANCE.getLogger().error(
-                    "Invalid log level \"%s\" for DAC operation %s. Falling back to \"OFF\".",
+                    "Invalid log level \"%s\" for DAC operation %s. Falling back to \"off\".",
                     op.name(), levelStr);
         }
 
