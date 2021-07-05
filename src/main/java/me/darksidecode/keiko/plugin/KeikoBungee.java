@@ -17,7 +17,7 @@
  * along with Keiko Plugin Inspector.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.darksidecode.keiko;
+package me.darksidecode.keiko.plugin;
 
 import net.md_5.bungee.api.plugin.Plugin;
 

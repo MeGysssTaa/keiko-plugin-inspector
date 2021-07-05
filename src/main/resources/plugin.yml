@@ -1,7 +1,7 @@
 name: Keiko
 description: Automatic Bukkit/Bungee plugin inspector that protects servers from malicious plugins. KEIKO IS NOT A PLUGIN! INSTALLATION INSTRUCTIONS - https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Installation-Instructions
 version: ${project.version}
-main: me.darksidecode.keiko.KeikoBukkit
+main: me.darksidecode.keiko.plugin.KeikoBukkit
 website: https://github.com/MeGysssTaa/keiko-plugin-inspector
 author: German Vekhorev (DarksideCode) - https://github.com/MeGysssTaa
 api-version: 1.13
