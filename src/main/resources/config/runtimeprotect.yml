@@ -143,7 +143,7 @@ domain_access_control:
   #     # Forbid plugin "not-malware-trust-me' to modify system's SocketFactory:
   #     - DENY PLUGIN=not-malware-trust-me *
   socket_factory_set:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
 
@@ -209,7 +209,7 @@ domain_access_control:
   #     # Forbid method "prepareNatives" of Java class "NativeRAT" in package "xyz.some.cool.plugin" to load any natives:
   #     - DENY SOURCE=xyz.some.cool.plugin.NativeRAT#prepareNatives *
   natives_linkage:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
       - ALLOW ALL sunec
@@ -232,7 +232,7 @@ domain_access_control:
   #     # Forbid all plugins to execute "wget http://some-fishy-host.io/rat.jar":
   #     - DENY ALL wget http://some-fishy-host.io/rat.jar
   command_execution:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
 
@@ -257,7 +257,7 @@ domain_access_control:
   #     # Forbid plugin "UntrustedPlugin" to perform system exit with any status code:
   #     - DENY PLUGIN=UntrustedPlugin *
   system_exit:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
 
@@ -368,7 +368,7 @@ domain_access_control:
   #     # Deny all plugins to op player with name SomeFishyDev:
   #     - DENY ALL SomeFishyDev
   minecraft_op_add:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
 
@@ -381,7 +381,7 @@ domain_access_control:
   #
   #     same as in minecraft_op_add, examples can also be found there
   minecraft_op_remove:
-    log: off
+    log: warning
     rules:
       - DENY ALL *
 
@@ -402,7 +402,7 @@ domain_access_control:
   #     # Deny plugin "SomeFishyPlugin" to execute command "/give SomeFishyDev minecraft:diamond 64":
   #     - DENY PLUGIN=SomeFishyPlugin give SomeFishyDev minecraft:diamond 64
   minecraft_command_dispatch:
-    log: off
+    log: info
     rules:
       - ALLOW ALL *
       - DENY ALL op *
