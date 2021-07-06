@@ -42,19 +42,19 @@ public class BookBackdoorHeuristic extends Heuristic {
     private void handleDetection(WrappedPlayer player) {
         // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
         // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
-        Keiko.INSTANCE.getLogger().warning("\n\n");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED, "\n\n");
         Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
                 "=====================================================================");
-        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED, "\n\n\n\n\n\n");
         Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
                 "runtimeProtect.megane.threatDetected", displayName);
-        Keiko.INSTANCE.getLogger().warning(" ");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED, " ");
         Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
                 i18nPrefix + "details", player);
-        Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED, "\n\n\n\n\n\n");
         Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
                 "=====================================================================");
-        Keiko.INSTANCE.getLogger().warning("\n\n");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED, "\n\n");
     }
 
     private static boolean isSuspicious(WrappedBookMeta bookMeta) {
