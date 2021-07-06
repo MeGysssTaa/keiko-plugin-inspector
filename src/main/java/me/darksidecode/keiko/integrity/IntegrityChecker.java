@@ -22,6 +22,7 @@ package me.darksidecode.keiko.integrity;
 import lombok.NonNull;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.i18n.I18n;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.io.UserInputRequest;
 import me.darksidecode.keiko.io.YesNo;
 import me.darksidecode.keiko.proxy.Keiko;
@@ -64,11 +65,11 @@ public class IntegrityChecker {
             else if (!cachedChecksum.equalsIgnoreCase(actualChecksum)) {
                 // Checksum has changed. Ask the user whether they want to update it or abort server startup.
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "integrityChecker.violationPlugin", plugName);
+                        KeikoLogger.RED, "integrityChecker.violationPlugin", plugName);
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "integrityChecker.violationCached", shorten(cachedChecksum));
+                        KeikoLogger.RED, "integrityChecker.violationCached", shorten(cachedChecksum));
                 Keiko.INSTANCE.getLogger().warningLocalized(
-                        "integrityChecker.violationActual", shorten(actualChecksum));
+                        KeikoLogger.RED, "integrityChecker.violationActual", shorten(actualChecksum));
 
                 // Message like "Update checksum? [yes/no]"
                 String prompt = I18n.get("integrityChecker.updatePrompt")

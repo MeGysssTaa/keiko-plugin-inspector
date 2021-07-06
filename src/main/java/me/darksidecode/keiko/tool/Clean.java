@@ -19,6 +19,7 @@
 
 package me.darksidecode.keiko.tool;
 
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
 
 import java.io.File;
@@ -37,7 +38,7 @@ class Clean extends KeikoTool {
             deleteRecursively(artifactsDir, result);
 
         Keiko.INSTANCE.getLogger().infoLocalized(
-                getI18nPrefix() + "success",
+                KeikoLogger.GREEN, getI18nPrefix() + "success",
                 result.filesDeleted, result.bytesDeleted, result.errors);
 
         return 0;

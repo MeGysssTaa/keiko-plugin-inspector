@@ -19,8 +19,11 @@
 
 package me.darksidecode.keiko.staticanalysis;
 
+import com.diogonunes.jcolor.AnsiFormat;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.registry.IndexedPlugin;
 import org.objectweb.asm.tree.ClassNode;
@@ -57,11 +60,15 @@ public class StaticAnalysisResult implements Serializable {
         return Keiko.INSTANCE.getEnv().getPluginContext().getClassOwner(analyzedClassName);
     }
 
+    @RequiredArgsConstructor
     public enum Type {
-        CLEAN,      // almost certainly not malware
-        VULNERABLE, // uses unsafe code, opens potential vulnerabilities
-        SUSPICIOUS, // could possibly act as malware
-        MALICIOUS   // almost certainly malware
+        CLEAN      (KeikoLogger.DEFAULT_FMT), // almost certainly not malware
+        VULNERABLE (KeikoLogger.YELLOW     ), // uses unsafe code, opens potential vulnerabilities
+        SUSPICIOUS (KeikoLogger.YELLOW     ), // could possibly act as malware
+        MALICIOUS  (KeikoLogger.RED        ); // almost certainly malware
+
+        @Getter @NonNull
+        private final AnsiFormat ansiFmt;
     }
 
     @Override

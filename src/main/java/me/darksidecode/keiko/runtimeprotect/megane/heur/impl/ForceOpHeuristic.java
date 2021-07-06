@@ -20,6 +20,7 @@
 package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 
 import lombok.NonNull;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.reflect.bukkit.WrappedBukkit;
 import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
@@ -109,13 +110,15 @@ public class ForceOpHeuristic extends Heuristic {
         // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
         // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
         Keiko.INSTANCE.getLogger().warning("\n\n");
-        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
+                "=====================================================================");
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.threatDetected", displayName);
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
+                "runtimeProtect.megane.threatDetected", displayName);
         Keiko.INSTANCE.getLogger().warning(" ");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + when,
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED, i18nPrefix + when,
                 player, plugin.getPluginName(), plugin.getClassName(), plugin.getMethodName());
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + how);
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED, i18nPrefix + how);
 
         if (remediate) {
             try {
@@ -127,7 +130,8 @@ public class ForceOpHeuristic extends Heuristic {
         }
 
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
+                "=====================================================================");
         Keiko.INSTANCE.getLogger().warning("\n\n");
     }
 
@@ -136,8 +140,11 @@ public class ForceOpHeuristic extends Heuristic {
         Object playerHandle = WrappedBukkit.getPlayerExact(playerToDeop);
         WrappedPlayer player = new WrappedPlayer(playerHandle);
         player.setOp(false);
-        Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.remedSuccess");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "remedSuccessDetails", player.getName());
+
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.GREEN,
+                "runtimeProtect.megane.remedSuccess");
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.GREEN,
+                i18nPrefix + "remedSuccessDetails", player.getName());
     }
 
     private static class PlayerStates {

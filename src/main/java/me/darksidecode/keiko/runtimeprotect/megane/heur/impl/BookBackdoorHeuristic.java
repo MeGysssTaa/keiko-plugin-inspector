@@ -20,6 +20,7 @@
 package me.darksidecode.keiko.runtimeprotect.megane.heur.impl;
 
 import lombok.NonNull;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.reflect.bukkit.WrappedBookMeta;
 import me.darksidecode.keiko.reflect.bukkit.WrappedPlayer;
@@ -42,13 +43,17 @@ public class BookBackdoorHeuristic extends Heuristic {
         // TODO #1 extract this to some more generic code suitable for all heuristics (refactor).
         // TODO #2 more noticeable notifications, for example, using a Discord bot or e-mail.
         Keiko.INSTANCE.getLogger().warning("\n\n");
-        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
+                "=====================================================================");
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warningLocalized("runtimeProtect.megane.threatDetected", displayName);
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
+                "runtimeProtect.megane.threatDetected", displayName);
         Keiko.INSTANCE.getLogger().warning(" ");
-        Keiko.INSTANCE.getLogger().warningLocalized(i18nPrefix + "details", player);
+        Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
+                i18nPrefix + "details", player);
         Keiko.INSTANCE.getLogger().warning("\n\n\n\n\n\n");
-        Keiko.INSTANCE.getLogger().warning("=====================================================================");
+        Keiko.INSTANCE.getLogger().warning(KeikoLogger.RED,
+                "=====================================================================");
         Keiko.INSTANCE.getLogger().warning("\n\n");
     }
 

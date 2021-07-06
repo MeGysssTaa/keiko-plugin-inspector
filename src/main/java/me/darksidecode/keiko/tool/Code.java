@@ -29,6 +29,7 @@ import me.darksidecode.jminima.phase.basic.PrintClassBytecodePhase;
 import me.darksidecode.jminima.printing.SimpleBytecodePrinter;
 import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.util.Holder;
 import org.objectweb.asm.tree.ClassNode;
@@ -67,7 +68,7 @@ class Code extends KeikoTool {
         }
 
         if (!outputDir.mkdirs()) {
-            Keiko.INSTANCE.getLogger().warningLocalized(
+            Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
                     getI18nPrefix() + "outMkFail", outputDir.getAbsolutePath());
             return 1;
         }
@@ -90,7 +91,7 @@ class Code extends KeikoTool {
 
             if (result != WorkflowExecutionResult.FULL_SUCCESS) {
                 String errType = result == WorkflowExecutionResult.FATAL_FAILURE ? "errFatal" : "err";
-                Keiko.INSTANCE.getLogger().warningLocalized(getI18nPrefix() + errType);
+                Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED, getI18nPrefix() + errType);
 
                 for (PhaseExecutionException err : workflow.getAllErrorsChronological())
                     Keiko.INSTANCE.getLogger().error("JMinima error", err);
@@ -108,7 +109,7 @@ class Code extends KeikoTool {
 
                 if (!parent.exists() && !parent.mkdirs()) {
                     // Just warn and skip -- don't exit at this point.
-                    Keiko.INSTANCE.getLogger().warningLocalized(
+                    Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
                             getI18nPrefix() + "outMkFail", parent.getAbsolutePath());
                     continue;
                 }
@@ -117,12 +118,12 @@ class Code extends KeikoTool {
                         new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
                     writer.write(clsCode);
                 } catch (IOException ex) {
-                    Keiko.INSTANCE.getLogger().warningLocalized(
+                    Keiko.INSTANCE.getLogger().warningLocalized(KeikoLogger.RED,
                             getI18nPrefix() + "saveErr", outputFile.getAbsolutePath(), ex.toString());
                 }
             }
 
-            Keiko.INSTANCE.getLogger().infoLocalized(
+            Keiko.INSTANCE.getLogger().infoLocalized(KeikoLogger.GREEN,
                     getI18nPrefix() + "complete", outputDir.getAbsolutePath());
         }
 

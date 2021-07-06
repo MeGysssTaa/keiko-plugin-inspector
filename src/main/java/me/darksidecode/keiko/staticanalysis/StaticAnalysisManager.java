@@ -19,6 +19,7 @@
 
 package me.darksidecode.keiko.staticanalysis;
 
+import com.diogonunes.jcolor.AnsiFormat;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.disassembling.SimpleJavaDisassembler;
@@ -32,10 +33,10 @@ import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.i18n.I18n;
+import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.io.UserInputRequest;
 import me.darksidecode.keiko.io.YesNo;
 import me.darksidecode.keiko.proxy.Keiko;
-import me.darksidecode.keiko.io.KeikoLogger;
 import me.darksidecode.keiko.proxy.KeikoProperties;
 import me.darksidecode.keiko.registry.Identity;
 import me.darksidecode.keiko.registry.IdentityFilter;
@@ -189,42 +190,61 @@ public class StaticAnalysisManager {
 
             // Log level depends on whether there was at least a single warning or not.
             // If the plugin is fully clean, then just debug it. Otherwise really warn.
+            AnsiFormat basePluginFmt;
+
+            if (warnings == 0)
+                basePluginFmt = KeikoLogger.DEFAULT_FMT;
+            else if (critical == 0)
+                basePluginFmt = KeikoLogger.YELLOW;
+            else
+                basePluginFmt = KeikoLogger.RED;
+
             KeikoLogger.Level logLevel = warnings == 0
                     ? KeikoLogger.Level.DEBUG : KeikoLogger.Level.WARNING;
 
             Keiko.INSTANCE.getLogger().logLocalized(
-                    logLevel, "staticInspections.pluginResults",
+                    logLevel, basePluginFmt, "staticInspections.pluginResults",
                     plugin.getName(), plugin.getJar().getName());
 
             for (StaticAnalysisResult result : pluginResults) {
                 String typeI18nKey = "staticInspections." + result.getType().name().toLowerCase();
                 String analysisDescI18nKey = "staticInspections.desc." + result.getScannerName();
+                AnsiFormat ansiFmt = result.getType().getAnsiFmt();
 
-                Keiko.INSTANCE.getLogger().logLocalized(logLevel, typeI18nKey);
+                Keiko.INSTANCE.getLogger().logLocalized(logLevel, ansiFmt, typeI18nKey);
                 Keiko.INSTANCE.getLogger().logLocalized(
-                        logLevel, "staticInspections.analysisName", result.getScannerName());
+                        logLevel, ansiFmt, "staticInspections.analysisName", result.getScannerName());
                 Keiko.INSTANCE.getLogger().logLocalized(
-                        logLevel, analysisDescI18nKey, plugin.getName(), plugin.getJar().getName());
-                Keiko.INSTANCE.getLogger().logLocalized(logLevel, "staticInspections.details");
+                        logLevel, ansiFmt, analysisDescI18nKey, plugin.getName(), plugin.getJar().getName());
+                Keiko.INSTANCE.getLogger().logLocalized(logLevel, ansiFmt, "staticInspections.details");
 
                 int counter = 0;
 
                 for (String detail : result.getDetails())
-                    Keiko.INSTANCE.getLogger().log(logLevel, "|            %s. %s", ++counter, detail);
+                    Keiko.INSTANCE.getLogger().log(logLevel, ansiFmt, "|            %s. %s", ++counter, detail);
 
-                Keiko.INSTANCE.getLogger().log(logLevel, "|            ");
+                Keiko.INSTANCE.getLogger().log(logLevel, ansiFmt, "|            ");
             }
 
             Keiko.INSTANCE.getLogger().logLocalized(
-                    logLevel, "staticInspections.pluginSummary",
+                    logLevel, basePluginFmt, "staticInspections.pluginSummary",
                     warnings, critical, plugin.getName(), plugin.getJar().getName());
 
-            Keiko.INSTANCE.getLogger().log(logLevel, " ");
-            Keiko.INSTANCE.getLogger().log(logLevel, " ");
+            Keiko.INSTANCE.getLogger().log(logLevel, basePluginFmt, " ");
+            Keiko.INSTANCE.getLogger().log(logLevel, basePluginFmt, " ");
         }
 
+        AnsiFormat baseSummaryFmt;
+
+        if (warningsTotal == 0)
+            baseSummaryFmt = KeikoLogger.DEFAULT_FMT;
+        else if (criticalTotal == 0)
+            baseSummaryFmt = KeikoLogger.YELLOW;
+        else
+            baseSummaryFmt = KeikoLogger.RED;
+
         Keiko.INSTANCE.getLogger().infoLocalized(
-                "staticInspections.finishSummary", warningsTotal, criticalTotal);
+                baseSummaryFmt, "staticInspections.finishSummary", warningsTotal, criticalTotal);
 
         return warningsTotal;
     }

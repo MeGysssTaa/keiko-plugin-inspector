@@ -50,7 +50,7 @@ public class KeikoLogger implements Prompter, Closeable {
     public static final AnsiFormat BLACK_ON_WHITE = new AnsiFormat(BLACK_TEXT(), WHITE_BACK());
     public static final AnsiFormat BRIGHT_WHITE   = new AnsiFormat(BRIGHT_WHITE_TEXT());
     public static final AnsiFormat YELLOW         = new AnsiFormat(BRIGHT_YELLOW_TEXT());
-    public static final AnsiFormat RED            = new AnsiFormat(BRIGHT_RED_TEXT());
+    public static final AnsiFormat RED            = new AnsiFormat(RED_TEXT());
     public static final AnsiFormat GREEN          = new AnsiFormat(BRIGHT_GREEN_TEXT());
     public static final AnsiFormat CYAN           = new AnsiFormat(BRIGHT_CYAN_TEXT());
 
@@ -293,7 +293,8 @@ public class KeikoLogger implements Prompter, Closeable {
         ERROR              (RED           ),
         USER_INPUT_REQUEST (BLACK_ON_WHITE),
         OFF                (DEFAULT_FMT   ); // format is unused, but needed because of @NonNull's
-        
+
+        @NonNull
         private final AnsiFormat defaultAnsiFmt;
 
         private String localizedPrefix; // null for Level.OFF
