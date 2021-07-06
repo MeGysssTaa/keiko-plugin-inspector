@@ -19,13 +19,12 @@
 
 package me.darksidecode.keiko.io;
 
+import com.diogonunes.jcolor.AnsiFormat;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.i18n.I18n;
 import me.darksidecode.keiko.util.StringUtils;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -36,18 +35,24 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static com.diogonunes.jcolor.Attribute.*;
+
 @SuppressWarnings ("UseOfSystemOutOrSystemErr")
 @RequiredArgsConstructor
 public class KeikoLogger implements Prompter, Closeable {
-
-    static {
-        AnsiConsole.systemInstall(); // for colorized logging
-    }
 
     private static final String PREFIX = "[Keiko] ";
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss"  );
+
+    public static final AnsiFormat DEFAULT_FMT    = new AnsiFormat();
+    public static final AnsiFormat BLACK_ON_WHITE = new AnsiFormat(BLACK_TEXT(), WHITE_BACK());
+    public static final AnsiFormat BRIGHT_WHITE   = new AnsiFormat(BRIGHT_WHITE_TEXT());
+    public static final AnsiFormat YELLOW         = new AnsiFormat(BRIGHT_YELLOW_TEXT());
+    public static final AnsiFormat RED            = new AnsiFormat(BRIGHT_RED_TEXT());
+    public static final AnsiFormat GREEN          = new AnsiFormat(BRIGHT_GREEN_TEXT());
+    public static final AnsiFormat CYAN           = new AnsiFormat(BRIGHT_CYAN_TEXT());
 
     private final Object writeLock = new Object();
 
@@ -60,7 +65,7 @@ public class KeikoLogger implements Prompter, Closeable {
 
     @Override
     public void prompt(@NonNull String message) {
-        log(Level.INFO, Ansi.Color.CYAN, message);
+        log(Level.USER_INPUT_REQUEST, BLACK_ON_WHITE, message);
     }
 
     @Override
@@ -71,21 +76,21 @@ public class KeikoLogger implements Prompter, Closeable {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void log(@NonNull Level level, @NonNull String s, Object... format) {
-        log(level, level.defaultColor, s, format);
+        log(level, level.defaultAnsiFmt, s, format);
     }
 
-    public void log(@NonNull Level level, @NonNull Ansi.Color color,
+    public void log(@NonNull Level level, @NonNull AnsiFormat ansiFmt,
                     @NonNull String s, Object... format) {
-        print(level, System.out, color, s, format);
+        print(level, System.out, ansiFmt, s, format);
     }
 
     public void logLocalized(@NonNull Level level, @NonNull String key, Object... args) {
         log(level, I18n.get(key, args));
     }
 
-    public void logLocalized(@NonNull Level level, @NonNull Ansi.Color color,
+    public void logLocalized(@NonNull Level level, @NonNull AnsiFormat ansiFmt,
                              @NonNull String key, Object... args) {
-        log(level, color, I18n.get(key, args));
+        log(level, ansiFmt, I18n.get(key, args));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,16 +99,16 @@ public class KeikoLogger implements Prompter, Closeable {
         log(Level.DEBUG, s, format);
     }
 
-    public void debug(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
-        log(Level.DEBUG, color, s, format);
+    public void debug(@NonNull AnsiFormat ansiFmt, @NonNull String s, Object... format) {
+        log(Level.DEBUG, ansiFmt, s, format);
     }
 
     public void debugLocalized(@NonNull String key, Object... args) {
         debug(I18n.get(key, args));
     }
 
-    public void debugLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
-        debug(color, I18n.get(key, args));
+    public void debugLocalized(@NonNull AnsiFormat ansiFmt, @NonNull String key, Object... args) {
+        debug(ansiFmt, I18n.get(key, args));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,16 +117,16 @@ public class KeikoLogger implements Prompter, Closeable {
         log(Level.INFO, s, format);
     }
 
-    public void info(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
-        log(Level.INFO, color, s, format);
+    public void info(@NonNull AnsiFormat ansiFmt, @NonNull String s, Object... format) {
+        log(Level.INFO, ansiFmt, s, format);
     }
 
     public void infoLocalized(@NonNull String key, Object... args) {
         info(I18n.get(key, args));
     }
 
-    public void infoLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
-        info(color, I18n.get(key, args));
+    public void infoLocalized(@NonNull AnsiFormat ansiFmt, @NonNull String key, Object... args) {
+        info(ansiFmt, I18n.get(key, args));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,25 +135,25 @@ public class KeikoLogger implements Prompter, Closeable {
         log(Level.WARNING, s, format);
     }
 
-    public void warning(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
-        log(Level.WARNING, color, s, format);
+    public void warning(@NonNull AnsiFormat ansiFmt, @NonNull String s, Object... format) {
+        log(Level.WARNING, ansiFmt, s, format);
     }
 
     public void warningLocalized(@NonNull String key, Object... args) {
         warning(I18n.get(key, args));
     }
 
-    public void warningLocalized(@NonNull Ansi.Color color, @NonNull String key, Object... args) {
-        warning(color, I18n.get(key, args));
+    public void warningLocalized(@NonNull AnsiFormat ansiFmt, @NonNull String key, Object... args) {
+        warning(ansiFmt, I18n.get(key, args));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void error(@NonNull String s, Object... format) {
-        error(Level.ERROR.defaultColor, s, format);
+        error(Level.ERROR.defaultAnsiFmt, s, format);
     }
 
-    public void error(@NonNull Ansi.Color color, @NonNull String s, Object... format) {
+    public void error(@NonNull AnsiFormat ansiFmt, @NonNull String s, Object... format) {
         Throwable t = null;
         Object lastFmt;
 
@@ -159,7 +164,7 @@ public class KeikoLogger implements Prompter, Closeable {
                     : Arrays.copyOf(format, format.length - 1);
         }
 
-        log(Level.ERROR, color, s, format);
+        log(Level.ERROR, ansiFmt, s, format);
 
         if (t != null) {
             error("    " + t);
@@ -175,10 +180,9 @@ public class KeikoLogger implements Prompter, Closeable {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void print(Level level, PrintStream printStream,
-                       Ansi.Color color, String message, Object... format) {
+                       AnsiFormat ansiFmt, String message, Object... format) {
         if (level == Level.OFF)
-            throw new IllegalArgumentException(
-                    "Level.OFF must not be used for logging explicitly");
+            return; // don't log anything
 
         if (format != null && format.length > 0)
             message = String.format(message, format);
@@ -189,11 +193,7 @@ public class KeikoLogger implements Prompter, Closeable {
 
             if (level.hasMinimum(GlobalConfig.getLogLevelConsole()))
                 // Print colorized.
-                printStream.println(Ansi.ansi()
-                        .fg(color)
-                        .a(PREFIX + level.localizedPrefix + message)
-                        .reset()
-                );
+                printStream.println(ansiFmt.format(PREFIX + level.localizedPrefix + message));
 
             if (level.hasMinimum(GlobalConfig.getLogLevelFile()))
                 printToFile(PREFIX + "[" + currentDate + "] " +
@@ -287,13 +287,14 @@ public class KeikoLogger implements Prompter, Closeable {
 
     @RequiredArgsConstructor
     public enum Level {
-        DEBUG   (Ansi.Color.DEFAULT),
-        INFO    (Ansi.Color.WHITE  ),
-        WARNING (Ansi.Color.YELLOW ),
-        ERROR   (Ansi.Color.RED    ),
-        OFF     (Ansi.Color.DEFAULT /* unused but needed because of @NonNull's */);
+        DEBUG              (DEFAULT_FMT   ),
+        INFO               (BRIGHT_WHITE  ),
+        WARNING            (YELLOW        ),
+        ERROR              (RED           ),
+        USER_INPUT_REQUEST (BLACK_ON_WHITE),
+        OFF                (DEFAULT_FMT   ); // format is unused, but needed because of @NonNull's
         
-        private final Ansi.Color defaultColor;
+        private final AnsiFormat defaultAnsiFmt;
 
         private String localizedPrefix; // null for Level.OFF
 

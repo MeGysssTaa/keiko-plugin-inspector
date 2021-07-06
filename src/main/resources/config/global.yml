@@ -42,8 +42,8 @@ logs_lifespan_days: 14
 
 # Minimum level (severity) of messages that Keiko should log.
 # Available level names (ordered by severity, ascending):
-# --  debug  info  warning  error  off
-#                                  ^^^ Disables logging completely.
+# --  debug  info  warning  error  user_input_request  off
+#                                                      ^^^ Disables logging completely.
 log_level:
   console: info
   file: debug
