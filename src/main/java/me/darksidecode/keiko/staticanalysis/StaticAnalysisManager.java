@@ -245,7 +245,7 @@ public class StaticAnalysisManager {
                     .classToInspectionName((Class<? extends StaticAnalysis>) inspectionClass);
             String configName = StaticAnalysis.inspectionNameToConfigName(inspectionName);
 
-            if (InspectionsConfig.getHandle().get(configName + ".enabled", true)) {
+            if (InspectionsConfig.getHandle().get(configName + ".enabled", false)) {
                 try {
                     String inputJarPath = plugin.getJar().getAbsolutePath()
                             .replace("\\", "/"); // better Windows compatibility
