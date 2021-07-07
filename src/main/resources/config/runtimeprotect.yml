@@ -163,6 +163,7 @@ domain_access_control:
   file_write:
     log: off
     rules:
+      - DENY ALL *
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
       - ALLOW ALL /tmp
@@ -186,6 +187,7 @@ domain_access_control:
   file_delete:
     log: off
     rules:
+      - DENY ALL *
       - ALLOW ALL {plugins_folder}/{plugin_name}
       - ALLOW ALL {plugins_folder}/{plugin_name}/*
       - ALLOW ALL /tmp
