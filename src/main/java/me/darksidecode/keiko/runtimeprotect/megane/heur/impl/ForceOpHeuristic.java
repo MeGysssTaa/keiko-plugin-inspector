@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RegisterHeuristic ({
         BukkitPlayerConnectionUpdateEvent.class,
+        BukkitPlayerChatEvent.class,
         BukkitPlayerCommandPreprocessEvent.class,
         MinecraftOpUpdateEvent.class,
         CraftBukkitCommandEvent.class,
