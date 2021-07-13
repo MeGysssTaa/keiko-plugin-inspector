@@ -20,6 +20,23 @@
 
 
 
+# List of directories which Keiko should treat as plugins folders. Keiko will ensure integrity
+# of all JAR-files inside these directories, and will run its static inspections on all such
+# JAR-files as well. If you are using modular plugins, or plugins that can link additional code
+# (add-ons, or extensions), then those plugins' modules/extensions' source directories (where
+# the JAR files are loaded from) should be listed here, since such add-ons may contain malicious
+# code as well. Despite being placed inside 'inspections.yml', this setting also affects Keiko's
+# RuntimeProtect features, such as DAC -- if a plugin runs some code, but that plugin's JAR-file
+# is not inside any of the directories listed below, then Keiko will be unable to check that
+# plugin's security permissions, and it will be able to do anything without restrictions.
+#
+# If a plugin detected by Keiko does not contain 'plugin.yml' nor 'bungee.yml', then Keiko will
+# infer plugin name from its JAR-file name (for example, a plugin whose file name is "CoolThing.jar"
+# will be named "CoolThing" by Keiko). This behavior /may/ change in the future.
+scanned_directories:
+  - "{server_folder}/plugins"
+  - "{server_folder}/plugins/PlaceholderAPI/expansions"
+
 # Names of plugins whose integrity should not be ensured. Keiko will exclude them
 # from checksum checking. It is strongly not recommended to list many plugins here.
 integrity_exclusions: []

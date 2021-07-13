@@ -45,6 +45,7 @@ import me.darksidecode.keiko.registry.PluginContext;
 import me.darksidecode.keiko.staticanalysis.cache.CacheManager;
 import me.darksidecode.keiko.staticanalysis.cache.InspectionCache;
 import me.darksidecode.keiko.util.ConfigurationUtils;
+import me.darksidecode.keiko.util.StringUtils;
 import org.reflections.Reflections;
 
 import java.util.*;
@@ -269,16 +270,13 @@ public class StaticAnalysisManager {
                 try {
                     String inputJarPath = plugin.getJar().getAbsolutePath()
                             .replace("\\", "/"); // better Windows compatibility
-                    String pluginsFolderPath = Keiko.INSTANCE.getEnv().getPluginsDir().getAbsolutePath();
                     List<String> exclusions = InspectionsConfig.getHandle()
                             .get(configName + ".exclusions", Collections.emptyList());
 
                     boolean excluded = false;
 
                     for (String exclusion : exclusions) {
-                        if (exclusion.replace("{plugins_folder}", pluginsFolderPath)
-                                .replace("\\", "/") // better Windows compatibility
-                                .equals(inputJarPath)) {
+                        if (StringUtils.basicReplacements(exclusion).equals(inputJarPath)) {
                             excluded = true;
                             break;
                         }

@@ -30,12 +30,16 @@ import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
 import me.darksidecode.jminima.workflow.Workflow;
 import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.GlobalConfig;
+import me.darksidecode.keiko.config.InspectionsConfig;
 import me.darksidecode.keiko.proxy.Keiko;
 import me.darksidecode.keiko.util.Holder;
+import me.darksidecode.keiko.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @RequiredArgsConstructor (access = AccessLevel.PRIVATE)
@@ -59,62 +63,74 @@ public class PluginContext {
                 -> plugin.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
 
-    public static PluginContext currentContext(@NonNull File pluginsFolder) {
+    public static PluginContext currentContext() {
         Keiko.INSTANCE.getLogger().infoLocalized("pluginsIndex.beginning");
-        File[] files = pluginsFolder.listFiles();
 
-        if (files != null) {
-            Collection<IndexedPlugin> indexedPlugins = new ArrayList<>();
+        Collection<File> pluginsFiles = new ArrayList<>();
+        List<String> scannedDirs = InspectionsConfig.getHandle()
+                .get("scanned_directories", new ArrayList<>());
 
-            for (File file : files) {
-                if (file.isFile() && file.getName().endsWith(".jar")) {
-                    Holder<IndexedPlugin> indexedPluginHolder = new Holder<>();
+        for (String dirPath : scannedDirs) {
+            File dir = new File(StringUtils.basicReplacements(dirPath));
+            File[] children;
 
-                    try (Workflow workflow = new Workflow()
-                            .phase(new OpenJarFilePhase(file))
-                            .phase(new IndexPluginPhase()
-                                    .watcher(new PhaseExecutionWatcher<IndexedPlugin>()
-                                            .doAfterExecution((val, err) -> indexedPluginHolder.setValue(val))
-                                    ))
-                            .phase(new CloseJarFilePhase())) {
-                        WorkflowExecutionResult result = workflow.executeAll();
+            if (dir.isDirectory() && (children = dir.listFiles()) != null) {
+                pluginsFiles.addAll(Arrays.asList(children));
+                Keiko.INSTANCE.getLogger().debug(
+                        "Directory will be scanned: %s", dir.getAbsolutePath());
+            } else
+                Keiko.INSTANCE.getLogger().debug(
+                        "Directory will not be scanned: %s", dir.getAbsolutePath());
+        }
 
-                        if (result == WorkflowExecutionResult.FATAL_FAILURE) {
-                            Keiko.INSTANCE.getLogger().warningLocalized(
-                                    "pluginsIndex.indexErr", file.getName());
+        Collection<IndexedPlugin> indexedPlugins = new ArrayList<>();
 
-                            for (PhaseExecutionException error : workflow.getAllErrorsChronological())
-                                Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
+        for (File file : pluginsFiles) {
+            if (file.isFile() && file.getName().endsWith(".jar")) {
+                Holder<IndexedPlugin> indexedPluginHolder = new Holder<>();
 
-                            if (GlobalConfig.getAbortOnError())
-                                return null;
-                        } else if (indexedPluginHolder.hasValue()) {
-                            IndexedPlugin plugin = indexedPluginHolder.getValue();
-                            indexedPlugins.add(plugin);
+                try (Workflow workflow = new Workflow()
+                        .phase(new OpenJarFilePhase(file))
+                        .phase(new IndexPluginPhase()
+                                .watcher(new PhaseExecutionWatcher<IndexedPlugin>()
+                                        .doAfterExecution((val, err) -> indexedPluginHolder.setValue(val))
+                                ))
+                        .phase(new CloseJarFilePhase())) {
+                    WorkflowExecutionResult result = workflow.executeAll();
 
-                            Keiko.INSTANCE.getLogger().debugLocalized(
-                                    "pluginsIndex.indexedInfo",
-                                    plugin.getName(), plugin.getJar().getName(), plugin.getClasses().size());
-                        } else {
-                            Keiko.INSTANCE.getLogger().warningLocalized(
-                                    "pluginsIndex.indexErr", file.getName());
-                            Keiko.INSTANCE.getLogger().error(
-                                    "IndexedPlugin Holder has no value, " +
-                                            "but workflow execution result is %s", result);
+                    if (result == WorkflowExecutionResult.FATAL_FAILURE) {
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                "pluginsIndex.indexErr", file.getName());
 
-                            if (GlobalConfig.getAbortOnError())
-                                return null;
-                        }
+                        for (PhaseExecutionException error : workflow.getAllErrorsChronological())
+                            Keiko.INSTANCE.getLogger().error("JMinima phase execution error:", error);
+
+                        if (GlobalConfig.getAbortOnError())
+                            return null;
+                    } else if (indexedPluginHolder.hasValue()) {
+                        IndexedPlugin plugin = indexedPluginHolder.getValue();
+                        indexedPlugins.add(plugin);
+
+                        Keiko.INSTANCE.getLogger().debugLocalized(
+                                "pluginsIndex.indexedInfo",
+                                plugin.getName(), plugin.getJar().getName(), plugin.getClasses().size());
+                    } else {
+                        Keiko.INSTANCE.getLogger().warningLocalized(
+                                "pluginsIndex.indexErr", file.getName());
+                        Keiko.INSTANCE.getLogger().error(
+                                "IndexedPlugin Holder has no value, " +
+                                        "but workflow execution result is %s", result);
+
+                        if (GlobalConfig.getAbortOnError())
+                            return null;
                     }
                 }
             }
+        }
+        Keiko.INSTANCE.getLogger().debugLocalized(
+                "pluginsIndex.numPluginsIndexed", indexedPlugins.size());
 
-            Keiko.INSTANCE.getLogger().debugLocalized(
-                    "pluginsIndex.numPluginsIndexed", indexedPlugins.size());
-
-            return new PluginContext(indexedPlugins);
-        } else
-            throw new IllegalStateException("missing plugins folder???");
+        return new PluginContext(indexedPlugins);
     }
 
 }

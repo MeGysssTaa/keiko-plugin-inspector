@@ -375,10 +375,7 @@ public final class Keiko {
     }
 
     private void indexPlugins() {
-        File pluginsDir = new File("plugins");
-        env.setPluginsDir(pluginsDir);
-
-        PluginContext pluginContext = PluginContext.currentContext(pluginsDir);
+        PluginContext pluginContext = PluginContext.currentContext();
         env.setPluginContext(pluginContext);
 
         if (pluginContext == null) {

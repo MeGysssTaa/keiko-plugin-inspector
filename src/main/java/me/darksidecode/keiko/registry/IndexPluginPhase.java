@@ -91,25 +91,25 @@ public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
             }
         }
 
-        // Validate plugin...
+        File pluginFile = new File(jarFile.getName());
+
         if (pluginName == null) {
+            // May be for non-classic plugins. For example, for PlaceholderAPI expansions. Don't error!
             Keiko.INSTANCE.getLogger().warningLocalized(
                     "pluginsIndex.invalidPluginYml", jarFile.getName());
 
-            return new EmittedValue<>(new PhaseExecutionException(
-                    true, "invalid plugin.yml in " + jarFile.getName()));
-        } else {
-            // Plugin is valid, add it to context
-            Keiko.INSTANCE.getLogger().debugLocalized(
-                    "pluginsIndex.indexedInfo",
-                    pluginName, jarFile.getName(), pluginClasses.size());
-
-            File pluginFile = new File(jarFile.getName());
-            String sha512 = StringUtils.sha512(pluginFile);
-
-            return new EmittedValue<>(
-                   new IndexedPlugin(pluginFile, pluginClasses, pluginName, sha512));
+            pluginName = pluginFile.getName().replace(".jar", "");
+            Keiko.INSTANCE.getLogger().debug("  Inferred name \"%s\"", pluginName);
         }
+
+        Keiko.INSTANCE.getLogger().debugLocalized(
+                "pluginsIndex.indexedInfo",
+                pluginName, jarFile.getName(), pluginClasses.size());
+
+        String sha512 = StringUtils.sha512(pluginFile);
+
+        return new EmittedValue<>(
+               new IndexedPlugin(pluginFile, pluginClasses, pluginName, sha512));
     }
 
 }

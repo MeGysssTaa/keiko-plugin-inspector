@@ -23,7 +23,7 @@ plugins {
 }
 
 group 'me.darksidecode.keiko'
-version '4.0.0-pre'
+version '4.0.0-dev'
 def buildTimestamp = new Date().format('yyyy/MM/dd_HH-mm-ss')
 
 compileJava.options.encoding = "UTF-8"

@@ -38,9 +38,8 @@ public final class StringUtils {
     }
 
     public static String basicReplacements(@NonNull String s) {
-        if (Keiko.INSTANCE.getLaunchState() != Keiko.LaunchState.NOT_LAUNCHED) // might be called, e.g., from tests
+        if (Keiko.INSTANCE.getLaunchState() != Keiko.LaunchState.NOT_LAUNCHED) // might be called, e.g., from tests (some <clinit>s)
             s = s.replace("{keiko_folder}",   Keiko.INSTANCE.getEnv().getWorkDir   ().getAbsolutePath())
-                 .replace("{plugins_folder}", Keiko.INSTANCE.getEnv().getPluginsDir().getAbsolutePath())
                  .replace("{server_folder}",  Keiko.INSTANCE.getEnv().getServerDir ().getAbsolutePath());
 
         return s.replace("{java_folder}", System.getProperty("java.home"))

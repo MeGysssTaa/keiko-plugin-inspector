@@ -21,6 +21,7 @@ package me.darksidecode.keiko.proxy.injector;
 
 import lombok.NonNull;
 import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.util.StringUtils;
 
 public final class PlaceholderApplicator {
 
@@ -28,8 +29,7 @@ public final class PlaceholderApplicator {
 
     PlaceholderApplicator() {
         // Cache because getters in Environment use 'synchronized' which is pretty slow.
-        String nmsVersion = Keiko.INSTANCE.getEnv().getNmsVersion();
-        this.nmsVersion = nmsVersion != null ? nmsVersion : "" /* Bungee (will not be used) */;
+        this.nmsVersion = StringUtils.orEmpty(Keiko.INSTANCE.getEnv().getNmsVersion());
     }
 
     public String apply(@NonNull String s) {

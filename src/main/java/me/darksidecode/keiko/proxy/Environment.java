@@ -38,8 +38,6 @@ public final class Environment {
 
     private File workDir;
 
-    private File pluginsDir;
-
     private PluginContext pluginContext;
 
     private String nmsVersion;
