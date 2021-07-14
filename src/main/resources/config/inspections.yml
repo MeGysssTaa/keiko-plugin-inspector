@@ -137,3 +137,14 @@ static:
   permissions_plugins_abuse:
     enabled: true
     exclusions: []
+
+  # Keiko has no publicly exposed APIs that plugins can be based on. Normally, plugins don't even
+  # need to know whether Keiko is present on your server or not to function. That is, legitimate
+  # plugins should never attempt to use Keiko's internal classes. However, malware may try to hack
+  # into Keiko's implementation to circumvent its restrictions and detections. For example, a malicious
+  # plugin may try to add itself into Keiko's DAC exclusions list at run-time (right in memory) to avoid
+  # its system calls being analyzed by Keiko's Domain Access Control. Excluding plugins from this inspection
+  # might be extremely dangerous! Do so with extra caution.
+  keiko_hook:
+    enabled: true
+    exclusions: []
