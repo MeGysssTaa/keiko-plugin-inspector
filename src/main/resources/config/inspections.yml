@@ -147,4 +147,6 @@ static:
   # might be extremely dangerous! Do so with extra caution.
   keiko_hook:
     enabled: true
+    countermeasures:
+      malicious: always abort
     exclusions: []
