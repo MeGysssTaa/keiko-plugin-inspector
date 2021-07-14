@@ -135,6 +135,9 @@ public class KeikoClassLoader extends URLClassLoader {
 
     @Override
     public Class<?> findClass(@NonNull String name) throws ClassNotFoundException {
+        if (Keiko.INSTANCE.getRuntimeProtect().isDacEnabled())
+            Keiko.INSTANCE.getRuntimeProtect().getDac().checkClassAccess(name);
+
         Class<?> result = classes.get(name);
 
         if (result == null)

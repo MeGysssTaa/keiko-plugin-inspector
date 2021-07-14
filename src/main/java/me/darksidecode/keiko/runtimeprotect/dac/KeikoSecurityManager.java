@@ -35,7 +35,7 @@ import java.security.Permission;
 import java.util.*;
 import java.util.function.Function;
 
-public class KeikoSecurityManager extends DomainAccessController implements MinecraftDAC {
+public class KeikoSecurityManager extends DomainAccessController implements ExtendedDAC {
 
     private final Map<Operation, KeikoLogger.Level> logLevels;
 
@@ -318,6 +318,16 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
     }
 
     @Override
+    public void checkClassAccess(String fqcn) {
+        // Note that, unlike in checkPackageAccess, this check only triggers on direct class lookups.
+        // That is, plugins will not be "accidentially" causing checkClassAccess due to injected calls
+        // or DAC (SecurityManager) checks. For this reason, we don't hardcode any exclusions. Only
+        // direct class usages from plugins will trigger this check.
+        checkAccess(arg -> StringUtils.matchWildcards(
+                fqcn, arg), Operation.CLASS_ACCESS, I18n.get("runtimeProtect.dac.class", fqcn));
+    }
+
+    @Override
     public void checkOpAdd(String player) {
         checkAccess(arg -> StringUtils.matchWildcards(
                 player, arg), Operation.MINECRAFT_OP_ADD,
@@ -409,6 +419,7 @@ public class KeikoSecurityManager extends DomainAccessController implements Mine
         PROPERTY_WRITE,
         PROPERTY_READ,
         PACKAGE_ACCESS,
+        CLASS_ACCESS,
         MINECRAFT_OP_ADD,
         MINECRAFT_OP_REMOVE,
         MINECRAFT_COMMAND_DISPATCH,
