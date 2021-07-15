@@ -3,9 +3,9 @@
 
 ## About
 
-Owning a big server? Can't use many public plugins just because you worry that they can harm your network? Want to monitor and/or restrict Internet activity, file access and other stuff for certain plugins? **That's all exactly what Keiko comes for.**
+Are you scared to use many public plugins just because they can harm your server? Want to monitor and/or restrict Internet activity, file access and other stuff for certain plugins? **That's all exactly what Keiko comes for.**
 
-### [→ Keiko on SpigotMC](https://www.spigotmc.org/resources/keiko-server-security-and-plugins-inspections.66278/)
+### [→ Keiko on SpigotMC](https://www.spigotmc.org/resources/66278/)
 
 
 **Keiko is capable of:**
@@ -16,14 +16,12 @@ Owning a big server? Can't use many public plugins just because you worry that t
 
 * checking the integrity of installed plugins, ensuring they are not artificially modified or infected;
 
-* ***[planned]*** detecting suspicious behavior of plugins at runtime.
+* detecting suspicious behavior of plugins at run-time, and sometimes even remediating the damage they've done.
 
 
 ## Installation
 
-Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/releases)** and download the latest Keiko release JAR, then put it in your server's `plugins/` folder and restart.
-
-> **IMPORTANT:** if you're runnning a BungeeCord network, make sure to install Keiko **both** on the Bungee itself and on **all** its 'child' (Bukkit) servers. This will let Keiko protect not only all your endpoints, but also your Bungee (proxy)!
+**Keiko is not a plugin!** Please visit the [Installation Instructions](https://github.com/MeGysssTaa/keiko-plugin-inspector/wiki/Installation-Instructions) page for a complete guide on getting started with Keiko.
 
 
 ## Configuration, help and troubleshooting
@@ -32,10 +30,12 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 
 * **[Use the Issue Tracker](https://github.com/MeGysssTaa/keiko-plugin-inspector/issues)** to report bugs, suggest features or get other sort of help.
 
-* **[Join Keiko's Discord](https://discord.gg/QWHzCXX)** for other kind of assistance or just for live chat.
+* **[Join Keiko's Discord](https://discord.gg/QWHzCXX)** for other kind of assistance or just for live chat and discussion.
 
 
 ## Building (Gradle)
+
+To build Keiko yourself from source:
 
 1. Clone or download this repository, `cd` into it.
 2. Run `./gradlew shadowJar`.
@@ -43,15 +43,18 @@ Go to **[releases page](https://github.com/MeGysssTaa/keiko-plugin-inspector/rel
 4. Grab the built JAR file in `build/libs/`.
 5. Profit!
 
+Note: Keiko is built against **Java 8**, but, as it works perfrectly with **Java 16 *runtime***, in theory, it should be possible to build Keiko against newer Java versions as well.
+
 
 ```bash
-echo "Cloning and building keiko-plugin-inspector..."
+echo "Cloning Keiko..."
 git clone https://github.com/MeGysssTaa/keiko-plugin-inspector
 cd keiko-plugin-inspector
+echo "Building Keiko..."
 ./gradlew shadowJar
 
 echo "Done! You can find the output JAR in build/libs/"
-echo "Use './gradlew shadowJar' in its root folder (you are browsing it at the moment) whenever you want to rebuild Keiko."
+echo "Use './gradlew shadowJar' in Keiko's root folder (you are browsing it at the moment) whenever you want to rebuild Keiko from source."
 ```
 
 
