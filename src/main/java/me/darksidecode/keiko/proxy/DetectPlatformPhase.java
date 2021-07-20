@@ -58,12 +58,17 @@ public class DetectPlatformPhase extends Phase<JarFile, Platform> {
         }
 
         if (inferredPlatform == null) {
-            Keiko.INSTANCE.getLogger().warningLocalized("startup.unsupportedPlatform");
-            return new EmittedValue<>(new PhaseExecutionException(true, "unsupported platform"));
-        } else {
-            Keiko.INSTANCE.getLogger().debugLocalized("startup.platform", inferredPlatform);
-            return new EmittedValue<>(inferredPlatform);
+            // Don't error, otherwise proxying Paper won't work (because paper is launched with
+            // paperclip, which installs, patches and loads the server on its own: paperclip jar
+            // does not contain any Bukkit classes (that we reference) itself). Also just 'debug'
+            // here because otherwise Paper users will be constantly annoyed.
+            Keiko.INSTANCE.getLogger().debugLocalized("startup.unsupportedPlatform");
+            inferredPlatform = Platform.BUKKIT; // fallback to Bukkit (generally more common and safe)
         }
+
+        Keiko.INSTANCE.getLogger().debugLocalized("startup.platform", inferredPlatform);
+
+        return new EmittedValue<>(inferredPlatform);
     }
 
 }

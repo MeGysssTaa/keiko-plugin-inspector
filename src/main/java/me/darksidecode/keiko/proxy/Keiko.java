@@ -24,7 +24,6 @@ import me.darksidecode.jminima.phase.PhaseExecutionWatcher;
 import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
 import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
 import me.darksidecode.jminima.workflow.Workflow;
-import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.ConfigurationLoader;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
@@ -393,10 +392,7 @@ public final class Keiko {
                         .watcher(new PhaseExecutionWatcher<Platform>()
                                 .doAfterExecution((val, err) -> env.setPlatform(val))))
                 .phase(new CloseJarFilePhase())) {
-            WorkflowExecutionResult result = workflow.executeAll();
-
-            if (result != WorkflowExecutionResult.FULL_SUCCESS)
-                System.exit(1); // unsupported platform
+            workflow.executeAll();
         }
     }
 
