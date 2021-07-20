@@ -91,7 +91,7 @@ public class PluginContext {
 
                 try (Workflow workflow = new Workflow()
                         .phase(new OpenJarFilePhase(file))
-                        .phase(new IndexPluginPhase()
+                        .phase(new IndexPluginPhase(Keiko.INSTANCE.getEnv().getPlatform())
                                 .watcher(new PhaseExecutionWatcher<IndexedPlugin>()
                                         .doAfterExecution((val, err) -> indexedPluginHolder.setValue(val))
                                 ))

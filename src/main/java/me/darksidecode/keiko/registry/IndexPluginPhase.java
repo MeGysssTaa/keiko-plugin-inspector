@@ -19,12 +19,15 @@
 
 package me.darksidecode.keiko.registry;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.darksidecode.jminima.phase.EmittedValue;
 import me.darksidecode.jminima.phase.Phase;
 import me.darksidecode.jminima.phase.PhaseExecutionException;
 import me.darksidecode.jminima.util.JarFileData;
 import me.darksidecode.keiko.config.YamlHandle;
 import me.darksidecode.keiko.proxy.Keiko;
+import me.darksidecode.keiko.proxy.Platform;
 import me.darksidecode.keiko.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
@@ -39,7 +42,11 @@ import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+@RequiredArgsConstructor
 public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
+
+    @NonNull
+    private final Platform platform;
 
     @Override
     public Class<? super JarFile> getTargetTypeClass() {
@@ -61,26 +68,12 @@ public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
         Collection<String> pluginClasses = new HashSet<>();
         String pluginName = null;
 
+        // Index classes.
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
             String entryName = entry.getName();
 
-            if (entryName.equals("plugin.yml") || entryName.equals("bungee.yml")) {
-                try (Reader reader = new BufferedReader(new InputStreamReader(
-                        jarFile.getInputStream(entry), StandardCharsets.UTF_8))) {
-                    Yaml yaml = new Yaml();
-                    YamlHandle handle = new YamlHandle(yaml.load(reader));
-
-                    if (pluginName == null)
-                        pluginName = handle.get("name");
-                } catch (Exception ex) {
-                    Keiko.INSTANCE.getLogger().warningLocalized(
-                            "pluginsIndex.invalidPluginYml", jarFile.getName());
-
-                    return new EmittedValue<>(new PhaseExecutionException(
-                            true, "invalid plugin.yml in " + jarFile.getName(), ex));
-                }
-            } else if (JarFileData.isClassEntry(entry)) {
+            if (JarFileData.isClassEntry(entry)) {
                 // 'my/cool/Class.class[/]' --> 'my.cool.Class'
                 String className = entryName
                         .replace(".class/", "")
@@ -91,9 +84,39 @@ public class IndexPluginPhase extends Phase<JarFile, IndexedPlugin> {
             }
         }
 
+        // Retrieve plugin name with respect to the current platform and the fact that Bungee
+        // plugins are not required to have 'bungee.yml' -- they can use 'plugin.yml' as well.
+        JarEntry pluginDescEntry = jarFile.getJarEntry(platform.getPluginsDescriptionFile());
+
+        if (pluginDescEntry == null && platform != Platform.BUKKIT) {
+            // Example scenario: we're running a Bungee server; we're reading a Bungee plugin;
+            // but that plugin does not contain 'bungee.yml' (but does contain 'plugin.yml').
+            // (Yes, Bungee allows such behavior...)
+            pluginDescEntry = jarFile.getJarEntry(Platform.BUKKIT.getPluginsDescriptionFile());
+            Keiko.INSTANCE.getLogger().debug("Plugin in file \"%s\" does not contain " +
+                    "plugin description file \"%s\" specific to the current platform (%s). " +
+                    "Trying to fall back to Bukkit's traditional \"plugin.yml\".",
+                    jarFile.getName(), platform.getPluginsDescriptionFile(), platform);
+        }
+
+        if (pluginDescEntry != null) { // if pluginDescEntry is STILL null, then we'll infer plugin name later
+            try (Reader reader = new BufferedReader(new InputStreamReader(
+                    jarFile.getInputStream(pluginDescEntry), StandardCharsets.UTF_8))) {
+                Yaml yaml = new Yaml();
+                YamlHandle handle = new YamlHandle(yaml.load(reader));
+                pluginName = handle.get("name");
+            } catch (Exception ex) {
+                Keiko.INSTANCE.getLogger().warningLocalized(
+                        "pluginsIndex.invalidPluginYml", jarFile.getName());
+
+                return new EmittedValue<>(new PhaseExecutionException(
+                        true, "invalid plugin.yml in " + jarFile.getName(), ex));
+            }
+        }
+
         File pluginFile = new File(jarFile.getName());
 
-        if (pluginName == null) {
+        if (pluginName == null) { // really no plugin description found, we have to infer plugin name
             // May be for non-classic plugins. For example, for PlaceholderAPI expansions. Don't error!
             Keiko.INSTANCE.getLogger().warningLocalized(
                     "pluginsIndex.invalidPluginYml", jarFile.getName());

@@ -26,11 +26,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Platform {
 
-    BUKKIT ("org/bukkit/Bukkit.class"),
+    BUKKIT ("org/bukkit/Bukkit.class", "plugin.yml"),
 
-    BUNGEE ("net/md_5/bungee/BungeeCord.class");
+    BUNGEE ("net/md_5/bungee/BungeeCord.class", "bungee.yml");
 
     @Getter @NonNull
     private final String referenceFile; // JAR entry name that makes it clear that a concrete Platform is used
+
+    @Getter @NonNull
+    private final String pluginsDescriptionFile;
 
 }
