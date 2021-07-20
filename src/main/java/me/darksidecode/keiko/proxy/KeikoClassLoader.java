@@ -82,9 +82,6 @@ public class KeikoClassLoader extends URLClassLoader {
         // JarFile as well. We don't want this - the JarFile is still used later (in loadClassFromJar).
         workflow = new Workflow()
                 .phase(new EmitArbitraryValuePhase<>(jar))
-                .phase(new DetectPlatformPhase()
-                        .watcher(new PhaseExecutionWatcher<Platform>()
-                                .doAfterExecution((val, err) -> Keiko.INSTANCE.getEnv().setPlatform(val))))
                 .phase(new DetectMinecraftVersionPhase()
                         .watcher(new PhaseExecutionWatcher<String>()
                                 .doAfterExecution((val, err) -> {

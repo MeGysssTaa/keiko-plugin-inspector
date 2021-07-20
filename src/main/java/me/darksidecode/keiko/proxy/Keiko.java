@@ -20,6 +20,11 @@
 package me.darksidecode.keiko.proxy;
 
 import lombok.Getter;
+import me.darksidecode.jminima.phase.PhaseExecutionWatcher;
+import me.darksidecode.jminima.phase.basic.CloseJarFilePhase;
+import me.darksidecode.jminima.phase.basic.OpenJarFilePhase;
+import me.darksidecode.jminima.workflow.Workflow;
+import me.darksidecode.jminima.workflow.WorkflowExecutionResult;
 import me.darksidecode.keiko.config.ConfigurationLoader;
 import me.darksidecode.keiko.config.GlobalConfig;
 import me.darksidecode.keiko.config.InspectionsConfig;
@@ -320,6 +325,7 @@ public final class Keiko {
         if (launchState != LaunchState.LAUNCHING)
             throw new IllegalStateException(launchState.name());
 
+        checkPlatform();
         indexPlugins();
         ensurePluginsIntegrity();
         runStaticAnalyses();
@@ -371,6 +377,22 @@ public final class Keiko {
 
             if (intervalMinutes != 0 /* only check at startup */)
                 new Timer().schedule(updater, millis, millis);
+        }
+    }
+
+    private void checkPlatform() {
+        // We must do this before indexing plugins, and so we cannot
+        // do this in KeikoClassLoader (because it's created after that).
+        try (Workflow workflow = new Workflow()
+                .phase(new OpenJarFilePhase(proxiedExecutable))
+                .phase(new DetectPlatformPhase()
+                        .watcher(new PhaseExecutionWatcher<Platform>()
+                                .doAfterExecution((val, err) -> env.setPlatform(val))))
+                .phase(new CloseJarFilePhase())) {
+            WorkflowExecutionResult result = workflow.executeAll();
+
+            if (result != WorkflowExecutionResult.FULL_SUCCESS)
+                System.exit(1); // unsupported platform
         }
     }
 

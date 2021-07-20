@@ -59,13 +59,11 @@ public class DetectPlatformPhase extends Phase<JarFile, Platform> {
 
         if (inferredPlatform == null) {
             Keiko.INSTANCE.getLogger().warningLocalized("startup.unsupportedPlatform");
-            System.exit(1);
-            return null;
+            return new EmittedValue<>(new PhaseExecutionException(true, "unsupported platform"));
+        } else {
+            Keiko.INSTANCE.getLogger().debugLocalized("startup.platform", inferredPlatform);
+            return new EmittedValue<>(inferredPlatform);
         }
-
-        Keiko.INSTANCE.getLogger().debugLocalized("startup.platform", inferredPlatform);
-
-        return new EmittedValue<>(inferredPlatform);
     }
 
 }
