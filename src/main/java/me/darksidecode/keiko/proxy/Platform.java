@@ -20,28 +20,17 @@
 package me.darksidecode.keiko.proxy;
 
 import lombok.Getter;
-import lombok.Setter;
-import lombok.Synchronized;
-import me.darksidecode.keiko.registry.PluginContext;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-import java.io.File;
+@RequiredArgsConstructor
+public enum Platform {
 
-@Getter (onMethod_ = @Synchronized) // makes all getters synchronize on a private $lock field (lombok-generated)
-@Setter (onMethod_ = @Synchronized) // makes all setters synchronize on a private $lock field (lombok-generated)
-public final class Environment {
+    BUKKIT ("org/bukkit/Bukkit.class"),
 
-    private BuildProperties buildProperties;
+    BUNGEE ("net/md_5/bungee/BungeeCord.class");
 
-    private File keikoExecutable;
-
-    private File serverDir;
-
-    private File workDir;
-
-    private PluginContext pluginContext;
-
-    private String nmsVersion;
-
-    private Platform platform;
+    @Getter @NonNull
+    private final String referenceFile; // JAR entry name that makes it clear that a concrete Platform is used
 
 }
