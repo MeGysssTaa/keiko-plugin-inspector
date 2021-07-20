@@ -88,8 +88,6 @@ public final class Keiko {
     @Getter
     private KeikoClassLoader loader;
 
-    private File proxiedExecutable;
-
     @SuppressWarnings ("UseOfSystemOutOrSystemErr")
     private Keiko() {
         checkEnvironment();
@@ -162,7 +160,7 @@ public final class Keiko {
         Runtime.getRuntime().addShutdownHook(new Thread(
                 INSTANCE::shutdown, "Keiko Proxy Shutdown Hook"));
 
-        INSTANCE.proxiedExecutable = proxiedExecutable;
+        INSTANCE.env.setProxiedExecutable(proxiedExecutable);
         INSTANCE.launch();
     }
 
@@ -384,7 +382,7 @@ public final class Keiko {
         // We must do this before indexing plugins, and so we cannot
         // do this in KeikoClassLoader (because it's created after that).
         try (Workflow workflow = new Workflow()
-                .phase(new OpenJarFilePhase(proxiedExecutable))
+                .phase(new OpenJarFilePhase(env.getProxiedExecutable()))
                 .phase(new DetectPlatformPhase()
                         .watcher(new PhaseExecutionWatcher<Platform>()
                                 .doAfterExecution((val, err) -> env.setPlatform(val))))
@@ -461,7 +459,7 @@ public final class Keiko {
         logger.infoLocalized("startup.launchingProxy");
 
         try {
-            loader = new KeikoClassLoader(proxiedExecutable);
+            loader = new KeikoClassLoader(env.getProxiedExecutable());
             Thread.currentThread().setContextClassLoader(loader); // otherwise resources (non-class files) won't load
             logger.debugLocalized("startup.classLoaderStats",
                     loader.getLoadResult().successes, loader.getLoadResult().failures);
