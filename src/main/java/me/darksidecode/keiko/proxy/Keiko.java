@@ -134,7 +134,7 @@ public final class Keiko {
         }
 
         // Run the Keiko proxy.
-        File proxiedExecutable = new File(String.join(" ", args));
+        File proxiedExecutable = new File(args[0]);
 
         if (!proxiedExecutable.exists()) {
             INSTANCE.getLogger().warningLocalized("startup.jarErr.notExists");
@@ -160,7 +160,13 @@ public final class Keiko {
         Runtime.getRuntime().addShutdownHook(new Thread(
                 INSTANCE::shutdown, "Keiko Proxy Shutdown Hook"));
 
+        // Pass arguments (like in "java -jar keiko.jar paper-1.8.8.jar nogui port=...") to the proxied executable.
+        String[] proxiedArguments = args.length == 1
+                ? new String[0] : Arrays.copyOfRange(args, 1, args.length);
+
         INSTANCE.env.setProxiedExecutable(proxiedExecutable);
+        INSTANCE.env.setProxiedArguments(proxiedArguments);
+
         INSTANCE.launch();
     }
 
@@ -467,7 +473,7 @@ public final class Keiko {
             logger.debugLocalized("startup.proxyBegin", loader.getBootstrapClassName());
             Class<?> bootstrapClass = loader.findClass(loader.getBootstrapClassName());
             Method bootstrapMethod = bootstrapClass.getMethod("main", String[].class);
-            bootstrapMethod.invoke(null, (Object) new String[0]);
+            bootstrapMethod.invoke(null, (Object) env.getProxiedArguments()); // cast to 'Object' is IMPORTANT
 
             launchState = LaunchState.LAUNCHED_PROXY;
         } catch (Exception ex) {

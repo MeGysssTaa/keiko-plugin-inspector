@@ -40,6 +40,8 @@ public final class Environment {
 
     private File proxiedExecutable;
 
+    private String[] proxiedArguments;
+
     private PluginContext pluginContext;
 
     private String nmsVersion;
