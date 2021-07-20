@@ -136,7 +136,10 @@ static:
   # use of the LuckPerms API may indicate that the plugin is able to harm your server.
   permissions_plugins_abuse:
     enabled: true
-    exclusions: []
+    exclusions:
+      - PLUGIN=LuckPerms
+      - PLUGIN=PermissionsEx
+      - PLUGIN=Vault
 
   # Keiko has no publicly exposed APIs that plugins can be based on. Normally, plugins don't even
   # need to know whether Keiko is present on your server or not to function. That is, legitimate
