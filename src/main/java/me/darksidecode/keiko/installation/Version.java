@@ -68,6 +68,10 @@ public class Version implements Comparable<Version> {
         return result;
     }
 
+    public boolean hasMinimum(@NonNull Version min) {
+        return compareTo(min) >= 0; // this >= o  =>  this is equal to o OR this is newer than o
+    }
+
     public boolean isNewerThan(@NonNull Version o) {
         return compareTo(o) > 0; // this > o  =>  this was published later than o
     }
