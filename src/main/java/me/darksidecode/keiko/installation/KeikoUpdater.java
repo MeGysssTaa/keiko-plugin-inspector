@@ -60,7 +60,7 @@ public class KeikoUpdater extends TimerTask {
             JsonArray assets = json.getAsJsonArray("assets");
             JsonObject release = assets.get(0).getAsJsonObject();
 
-            String latestVersionStr = json.get("name").getAsString();
+            String latestVersionStr = json.get("tag_name").getAsString();
             String downloadUrl = release.get("browser_download_url").getAsString();
 
             if (latestVersionStr.startsWith("v"))
