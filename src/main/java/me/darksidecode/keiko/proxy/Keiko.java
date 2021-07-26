@@ -142,7 +142,7 @@ public final class Keiko {
             return;
         }
 
-        if (!proxiedExecutable.exists()) {
+        if (proxiedExecutable.isDirectory()) {
             INSTANCE.getLogger().warningLocalized("startup.jarErr.isDir");
             System.exit(1);
 
