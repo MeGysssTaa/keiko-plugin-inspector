@@ -61,3 +61,4 @@ echo "Use './gradlew shadowJar' in Keiko's root folder (you are browsing it at t
 ## License
 
 **[GNU GPLv3](https://github.com/MeGysssTaa/keiko-plugin-inspector/blob/master/LICENSE)**
+
